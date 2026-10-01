@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.embedding_cache.json
+.dart_tool/
+build/
+.env
+*.log
+.DS_Store
