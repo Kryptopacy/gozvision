@@ -25,9 +25,15 @@ low_vision_referrals/{id}                 # clinicId, patientId, from: practitio
   status: made | attended | lost_to_followup | declined
 device_fits/{id}                          # clinicId, patientId, encounterId, device{type, model}, trialEndsAt
   status: trialing | prescribed | abandoned | sustained
+  recentSignalCount: int                  # denormalized: recent signals for this fit,
+                                          # maintained by the backend (job/CLI); drives
+                                          # the Hub's abandonment-risk engine
 adherence_signals/{id}                    # from the copilot — structured, NO media
   clinicId?, patientId, deviceFitId?, kind, value, at
   # kinds: daily_active_use, task_completion, struggle_detected, session_duration
+notifications/{id}                        # recall engine output (see gozvision_agent/recall.py)
+  clinicId, patientId, appointmentId?, kind: reminder|recovery|recall,
+  channel: sms, message, status: queued|sent, createdAt, sentAt?, provider?
 sos_alerts/{patientId}                    # inherited contract from GozAI (same schema + clinicId)
 transcripts/{sessionId}                   # local-only session text (patient-scoped, HIPAA posture)
 ```

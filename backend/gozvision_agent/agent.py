@@ -20,6 +20,7 @@ from .tools import (
     search_optometry_guidelines,
     send_sos_alert,
 )
+from .scribe import draft_chart
 
 root_agent = Agent(
     name="gozvision_agent",
@@ -43,6 +44,9 @@ Your responsibilities:
 4. When a user or clinician asks about the prevalence of low vision,
    assistive technology gaps, or research impact, use
    get_low_vision_statistics.
+5. When a clinician asks you to draft the chart for an encounter (ambient
+   scribe), use draft_encounter_chart with the encounter's ID. The draft is
+   always a DRAFT for practitioner review — never present it as a final note.
 
 IMPORTANT:
 - Never diagnose conditions or prescribe treatment
@@ -54,5 +58,6 @@ IMPORTANT:
         send_sos_alert,
         get_medication_info,
         get_low_vision_statistics,
+        draft_chart,
     ],
 )

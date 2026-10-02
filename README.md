@@ -33,12 +33,31 @@ gozvision/
 │   ├── domain/            # Shared models: Clinic, Patient, Encounter, DeviceFit, ...
 │   └── api_client/        # Typed backend client
 ├── backend/
-│   ├── agents/            # ADK agents (clinical RAG grounded — ported from GozAI)
-│   └── api/               # Multi-tenant clinic API (planned)
+│   ├── gozvision_agent/   # ADK agent: clinical RAG + SOS + ambient Scribe (draft_chart)
+│   │                      #   recall.py: recall/no-show outreach engine (notifications queue)
+│   ├── deploy.sh          # Cloud Run deployment (adk api_server gozvision_agent)
+│   ├── seed_clinic_demo.py# Seeds a full demo clinic world (auth users + data)
+│   └── test_*.py          # Offline test suites (no API keys needed)
 └── docs/
     ├── DATA_MODEL.md      # Multi-tenant data model
     ├── EXTRACTION.md      # What ports from GozAI vs. what is rebuilt
     └── adr/               # Architecture decision records
+```
+
+## Clinic Suite quick start
+
+```bash
+# 1. Seed the demo world (needs Firebase Admin credentials)
+cd backend && python seed_clinic_demo.py --project your-project-id
+
+# 2. Run the recall sweep — reminders, no-show recovery, annual recalls
+python -m gozvision_agent.recall --clinic demo_clinic_001
+
+# 3. Draft a scribe chart (or ask the agent: "draft the chart for enc_1")
+python -m gozvision_agent.scribe enc_1
+
+# 4. Run the Clinic Suite and sign in (password: gozvision-demo)
+cd ../apps/clinic && flutter run -d chrome    # practitioner@gozvision.demo
 ```
 
 ## Stack (current as of 2026-10)

@@ -152,6 +152,16 @@ service cloud.firestore {
       allow update, delete: if false; // signals are append-only
     }
 
+    // Outreach queue: the recall sweep (Admin SDK) enqueues; staff review
+    // status. Delivery jobs (Admin SDK) drain it.
+    match /notifications/{id} {
+      allow read: if signedIn() && isStaff() && sameClinic(resource.data.clinicId);
+      allow create: if signedIn() && isStaff() && sameClinic(request.resource.data.clinicId);
+      allow update: if signedIn() && isStaff() && sameClinic(resource.data.clinicId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'sentAt', 'provider']);
+      allow delete: if isPractitioner() && sameClinic(resource.data.clinicId);
+    }
+
     // ---- Safety --------------------------------------------------------
 
     // SOS alerts: the patient (client) and the backend agent both write;
