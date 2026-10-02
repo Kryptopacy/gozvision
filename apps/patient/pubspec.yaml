@@ -1,0 +1,49 @@
+name: patient_app
+description: "Goz — the AI copilot for low-vision patients (GozVision B2C app)."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+resolution: workspace
+
+dependencies:
+  copilot_core:
+    path: ../../packages/copilot_core
+  flutter:
+    sdk: flutter
+  firebase_core: ^4.4.0
+  firebase_auth: any
+  cloud_firestore: any
+  record: any
+  just_audio: any
+  camera: any
+  web_socket_channel: ^3.0.0
+  web: any
+  google_mlkit_text_recognition: any
+  google_mlkit_barcode_scanning: any
+  http: ^1.2.0
+  url_launcher: any
+  provider: any
+  permission_handler: any
+  vibration: any
+  sensors_plus: any
+  flutter_dotenv: any
+  path_provider: any
+  uuid: any
+  cupertino_icons: any
+  google_fonts: ^6.2.1
+  go_router: any
+  image: ^4.8.0
+  flutter_animate: ^4.5.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/app.env
+    - assets/logos/

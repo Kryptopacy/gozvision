@@ -1,0 +1,7 @@
+name: gozvision_workspace
+publish_to: "none"
+environment:
+  sdk: ^3.13.0
+workspace:
+  - apps/patient
+  - packages/copilot_core
