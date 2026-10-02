@@ -1,15 +1,13 @@
 import 'package:copilot_core/copilot_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_config.dart';
 import 'core/system_prompt.dart';
 import 'core/theme.dart';
-import 'core/firebase_options.dart';
 import 'screens/caregiver_dashboard.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
@@ -31,15 +29,13 @@ import 'services/user_memory_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment configuration FIRST before Firebase.
-  // NOTE: We use 'assets/app.env' (not '.env') because dotfiles are excluded
-  // from Flutter web builds and Firebase Hosting ignores them via the '**/.*'
-  // rule. A plain file under assets/ is correctly bundled and served.
+  // Load environment configuration FIRST (assets/app.env — see README).
   await dotenv.load(fileName: 'assets/app.env');
 
-  // Initialize Firebase using the generated options
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  // Supabase: auth + Postgres (ADR-0003).
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    publishableKey: AppConfig.supabasePublishableKey,
   );
 
   // Validate configuration
@@ -47,15 +43,20 @@ void main() async {
     debugPrint('ERROR: Missing GEMINI_API_KEY in .env file');
   }
 
-  runApp(GozVisionApp(identity: UserIdentityService()));
+  // Zero-UI demo flow: establish the demo patient session (no-op when real
+  // credentials are absent) before anything reads the identity.
+  final identity = UserIdentityService();
+  await identity.ensureSignedIn();
+
+  runApp(GozVisionApp(identity: identity));
 }
 
 /// GozVision — Premium Navigation Router
 final GoRouter _router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    final user = FirebaseAuth.instance.currentUser;
-    final isGoingToProtected = state.matchedLocation == '/caregiver' || state.matchedLocation == '/doctor';
+    final user = Supabase.instance.client.auth.currentUser;
+    final isGoingToProtected = state.matchedLocation == '/caregiver';
 
     // If unauthenticated and trying to access pro dashboards, route to login wall
     if (user == null && isGoingToProtected) {

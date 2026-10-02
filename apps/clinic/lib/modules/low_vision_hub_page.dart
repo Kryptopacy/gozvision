@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,20 +34,20 @@ class LowVisionHubPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            child: StreamBuilder<ClinicRows>(
               stream: fits,
               builder: (context, fitsSnap) {
-                final fitDocs = fitsSnap.data?.docs ?? const [];
-                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                final fitRows = fitsSnap.data ?? const [];
+                return StreamBuilder<ClinicRows>(
                   stream: referrals,
                   builder: (context, refSnap) {
-                    final refDocs = refSnap.data?.docs ?? const [];
+                    final refRows = refSnap.data ?? const [];
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _ReferralPanel(docs: refDocs),
+                        _ReferralPanel(rows: refRows),
                         const SizedBox(width: 24),
-                        Expanded(child: _DeviceFitPanel(docs: fitDocs)),
+                        Expanded(child: _DeviceFitPanel(rows: fitRows)),
                       ],
                     );
                   },
@@ -67,15 +66,15 @@ class LowVisionHubPage extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ReferralPanel extends StatelessWidget {
-  const _ReferralPanel({required this.docs});
+  const _ReferralPanel({required this.rows});
 
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  final ClinicRows rows;
 
   @override
   Widget build(BuildContext context) {
     final byStatus = <String, int>{};
-    for (final d in docs) {
-      final status = (d.data()['status'] as String?) ?? 'made';
+    for (final row in rows) {
+      final status = (row['status'] as String?) ?? 'made';
       byStatus[status] = (byStatus[status] ?? 0) + 1;
     }
 
@@ -89,7 +88,7 @@ class _ReferralPanel extends StatelessWidget {
             children: [
               const Text('Referrals', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text('${docs.length} tracked',
+              Text('${rows.length} tracked',
                   style: const TextStyle(color: ClinicTheme.textSecondary)),
               const SizedBox(height: 16),
               if (byStatus.isEmpty)
@@ -139,14 +138,14 @@ class _ReferralPanel extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _DeviceFitPanel extends StatelessWidget {
-  const _DeviceFitPanel({required this.docs});
+  const _DeviceFitPanel({required this.rows});
 
-  final List<QueryDocumentSnapshot<Map<String, dynamic>>> docs;
+  final ClinicRows rows;
 
   @override
   Widget build(BuildContext context) {
-    final risky = docs
-        .map((d) => DeviceFitView.fromMap(d.id, d.data()))
+    final risky = rows
+        .map(DeviceFitView.fromMap)
         .where((f) => f.risk == AbandonmentRisk.elevated)
         .length;
 
@@ -168,7 +167,7 @@ class _DeviceFitPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Expanded(
-          child: docs.isEmpty
+          child: rows.isEmpty
               ? const Card(
                   child: Padding(
                     padding: EdgeInsets.all(20),
@@ -180,10 +179,10 @@ class _DeviceFitPanel extends StatelessWidget {
                   ),
                 )
               : ListView.separated(
-                  itemCount: docs.length,
+                  itemCount: rows.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
-                    final fit = DeviceFitView.fromMap(docs[i].id, docs[i].data());
+                    final fit = DeviceFitView.fromMap(rows[i]);
                     return _FitCard(fit: fit);
                   },
                 ),
@@ -262,12 +261,12 @@ class DeviceFitView {
     required this.recentSignalCount,
   });
 
-  factory DeviceFitView.fromMap(String id, Map<String, dynamic> data) {
+  factory DeviceFitView.fromMap(Map<String, dynamic> data) {
     final device = (data['device'] as Map<String, dynamic>?) ?? const {};
-    final signals = (data['recentSignalCount'] as num?)?.toInt() ?? 0;
+    final signals = (data['recent_signal_count'] as num?)?.toInt() ?? 0;
     return DeviceFitView(
-      id: id,
-      patientId: (data['patientId'] as String?) ?? '?',
+      id: (data['id'] as String?) ?? '',
+      patientId: (data['patient_id'] as String?) ?? '?',
       status: (data['status'] as String?) ?? 'trialing',
       deviceType: (device['type'] as String?) ?? 'device',
       deviceModel: (device['model'] as String?) ?? '',

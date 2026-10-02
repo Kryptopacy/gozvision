@@ -1,10 +1,10 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/app_config.dart';
 import '../core/theme.dart';
@@ -37,14 +37,15 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   }
 
   Future<void> _resolveAssignedPatient() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final assigned = doc.data()?['assigned_patients'];
+      final row = await Supabase.instance.client
+          .from('profiles')
+          .select('assigned_patients')
+          .eq('id', user.id)
+          .maybeSingle();
+      final assigned = row?['assigned_patients'];
       if (assigned is List && assigned.isNotEmpty && mounted) {
         setState(() => _assignedPatientUid = assigned.first as String);
       }
@@ -194,23 +195,23 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   }
 
   Widget _buildSosAlertBanner(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('sos_alerts')
-          .doc(patientUid)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: Supabase.instance.client
+          .from('sos_alerts')
+          .stream(primaryKey: ['patient_id'])
+          .eq('patient_id', patientUid),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data?.data() == null) {
-          return const SizedBox.shrink(); // No alert document
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink(); // No alert yet
         }
 
-        final data = snapshot.data!.data()!;
+        final data = snapshot.data!.first;
         final resolved = data['resolved'] == true;
         if (resolved) {
           return const SizedBox.shrink(); // Alert is resolved
         }
 
-        final message = data['message'] ?? data['note'] ?? 'Emergency assistance requested.';
+        final message = (data['note'] as String?) ?? 'Emergency assistance requested.';
         final severity = data['severity'] ?? 'critical';
         final isCritical = severity.toString().toLowerCase() == 'critical' || severity.toString().toLowerCase() == 'high';
 
@@ -390,15 +391,11 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('patients')
-                      .doc(patientUid)
-                      .collection('clinical_events')
-                      .where('type', whereIn: ['hazard', 'wandering'])
-                      .orderBy('timestamp', descending: true)
-                      .limit(20)
-                      .snapshots(),
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: Supabase.instance.client
+                      .from('clinical_events')
+                      .stream(primaryKey: ['id'])
+                      .eq('patient_id', patientUid),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator(color: GozAITheme.malachite));
@@ -409,7 +406,12 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                             style: TextStyle(color: GozAITheme.hazardAlert)),
                       );
                     }
-                    final docs = snapshot.data?.docs ?? [];
+                    final rows = (snapshot.data ?? const [])
+                        .where((r) => ['hazard', 'wandering'].contains(r['kind']))
+                        .toList()
+                      ..sort((a, b) => (b['at'] as String? ?? '')
+                          .compareTo(a['at'] as String? ?? ''));
+                    final docs = rows.take(20).toList();
                     if (docs.isEmpty) {
                       return Center(
                         child: Column(
@@ -432,15 +434,15 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       itemCount: docs.length,
                       separatorBuilder: (context, _) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
-                        final data = docs[index].data() as Map<String, dynamic>;
-                        final isHazard = data['type'] == 'hazard';
-                        final time = data['timestamp'] as Timestamp?;
-                        final timeStr = time != null
-                            ? _formatTimestamp(time.toDate())
+                        final data = docs[index];
+                        final isHazard = data['kind'] == 'hazard';
+                        final at = (data['at'] as String?);
+                        final timeStr = at != null
+                            ? _formatTimestamp(DateTime.parse(at).toLocal())
                             : 'Just now';
                         return _AlertRow(
                           isHazard: isHazard,
-                          note: data['note'] ?? 'Unknown event',
+                          note: (data['payload']?['note'] as String?) ?? 'Unknown event',
                           timeStr: timeStr,
                         ).animate().fade(delay: Duration(milliseconds: 50 * index)).slideX(begin: 0.05);
                       },

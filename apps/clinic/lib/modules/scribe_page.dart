@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
@@ -35,11 +34,11 @@ class ScribePage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            child: StreamBuilder<ClinicRows>(
               stream: encounters,
               builder: (context, snap) {
-                final docs = snap.data?.docs ?? const [];
-                if (docs.isEmpty) {
+                final rows = snap.data ?? const [];
+                if (rows.isEmpty) {
                   return const Card(
                     child: Padding(
                       padding: EdgeInsets.all(20),
@@ -52,12 +51,9 @@ class ScribePage extends StatelessWidget {
                   );
                 }
                 return ListView.separated(
-                  itemCount: docs.length,
+                  itemCount: rows.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) => _EncounterCard(
-                    id: docs[i].id,
-                    data: docs[i].data(),
-                  ),
+                  itemBuilder: (context, i) => _EncounterCard(row: rows[i]),
                 );
               },
             ),
@@ -69,18 +65,17 @@ class ScribePage extends StatelessWidget {
 }
 
 class _EncounterCard extends StatelessWidget {
-  const _EncounterCard({required this.id, required this.data});
+  const _EncounterCard({required this.row});
 
-  final String id;
-  final Map<String, dynamic> data;
+  final Map<String, dynamic> row;
 
   @override
   Widget build(BuildContext context) {
-    final scribe = (data['scribe_draft'] as Map<String, dynamic>?) ?? const {};
+    final scribe = (row['scribe_draft'] as Map<String, dynamic>?) ?? const {};
     final status = (scribe['status'] as String?) ?? 'none';
     final sections = (scribe['sections'] as Map<String, dynamic>?) ?? const {};
-    final type = (data['type'] as String?) ?? 'encounter';
-    final patient = (data['patientId'] as String?) ?? '?';
+    final type = (row['type'] as String?) ?? 'encounter';
+    final patient = (row['patient_id'] as String?) ?? '?';
 
     final (icon, color, label) = switch (status) {
       'draft' => (Icons.pending_outlined, ClinicTheme.warningAmber, 'Draft awaiting review'),
@@ -133,14 +128,16 @@ class _EncounterCard extends StatelessWidget {
   }
 
   Future<void> _markReviewed(BuildContext context) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
-    await FirebaseFirestore.instance.collection('encounters').doc(id).set({
-      'scribe_draft': {
-        'status': 'reviewed',
-        'reviewedBy': uid,
-        'reviewedAt': FieldValue.serverTimestamp(),
-      }
-    }, SetOptions(merge: true));
+    final uid = Supabase.instance.client.auth.currentUser?.id ?? 'unknown';
+    final updated = {
+      ...(row['scribe_draft'] as Map<String, dynamic>? ?? const {}),
+      'status': 'reviewed',
+      'reviewedBy': uid,
+      'reviewedAt': DateTime.now().toUtc().toIso8601String(),
+    };
+    await Supabase.instance.client
+        .from('encounters')
+        .update({'scribe_draft': updated}).eq('id', row['id'] as String);
   }
 
   String _capitalize(String s) =>

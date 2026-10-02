@@ -20,17 +20,10 @@ from datetime import datetime, timezone
 
 import os
 
-try:
-    import firebase_admin
-    from firebase_admin import firestore as fb_firestore
+from .db import service_client
 
-    if not firebase_admin._apps:
-        firebase_admin.initialize_app()
-    _db = fb_firestore.client()
-    FIREBASE_AVAILABLE = True
-except Exception as _e:  # pragma: no cover - exercised in stub environments
-    _db = None
-    FIREBASE_AVAILABLE = False
+_db = service_client()
+SUPABASE_AVAILABLE = _db is not None
 
 try:
     import google.genai as genai
@@ -84,15 +77,15 @@ def parse_chart(response_text: str) -> dict:
 async def draft_chart(encounter_id: str, transcript: str | None = None) -> dict:
     """Generates and persists a scribe draft for one encounter.
 
-    With Firebase configured, `transcript` may be omitted — the encounter
+    With Supabase configured, `transcript` may be omitted — the encounter
     document's `transcript_text` field is used. Returns the stored draft
     (or an error-shaped dict in stub mode) so the agent tool can relay it.
     """
     encounter = None
-    if FIREBASE_AVAILABLE and _db is not None:
-        snap = _db.collection("encounters").document(encounter_id).get()
-        if snap.exists:
-            encounter = snap.to_dict()
+    if SUPABASE_AVAILABLE and _db is not None:
+        rows = _db.table("encounters").select("*").eq("id", encounter_id).execute().data
+        if rows:
+            encounter = rows[0]
     transcript = transcript or (encounter or {}).get("transcript_text") or ""
     if not transcript.strip():
         return {
@@ -122,8 +115,7 @@ async def draft_chart(encounter_id: str, transcript: str | None = None) -> dict:
         "model": _SCRIBE_MODEL,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
     }
-    if FIREBASE_AVAILABLE and _db is not None:
-        _db.collection("encounters").document(encounter_id).set(
-            {"scribe_draft": draft}, merge=True
-        )
+    if SUPABASE_AVAILABLE and _db is not None:
+        _db.table("encounters").update(
+            {"scribe_draft": draft}).eq("id", encounter_id).execute()
     return {"status": "drafted", "encounter_id": encounter_id, **draft}

@@ -1,23 +1,23 @@
 import 'package:copilot_core/copilot_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/app_config.dart';
 
 /// The identity of the patient this copilot session serves.
 ///
-/// One definition point for "who is the patient" (see CONTEXT.md — Patient):
-/// - When a patient account is logged in on this device, that account's uid
-///   is the identity — SOS alerts, companion memory, and telemetry are all
-///   written under it.
-/// - Otherwise (the zero-UI flow, where the copilot starts with no login
-///   wall) the identity falls back to [AppConfig.patientId] so the demo
-///   wiring on the caregiver dashboard keeps working unchanged.
+/// One definition point for "who is the patient" (see CONTEXT.md — Patient
+/// identity): a Supabase session — either a real patient account or the
+/// seeded demo account used by the zero-UI flow (credentials from
+/// [AppConfig.demoPatientEmail]). Every SOS alert, memory fact, and
+/// telemetry event is written under [userId], satisfying RLS as a real
+/// authenticated row.
 class UserIdentityService extends ChangeNotifier implements CopilotIdentity {
   UserIdentityService() {
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (_uid != user?.uid) {
-        _uid = user?.uid;
+    Supabase.instance.client.auth.onAuthStateChange.listen((state) {
+      final uid = state.session?.user.id;
+      if (_uid != uid) {
+        _uid = uid;
         notifyListeners();
       }
     });
@@ -25,7 +25,7 @@ class UserIdentityService extends ChangeNotifier implements CopilotIdentity {
 
   String? _uid;
 
-  /// True when a real authenticated account backs this identity.
+  /// True when a real authenticated session backs this identity.
   bool get isAuthenticated => _uid != null;
 
   /// The patient id that alerts, memory and telemetry belong to.
@@ -36,5 +36,31 @@ class UserIdentityService extends ChangeNotifier implements CopilotIdentity {
   /// for request-scoped code outside the provider graph (e.g. the ADK
   /// bridge, which must stamp every backend call with the patient id).
   static String resolveCurrentUserId() =>
-      FirebaseAuth.instance.currentUser?.uid ?? AppConfig.patientId;
+      Supabase.instance.client.auth.currentUser?.id ?? AppConfig.patientId;
+
+  /// Zero-UI demo flow: sign in as the seeded demo patient when the app
+  /// opens with no session. Harmless no-op when demo credentials are absent.
+  Future<void> ensureSignedIn() async {
+    final client = Supabase.instance.client;
+    final existing = client.auth.currentUser;
+    if (existing != null) {
+      _uid = existing.id;
+      notifyListeners();
+      return;
+    }
+    final email = AppConfig.demoPatientEmail;
+    final password = AppConfig.demoPatientPassword;
+    if (email.isEmpty || password.isEmpty) return;
+    try {
+      final res = await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      _uid = res.session?.user.id;
+      debugPrint('UserIdentity: demo session established.');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('UserIdentity: demo sign-in failed: $e');
+    }
+  }
 }

@@ -1,9 +1,9 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/theme.dart';
 
@@ -43,53 +43,43 @@ class _LoginScreenState extends State<LoginScreen> {
         throw Exception('Please enter your full name for registration.');
       }
 
-      UserCredential cred;
+      final client = Supabase.instance.client;
 
       if (_isLogin) {
-        cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email, 
+        await client.auth.signInWithPassword(
+          email: email,
           password: password,
         );
       } else {
-        cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email, 
-          password: password,
-        );
-        
-        // On Registration, create the RBAC user document
-        await FirebaseFirestore.instance.collection('users').doc(cred.user!.uid).set({
+        await client.auth.signUp(email: email, password: password);
+        // On registration, create the RBAC profile row (RLS: own row only).
+        await client.from('profiles').upsert({
+          'id': client.auth.currentUser!.id,
           'email': email,
           'name': name,
           'role': _selectedRole,
-          'createdAt': FieldValue.serverTimestamp(),
-          // Default empty array for doctors/caregivers
           'assigned_patients': [],
         });
       }
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(cred.user!.uid)
-          .get();
+      final profile = await client
+          .from('profiles')
+          .select('role')
+          .eq('id', client.auth.currentUser!.id)
+          .maybeSingle();
 
-      if (!userDoc.exists) {
-        throw Exception('User role not found in database.');
-      }
-
-      final role = userDoc.data()?['role'] ?? 'Patient';
+      final role = (profile?['role'] as String?) ?? 'Patient';
 
       if (!mounted) return;
 
-      // Dynamic routing based on RBAC
-      if (role == 'Doctor') {
-        context.go('/doctor');
-      } else if (role == 'Caregiver') {
+      // Dynamic routing based on RBAC (clinic staff use the Clinic Suite app)
+      if (role == 'Caregiver') {
         context.go('/caregiver');
       } else {
         context.go('/');
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() => _errorMessage = e.message ?? 'Authentication failed');
+    } on AuthApiException catch (e) {
+      setState(() => _errorMessage = e.message);
     } catch (e) {
       setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
     } finally {

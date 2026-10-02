@@ -10,26 +10,17 @@ from datetime import datetime, timezone
 
 from .rag_service import SemanticKnowledgeBase
 
-# Initialize Firebase Admin SDK (for real-time Firestore writes)
-try:
-    import firebase_admin
-    from firebase_admin import credentials, firestore as fb_firestore
+# Supabase service client (real-time alert writes; see db.py + ADR-0003)
+from .db import service_client
 
-    if not firebase_admin._apps:
-        # On Cloud Run: uses Application Default Credentials automatically.
-        # Locally: set GOOGLE_APPLICATION_CREDENTIALS env var.
-        firebase_admin.initialize_app()
-
-    _db = fb_firestore.client()
-    _FIREBASE_AVAILABLE = True
-except Exception as _firebase_init_err:
-    _db = None
-    _FIREBASE_AVAILABLE = False
-    print(f"[GozAI] Firebase Admin SDK unavailable: {_firebase_init_err}. SOS will run in stub mode.")
+_db = service_client()
+_SUPABASE_AVAILABLE = _db is not None
+if not _SUPABASE_AVAILABLE:
+    print("[GozVision] Supabase unavailable (SUPABASE_URL/SERVICE_KEY missing). SOS will run in stub mode.")
 
 
 # Initialize the vector DB (client/db fall back internally; db=None when
-# Firebase is unavailable skips dynamic RAG loading)
+# Supabase unavailable skips dynamic RAG loading)
 knowledge_base = SemanticKnowledgeBase(db=_db)
 
 # Shared disclaimer appended to all medical responses
@@ -126,8 +117,8 @@ def send_sos_alert(
 
     Triggered when the user feels lost, disoriented, or needs help.
     Writes a real-time alert document to Firestore so the caregiver
-    dashboard updates live. Also designed for Firebase Cloud Messaging
-    push notification integration in production.
+    dashboard updates live, and can be relayed to push notification
+    delivery (Firebase Cloud Messaging or any provider) in production.
 
     The alert is written under the patient id carried by the ADK session
     (`user_id` the Flutter bridge supplies when it calls /run), so alerts
@@ -162,22 +153,23 @@ def send_sos_alert(
     }
 
     firestore_written = False
-    if _FIREBASE_AVAILABLE and _db is not None:
+    if _SUPABASE_AVAILABLE and _db is not None:
         try:
-            # Write to the unified sos_alerts collection so the CaregiverDashboard
-            # picks it up immediately through the dedicated SOS stream.
+            # Upsert into sos_alerts so the CaregiverDashboard picks it up
+            # immediately through its realtime stream (one current alert per
+            # patient — the GozAI contract preserved on Postgres).
             alert_data.update({
-                "userId": patient_id,
+                "patient_id": patient_id,
+                "user_id": patient_id,
                 "resolved": False,
+                "updated_at": now.isoformat(),
             })
-            _db.collection("sos_alerts") \
-               .document(patient_id) \
-               .set(alert_data)
+            _db.table("sos_alerts").upsert(alert_data).execute()
             firestore_written = True
-            print(f"[GozAI] SOS alert written to Firestore for {patient_id}: {message}")
+            print(f"[GozVision] SOS alert written for {patient_id}: {message}")
         except Exception as e:
             traceback.print_exc()
-            print(f"[GozAI] Firestore SOS write failed: {e}")
+            print(f"[GozVision] SOS write failed: {e}")
 
     return {
         "status": "sent" if firestore_written else "stub",

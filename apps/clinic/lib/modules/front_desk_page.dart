@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,9 +8,9 @@ import '../data/clinic_scope.dart';
 ///
 /// The queue is computed by the backend recall engine
 /// (`python -m gozvision_agent.recall --clinic <id>`), which writes
-/// `notifications` documents (status: queued). A delivery job drains them;
-/// when one does, it stamps provider + sentAt. Channel today is SMS-shaped;
-/// the provider (AWS End User Messaging, WhatsApp, SES) is a swap-in seam.
+/// `notifications` rows (status: queued). A delivery job drains them; when
+/// one does, it stamps provider + sent_at. Channel today is SMS-shaped; the
+/// provider (AWS End User Messaging, WhatsApp, SES) is a swap-in seam.
 class FrontDeskPage extends StatelessWidget {
   const FrontDeskPage({super.key});
 
@@ -40,11 +39,14 @@ class FrontDeskPage extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  child: StreamBuilder<ClinicRows>(
                     stream: appointments,
                     builder: (context, snap) {
-                      final docs = snap.data?.docs ?? const [];
-                      if (docs.isEmpty) {
+                      final rows = (snap.data ?? const [])
+                          .toList()
+                        ..sort((a, b) => (a['start_at'] as String? ?? '')
+                            .compareTo(b['start_at'] as String? ?? ''));
+                      if (rows.isEmpty) {
                         return const Card(
                           child: Padding(
                             padding: EdgeInsets.all(20),
@@ -55,19 +57,13 @@ class FrontDeskPage extends StatelessWidget {
                           ),
                         );
                       }
-                      final sorted = docs.toList()
-                        ..sort((a, b) {
-                          final av = a.data()['start'] as dynamic;
-                          final bv = b.data()['start'] as dynamic;
-                          return (av?.compareTo(bv) ?? 0);
-                        });
                       return ListView.separated(
-                        itemCount: sorted.length,
+                        itemCount: rows.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, i) {
-                          final data = sorted[i].data();
+                          final data = rows[i];
                           final status = (data['status'] as String?) ?? 'scheduled';
-                          final start = data['start'];
+                          final start = data['start_at'] as String?;
                           return Card(
                             child: ListTile(
                               leading: Icon(
@@ -84,7 +80,7 @@ class FrontDeskPage extends StatelessWidget {
                                 },
                               ),
                               title: Text(
-                                  '${data['type'] ?? 'appointment'} — patient ${data['patientId'] ?? '?'}'),
+                                  '${data['type'] ?? 'appointment'} — patient ${data['patient_id'] ?? '?'}'),
                               subtitle: Text(
                                   'status: $status${start != null ? '  ·  starts ${_fmt(start)}' : ''}'),
                             ),
@@ -97,13 +93,13 @@ class FrontDeskPage extends StatelessWidget {
                 const SizedBox(width: 24),
                 Expanded(
                   flex: 2,
-                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  child: StreamBuilder<ClinicRows>(
                     stream: outreach,
                     builder: (context, snap) {
-                      final docs = (snap.data?.docs ?? const [])
+                      final rows = (snap.data ?? const [])
                           .toList()
-                        ..sort((a, b) => (b.data()['createdAt'] as dynamic)
-                            ?.compareTo(a.data()['createdAt'] as dynamic) ?? 0);
+                        ..sort((a, b) => (b['created_at'] as String? ?? '')
+                            .compareTo(a['created_at'] as String? ?? ''));
                       return Card(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -120,7 +116,7 @@ class FrontDeskPage extends StatelessWidget {
                                           fontWeight: FontWeight.w700,
                                           color: ClinicTheme.textPrimary)),
                                   const Spacer(),
-                                  Text('${docs.length}',
+                                  Text('${rows.length}',
                                       style: const TextStyle(
                                           color: ClinicTheme.textSecondary)),
                                 ],
@@ -133,7 +129,7 @@ class FrontDeskPage extends StatelessWidget {
                                     color: ClinicTheme.textSecondary, fontSize: 12),
                               ),
                               const SizedBox(height: 12),
-                              if (docs.isEmpty)
+                              if (rows.isEmpty)
                                 const Text(
                                   'Queue empty. Run the sweep:\n'
                                   'python -m gozvision_agent.recall --clinic <id>',
@@ -143,11 +139,11 @@ class FrontDeskPage extends StatelessWidget {
                               else
                                 Expanded(
                                   child: ListView.separated(
-                                    itemCount: docs.length,
+                                    itemCount: rows.length,
                                     separatorBuilder: (_, _) => const Divider(
                                         color: ClinicTheme.border, height: 16),
                                     itemBuilder: (context, i) {
-                                      final n = docs[i].data();
+                                      final n = rows[i];
                                       final kind = (n['kind'] as String?) ?? 'recall';
                                       final status = (n['status'] as String?) ?? 'queued';
                                       return Column(
@@ -196,9 +192,9 @@ class FrontDeskPage extends StatelessWidget {
     );
   }
 
-  String _fmt(dynamic ts) {
+  String _fmt(String iso) {
     try {
-      final dt = ts.toDate() as DateTime;
+      final dt = DateTime.parse(iso).toLocal();
       return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
       return '';

@@ -1,22 +1,28 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:copilot_core/copilot_core.dart';
 
 /// SOS Caregiver Alert Service.
 ///
-/// When Gemini detects a crisis (the user uses distress words or requests help),
-/// it calls the `sendSosAlert` tool. This service:
-/// 1. Writes a real-time alert document to Firestore (visible on CaregiverDashboard)
-/// 2. Fallback: opens the phone dialer with the caregiver's saved number
+/// When Gemini detects a crisis (the user uses distress words or requests
+/// help), it calls the `sendSosAlert` intent. This service:
+/// 1. Upserts a real-time alert row in the `sos_alerts` table (visible on
+///    the CaregiverDashboard through its live stream)
+/// 2. Fallback: opens the phone dialer with the linked caregiver's number
+///    (profiles.caregiver_phone for caregivers whose assigned_patients
+///    include this patient).
 class SosService implements CopilotAlertSink {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _alertsCollection = 'sos_alerts';
-  static const String _prefsCollection = 'user_preferences';
+  SosService({SupabaseClient? client}) : _injectedClient = client;
+
+  // Lazily resolved so construction stays offline-safe.
+  final SupabaseClient? _injectedClient;
+  SupabaseClient get _client => _injectedClient ?? Supabase.instance.client;
 
   /// Sends an SOS alert for [userId] with the given [message] and [severity].
   ///
-  /// [severity] is either "mild" (user is confused/lost) or "critical" (danger).
+  /// [severity] is "mild" (user is confused/lost), "critical" (danger) or
+  /// "info" (hardware intentionally disabled via voice).
   @override
   Future<void> sendAlert({
     required String userId,
@@ -25,26 +31,26 @@ class SosService implements CopilotAlertSink {
     required String target,
   }) async {
     try {
-      final alertData = {
-        'userId': userId,
-        'message': message,
+      // One current alert per patient (unique patient_id — upsert keeps the
+      // GozAI document contract on Postgres).
+      await _client.from('sos_alerts').upsert({
+        'patient_id': userId,
+        'type': 'sos',
+        'note': message,
         'severity': severity,
         'target': target,
-        'timestamp': FieldValue.serverTimestamp(),
+        'user_id': userId,
         'resolved': false,
-      };
+        'alert_status': 'unacknowledged',
+        'source': 'gemini_live_agent',
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
 
-      // Write to Firestore — triggers real-time listener on CaregiverDashboard
-      await _firestore
-          .collection(_alertsCollection)
-          .doc(userId)
-          .set(alertData, SetOptions(merge: false));
-
-      debugPrint('SosService: Alert written to Firestore for user $userId');
+      debugPrint('SosService: Alert written to sos_alerts for user $userId');
 
       // For critical alerts, also try to open the phone dialer as a hard fallback
       if (severity == 'critical') {
-        await _dialCargiver(userId);
+        await _dialCaregiver(userId);
       }
     } catch (e) {
       debugPrint('SosService: Failed to send alert: $e');
@@ -54,32 +60,33 @@ class SosService implements CopilotAlertSink {
   /// Resolves (clears) the outstanding SOS alert for [userId].
   Future<void> resolveAlert({required String userId}) async {
     try {
-      await _firestore
-          .collection(_alertsCollection)
-          .doc(userId)
-          .update({'resolved': true});
+      await _client
+          .from('sos_alerts')
+          .update({'resolved': true}).eq('patient_id', userId);
     } catch (e) {
       debugPrint('SosService: Failed to resolve alert: $e');
     }
   }
 
-  /// Returns a real-time stream of the alert document for [userId].
+  /// Returns a real-time stream of the alert rows for [userId].
   /// The CaregiverDashboard subscribes to this to show live alerts.
-  Stream<DocumentSnapshot<Map<String, dynamic>>> alertStream(String userId) {
-    return _firestore
-        .collection(_alertsCollection)
-        .doc(userId)
-        .snapshots();
+  Stream<List<Map<String, dynamic>>> alertStream(String userId) {
+    return _client
+        .from('sos_alerts')
+        .stream(primaryKey: ['patient_id']).eq('patient_id', userId);
   }
 
-  /// Attempts to open the phone app dialer with the caregiver's saved number.
-  Future<void> _dialCargiver(String userId) async {
+  /// Attempts to open the phone app dialer with the linked caregiver's number.
+  Future<void> _dialCaregiver(String userId) async {
     try {
-      final prefs = await _firestore
-          .collection(_prefsCollection)
-          .doc(userId)
-          .get();
-      final caregiverPhone = prefs.data()?['caregiverPhone'] as String?;
+      final rows = await _client
+          .from('profiles')
+          .select('caregiver_phone')
+          .contains('assigned_patients', [userId])
+          .limit(1);
+      final caregiverPhone = rows.isNotEmpty
+          ? rows.first['caregiver_phone'] as String?
+          : null;
       if (caregiverPhone != null && caregiverPhone.isNotEmpty) {
         final uri = Uri(scheme: 'tel', path: caregiverPhone);
         if (await canLaunchUrl(uri)) {

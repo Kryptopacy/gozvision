@@ -20,17 +20,10 @@ import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 
-try:
-    import firebase_admin
-    from firebase_admin import firestore as fb_firestore
+from .db import service_client
 
-    if not firebase_admin._apps:
-        firebase_admin.initialize_app()
-    _db = fb_firestore.client()
-    FIREBASE_AVAILABLE = True
-except Exception:  # pragma: no cover
-    _db = None
-    FIREBASE_AVAILABLE = False
+_db = service_client()
+SUPABASE_AVAILABLE = _db is not None
 
 
 @dataclass
@@ -140,53 +133,52 @@ def render_message(item: RecallItem, patient_name: str = "there",
 def run_sweep(clinic_id: str, horizon_days: int = 14) -> list[dict]:
     """Queries the clinic's appointments, computes the worklist, and writes
     queued notifications. Returns what was enqueued."""
-    if not FIREBASE_AVAILABLE or _db is None:
-        raise RuntimeError("Recall sweep requires Firebase Admin credentials.")
+    if not SUPABASE_AVAILABLE or _db is None:
+        raise RuntimeError("Recall sweep requires SUPABASE_URL + SUPABASE_SERVICE_KEY.")
 
     now = datetime.now(timezone.utc)
-    snap = (_db.collection("appointments")
-            .where("clinicId", "==", clinic_id).get())
+    appt_rows = (_db.table("appointments")
+                 .select("id,patient_id,status,start_at,type")
+                 .eq("clinic_id", clinic_id).execute().data)
     appointments = []
-    for doc in snap:
-        data = doc.to_dict()
-        start = _parse_ts(data.get("start"))
+    for row in appt_rows:
+        start = _parse_ts(row.get("start_at"))
         if start is None:
             continue
         appointments.append(AppointmentView(
-            id=doc.id,
-            patient_id=data.get("patientId", "?"),
-            status=data.get("status", "scheduled"),
+            id=row["id"],
+            patient_id=row.get("patient_id", "?"),
+            status=row.get("status", "scheduled"),
             start=start,
-            type=data.get("type", "eye exam"),
+            type=row.get("type", "eye exam"),
         ))
     worklist = compute_recall_worklist(appointments, now, horizon_days=horizon_days)
 
     names: dict[str, str] = {}
-    patients = (_db.collection("patients")
-                .where("clinicId", "==", clinic_id).get())
-    for doc in patients:
-        names[doc.id] = doc.to_dict().get("name", "there")
+    for row in (_db.table("patients")
+                .select("id,name").eq("clinic_id", clinic_id).execute().data):
+        names[row["id"]] = row.get("name", "there")
 
     enqueued = []
-    batch = _db.batch()
+    pending = []
     for item in worklist:
         appt_type = next(
             (a.type for a in appointments if a.id == item.appointment_id), "eye exam")
         message = render_message(item, names.get(item.patient_id, "there"), appt_type)
-        ref = _db.collection("notifications").document()
-        batch.set(ref, {
-            "clinicId": clinic_id,
-            "patientId": item.patient_id,
-            "appointmentId": item.appointment_id,
+        pending.append({
+            "clinic_id": clinic_id,
+            "patient_id": item.patient_id,
+            "appointment_id": item.appointment_id,
             "kind": item.kind,
             "channel": "sms",
             "message": message,
             "status": "queued",
-            "createdAt": datetime.now(timezone.utc),
+            "created_at": now.isoformat(),
         })
         enqueued.append({"patientId": item.patient_id, "kind": item.kind,
                          "message": message})
-    batch.commit()
+    if pending:
+        _db.table("notifications").insert(pending).execute()
     return enqueued
 
 

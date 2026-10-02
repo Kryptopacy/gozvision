@@ -2,18 +2,30 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// App-wide configuration loaded from environment variables.
 class AppConfig {
-  /// The patient this installation serves. Single definition point for the
-  /// demo identity — every Firestore read/write for patient data references
-  /// [patientId] instead of a hand-typed id. See CONTEXT.md ("Patient").
+  /// Fallback patient identity for the demo flow when no session exists.
+  /// The zero-UI flow signs in as the seeded demo patient (see
+  /// [demoPatientEmail]) so every write satisfies RLS as a real identity.
+  /// See CONTEXT.md ("Patient identity").
   static const String patientId = 'demo_patient_001';
 
-  /// The ADK agent module name running on Cloud Run (backend/agents/).
+  /// The ADK agent module running on Cloud Run (backend/gozvision_agent/).
   /// Used to address the agent in ADK API server routes (/apps/{app}/..., /run).
   static const String adkAgentName = 'gozvision_agent';
 
   static String get geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
-  static String get firebaseProjectId =>
-      dotenv.env['FIREBASE_PROJECT_ID'] ?? 'gozai-app';
+
+  /// Supabase backend (auth + Postgres). See supabase/migrations/ and ADR-0003.
+  static String get supabaseUrl =>
+      dotenv.env['SUPABASE_URL'] ?? 'http://127.0.0.1:54321';
+  static String get supabasePublishableKey =>
+      dotenv.env['SUPABASE_ANON_KEY'] ?? '';
+
+  /// Zero-UI demo credentials: when present, the copilot signs in as the
+  /// seeded demo patient so every write happens under a real identity.
+  static String get demoPatientEmail => dotenv.env['DEMO_PATIENT_EMAIL'] ?? '';
+  static String get demoPatientPassword =>
+      dotenv.env['DEMO_PATIENT_PASSWORD'] ?? '';
+
   static String get adkBackendUrl =>
       dotenv.env['ADK_BACKEND_URL'] ?? 'http://localhost:8080';
 

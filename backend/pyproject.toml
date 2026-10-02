@@ -8,7 +8,7 @@ dependencies = [
     "google-genai",
     "numpy",
     "python-dotenv",
-    "firebase-admin",
+    "supabase>=2.0.0",
 ]
 
 [tool.uv]

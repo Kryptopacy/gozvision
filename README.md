@@ -32,6 +32,8 @@ gozvision/
 │   ├── design_system/     # One UI kit: accessible B2C theme + professional B2B theme
 │   ├── domain/            # Shared models: Clinic, Patient, Encounter, DeviceFit, ...
 │   └── api_client/        # Typed backend client
+├── supabase/
+│   └── migrations/        # Postgres schema + RLS policies (ADR-0003)
 ├── backend/
 │   ├── gozvision_agent/   # ADK agent: clinical RAG + SOS + ambient Scribe (draft_chart)
 │   │                      #   recall.py: recall/no-show outreach engine (notifications queue)
@@ -47,8 +49,11 @@ gozvision/
 ## Clinic Suite quick start
 
 ```bash
-# 1. Seed the demo world (needs Firebase Admin credentials)
-cd backend && python seed_clinic_demo.py --project your-project-id
+# 1. Create the schema (once): paste supabase/migrations/0001_initial_schema.sql
+#    into the Supabase dashboard SQL editor — or `supabase db push` after linking.
+
+# 2. Seed the demo world (reads SUPABASE_URL + SUPABASE_SERVICE_KEY from backend/.env)
+cd backend && python seed_clinic_demo.py
 
 # 2. Run the recall sweep — reminders, no-show recovery, annual recalls
 python -m gozvision_agent.recall --clinic demo_clinic_001
@@ -63,7 +68,7 @@ cd ../apps/clinic && flutter run -d chrome    # practitioner@gozvision.demo
 ## Stack (current as of 2026-10)
 
 - **Flutter 3.47 stable / Dart 3.13** — PWA-first, mobile-ready
-- **Firebase**: Auth (RBAC), Firestore (realtime copilot + clinic data, v1)
+- **Supabase**: Auth (RBAC), Postgres + RLS (multi-tenant clinic + copilot data), Realtime streams
 - **Google ADK 1.26** on Cloud Run — grounded clinical agents (`POST /run` contract)
 - **Embeddings**: `gemini-embedding-001` (text-embedding-004 is retired and 404s)
 - Node 22 LTS / Python 3.13 for the agent runtime

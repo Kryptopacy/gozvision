@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
 
 /// Clinic Suite sign-in. Roles (Owner/Practitioner/Staff) are resolved
-/// against the user's Firestore document after auth; see ClinicScope.
+/// against the user's profiles row after auth; see ClinicScope.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -31,13 +31,13 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await Supabase.instance.client.auth.signInWithPassword(
         email: _email.text.trim(),
         password: _password.text,
       );
       // Auth state stream in main.dart routes into the shell.
-    } on FirebaseAuthException catch (e) {
-      setState(() => _error = e.message ?? 'Sign-in failed.');
+    } on AuthApiException catch (e) {
+      setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

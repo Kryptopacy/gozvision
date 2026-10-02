@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
@@ -42,12 +42,12 @@ class _ClinicShellState extends State<ClinicShell> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Ask your practice owner to assign you in users/{uid}.clinicId.',
+                'Ask your practice owner to assign you in profiles.clinic_id.',
                 style: const TextStyle(color: ClinicTheme.textSecondary),
               ),
               const SizedBox(height: 24),
               TextButton(
-                onPressed: () => FirebaseAuth.instance.signOut(),
+                onPressed: () => Supabase.instance.client.auth.signOut(),
                 child: const Text('Sign out'),
               ),
             ],
@@ -86,7 +86,7 @@ class _ClinicShellState extends State<ClinicShell> {
           IconButton(
             icon: const Icon(Icons.logout, color: ClinicTheme.textSecondary),
             tooltip: 'Sign out',
-            onPressed: () => FirebaseAuth.instance.signOut(),
+            onPressed: () => Supabase.instance.client.auth.signOut(),
           ),
         ],
       ),

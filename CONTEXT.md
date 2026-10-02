@@ -92,5 +92,6 @@ SENSES ──▶ CONTEXT ──▶ SESSION (Gemini Live) ──▶ INTENTS ─�
   plugs into the same CopilotDelegate.
 - **Zero images/audio stored** by the copilot — adherence signals are
   structured data. Clinic Suite stores clinical records, not media.
-- **Firestore-first** for v1 (see ADR-0002); Postgres remains the known
-  evolution path if clinic record queries outgrow it.
+- **Supabase (Postgres + RLS + Realtime)** is the data layer (ADR-0003):
+  multi-tenant by clinic_id, policies in `supabase/migrations/`, backend
+  writes via the service role, everything else through RLS.

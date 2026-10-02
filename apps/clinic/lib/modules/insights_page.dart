@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +5,8 @@ import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
 
 /// Insights — practice analytics (v0: live counters over the clinic's own
-/// collections; deeper aggregation lands with the backend jobs).
+/// tables; deeper aggregation lands with SQL views — the reason the platform
+/// sits on Postgres, see ADR-0003).
 class InsightsPage extends StatelessWidget {
   const InsightsPage({super.key});
 
@@ -29,23 +29,23 @@ class InsightsPage extends StatelessWidget {
           const Text('Where your low-vision loop leaks — and where it holds.',
               style: TextStyle(color: ClinicTheme.textSecondary)),
           const SizedBox(height: 24),
-          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          StreamBuilder<ClinicRows>(
             stream: fits,
             builder: (context, fitsSnap) {
-              return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              return StreamBuilder<ClinicRows>(
                 stream: referrals,
                 builder: (context, refSnap) {
-                  final fitDocs = fitsSnap.data?.docs ?? const [];
-                  final refDocs = refSnap.data?.docs ?? const [];
+                  final fitRows = fitsSnap.data ?? const [];
+                  final refRows = refSnap.data ?? const [];
 
                   final trialing =
-                      fitDocs.where((d) => d.data()['status'] == 'trialing').length;
+                      fitRows.where((d) => d['status'] == 'trialing').length;
                   final abandoned =
-                      fitDocs.where((d) => d.data()['status'] == 'abandoned').length;
+                      fitRows.where((d) => d['status'] == 'abandoned').length;
                   final sustained =
-                      fitDocs.where((d) => d.data()['status'] == 'sustained').length;
+                      fitRows.where((d) => d['status'] == 'sustained').length;
                   final attended =
-                      refDocs.where((d) => d.data()['status'] == 'attended').length;
+                      refRows.where((d) => d['status'] == 'attended').length;
 
                   return Wrap(
                     spacing: 16,
@@ -62,7 +62,7 @@ class InsightsPage extends StatelessWidget {
                               : ClinicTheme.malachite),
                       _StatCard(
                           label: 'Referrals attended',
-                          value: '$attended / ${refDocs.length}'),
+                          value: '$attended / ${refRows.length}'),
                     ],
                   );
                 },

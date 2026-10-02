@@ -1,6 +1,6 @@
 # ADR-0002: Firestore-first data layer for v1
 
-Date: 2026-10-02 · Status: Accepted
+Date: 2026-10-02 · Status: Superseded by [ADR-0003](0003-supabase-data-layer.md) the same day — see that ADR for the reasoning.
 
 ## Context
 
