@@ -4,4 +4,5 @@ environment:
   sdk: ^3.13.0
 workspace:
   - apps/patient
+  - apps/clinic
   - packages/copilot_core

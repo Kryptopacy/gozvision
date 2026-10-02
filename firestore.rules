@@ -1,0 +1,182 @@
+rules_version = '2';
+
+// GozVision — multi-tenant security rules (see docs/DATA_MODEL.md).
+//
+// Tenancy: every clinic-scoped document carries `clinicId`; a user may only
+// touch documents of their own clinic. Patients are the exception — they may
+// be clinic-prescribed (clinicId set) or self-serve (clinicId null); they
+// always own their own record.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helpers -------------------------------------------------------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function role() {
+      return userDoc().role;
+    }
+
+    function userClinicId() {
+      return userDoc().clinicId;
+    }
+
+    function isStaff() {
+      return signedIn() && (role() == 'Practitioner' || role() == 'Staff' || role() == 'Owner');
+    }
+
+    function isPractitioner() {
+      return signedIn() && (role() == 'Practitioner' || role() == 'Owner');
+    }
+
+    function sameClinic(clinicId) {
+      return clinicId != null && clinicId == userClinicId();
+    }
+
+    function isLinkedTo(patientId) {
+      // Caregivers and practitioners linked via users.assigned_patients
+      return request.auth.uid in userDoc().get('assigned_patients', []);
+    }
+
+    // ---- Identity ------------------------------------------------------
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+      allow create: if signedIn() && request.auth.uid == uid;
+      // Role and clinic assignments are back-office writes; users may only
+      // touch their own profile fields (not role/clinicId/assigned_patients).
+      allow update: if signedIn() && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role', 'clinicId', 'assigned_patients']);
+      allow delete: if false; // via Admin SDK only
+    }
+
+    // ---- Clinic tenants ------------------------------------------------
+
+    match /clinics/{clinicId} {
+      allow read: if signedIn() && sameClinic(clinicId);
+      allow write: if signedIn() && role() == 'Owner' && sameClinic(clinicId);
+
+      match /practitioners/{uid} {
+        allow read: if signedIn() && sameClinic(clinicId);
+        allow write: if signedIn() && role() == 'Owner' && sameClinic(clinicId);
+      }
+      match /staff/{uid} {
+        allow read, write: if signedIn() && sameClinic(clinicId)
+          && (role() == 'Owner' || request.auth.uid == uid);
+      }
+      match /invitations/{id} {
+        allow read, write: if signedIn() && role() == 'Owner' && sameClinic(clinicId);
+      }
+    }
+
+    // ---- Patients ------------------------------------------------------
+
+    match /patients/{patientId} {
+      allow read: if signedIn() && (
+        request.auth.uid == patientId
+        || (isStaff() && sameClinic(resource.data.clinicId))
+        || isLinkedTo(patientId)
+      );
+      allow create: if signedIn() && (
+        (request.resource.data.clinicId == null && request.auth.uid == patientId)
+        || (isStaff() && sameClinic(request.resource.data.clinicId))
+      );
+      allow update: if signedIn() && (
+        (request.auth.uid == patientId
+          && !request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(['clinicId', 'practitionerId']))
+        || (isStaff() && sameClinic(resource.data.clinicId))
+      );
+      allow delete: if isPractitioner() && sameClinic(resource.data.clinicId);
+    }
+
+    // ---- Scheduling & clinical records ---------------------------------
+
+    match /appointments/{id} {
+      allow read: if signedIn() && (
+        sameClinic(resource.data.clinicId)
+        || request.auth.uid == resource.data.patientId
+      );
+      allow create: if signedIn() && isStaff() && sameClinic(request.resource.data.clinicId);
+      allow update, delete: if signedIn() && isStaff() && sameClinic(resource.data.clinicId);
+    }
+
+    match /encounters/{id} {
+      allow read: if signedIn() && (
+        sameClinic(resource.data.clinicId)
+        || request.auth.uid == resource.data.patientId
+      );
+      // Scribe drafts are written by the backend agent (Admin SDK, bypasses
+      // rules) and reviewed by practitioners.
+      allow create: if signedIn() && isStaff() && sameClinic(request.resource.data.clinicId);
+      allow update: if signedIn() && isPractitioner() && sameClinic(resource.data.clinicId);
+      allow delete: if isPractitioner() && sameClinic(resource.data.clinicId);
+    }
+
+    // ---- Low Vision Hub ------------------------------------------------
+
+    match /low_vision_referrals/{id} {
+      allow read: if signedIn() && (
+        sameClinic(resource.data.clinicId)
+        || request.auth.uid == resource.data.patientId
+      );
+      allow create, update: if signedIn() && isStaff() && sameClinic(request.resource.data.clinicId);
+      allow delete: if isPractitioner() && sameClinic(resource.data.clinicId);
+    }
+
+    match /device_fits/{id} {
+      allow read: if signedIn() && (
+        sameClinic(resource.data.clinicId)
+        || request.auth.uid == resource.data.patientId
+      );
+      allow create, update: if signedIn() && isStaff() && sameClinic(request.resource.data.clinicId);
+      allow delete: if isPractitioner() && sameClinic(resource.data.clinicId);
+    }
+
+    // Adherence signals: written by the copilot/backend (Admin SDK or the
+    // patient for their own signals), read by the owning clinic.
+    match /adherence_signals/{id} {
+      allow read: if signedIn() && (
+        sameClinic(resource.data.clinicId)
+        || request.auth.uid == resource.data.patientId
+        || isLinkedTo(resource.data.patientId)
+      );
+      allow create: if signedIn() && request.auth.uid == request.resource.data.patientId;
+      allow update, delete: if false; // signals are append-only
+    }
+
+    // ---- Safety --------------------------------------------------------
+
+    // SOS alerts: the patient (client) and the backend agent both write;
+    // linked caregivers and the owning clinic read. Same contract as GozAI.
+    match /sos_alerts/{patientId} {
+      allow read: if signedIn() && (
+        request.auth.uid == patientId || isLinkedTo(patientId)
+        || (isStaff() && sameClinic(resource.data.clinicId))
+      );
+      allow create, update: if signedIn() && request.auth.uid == patientId;
+      allow delete: if false;
+    }
+
+    // ---- Copilot data --------------------------------------------------
+
+    match /user_memory/{userId}/facts/{factId} {
+      allow read, write: if signedIn() && (
+        request.auth.uid == userId || isLinkedTo(userId)
+        || (isStaff() && sameClinic(get(/databases/$(database)/documents/patients/$(userId)).data.clinicId))
+      );
+    }
+
+    // Session transcripts are local-first; the doc (if any) is patient-scoped.
+    match /transcripts/{sessionId} {
+      allow read, write: if signedIn() && resource.data.patientId == request.auth.uid;
+    }
+  }
+}

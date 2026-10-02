@@ -1,0 +1,15 @@
+[project]
+name = "gozvision-backend"
+version = "0.1.0"
+description = "GozVision ADK agents — grounded clinical support for the Goz copilot"
+requires-python = ">=3.10"
+dependencies = [
+    "google-adk>=1.0.0",
+    "google-genai",
+    "numpy",
+    "python-dotenv",
+    "firebase-admin",
+]
+
+[tool.uv]
+dev-dependencies = []

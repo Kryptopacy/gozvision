@@ -1,0 +1,27 @@
+name: clinic_app
+description: "GozVision Clinic Suite (B2B) — Low Vision Hub, Front Desk, Scribe, Insights."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^4.4.0
+  firebase_auth: any
+  cloud_firestore: any
+  provider: any
+  flutter_dotenv: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/app.env
