@@ -24,6 +24,19 @@ if [[ -z "${GEMINI_API_KEY:-}" ]]; then
     exit 1
 fi
 
+# Supabase service credentials (backend writes: SOS, scribe drafts, recall)
+if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_SERVICE_KEY:-}" ]]; then
+    for env_file in "backend/.env" "../backend/.env"; do
+        if [[ -f "$env_file" ]]; then
+            export $(grep -E 'SUPABASE_URL|SUPABASE_SERVICE_KEY' "$env_file" | xargs) && break || true
+        fi
+    done
+fi
+if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_SERVICE_KEY:-}" ]]; then
+    echo "ERROR: SUPABASE_URL / SUPABASE_SERVICE_KEY not set (backend/.env or environment)."
+    exit 1
+fi
+
 gcloud config set project "${PROJECT_ID}"
 
 echo "[1/4] Enabling APIs..."
@@ -42,7 +55,7 @@ gcloud run deploy "${SERVICE_NAME}" \
     --allow-unauthenticated \
     --memory 1Gi --cpu 1 \
     --min-instances 0 --max-instances 10 \
-    --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GEMINI_API_KEY=${GEMINI_API_KEY}" \
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GEMINI_API_KEY=${GEMINI_API_KEY},SUPABASE_URL=${SUPABASE_URL},SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}" \
     --quiet
 
 SERVICE_URL=$(gcloud run services describe "${SERVICE_NAME}" --region "${REGION}" --format "value(status.url)")
