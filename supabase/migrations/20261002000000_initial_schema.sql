@@ -150,6 +150,17 @@ create table public.clinical_events (
 );
 create index clinical_events_patient_idx on public.clinical_events (patient_id, at desc);
 
+-- Optional dynamic RAG documents merged over the clinical corpus at startup
+-- (backend/gozvision_agent/clinical_corpus.py). Service-role managed.
+create table public.rag_documents (
+  id uuid primary key default gen_random_uuid(),
+  domain text not null check (domain in ('optometry', 'medication', 'statistics')),
+  key text not null,
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  unique (domain, key)
+);
+
 -- ───────────────────────────── copilot data ──────────────────────────────────
 
 create table public.memory_facts (

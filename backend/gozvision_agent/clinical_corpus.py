@@ -225,19 +225,18 @@ LOW_VISION_STATS = {
 
 
 def load_dynamic_documents(db, optometry_data, medication_data, stats_data):
-    """Fetches dynamic RAG documents from Firestore (Cloud Architecture proof).
+    """Fetches dynamic RAG documents from Supabase (the `rag_documents` table).
 
-    Streams the `gozai_rag_data` collection and merges each document into the
-    given corpus dicts in place. Documents carry `domain`
-    ('optometry'/'medication'/'statistics'), `key`, and `data` fields; see
-    seed_rag_firestore.py for the exact document shape.
+    Reads every row and merges it into the given corpus dicts in place. Rows
+    carry `domain` ('optometry'/'medication'/'statistics'), `key`, and `data`
+    (jsonb) fields.
 
-    A `db` of None (Firebase unavailable) skips dynamic loading entirely.
-    Never raises: on failure it prints and the caller falls back to whatever
-    is already in the local clinical cache dicts.
+    A `db` of None (Supabase unavailable) or a missing table skips dynamic
+    loading entirely. Never raises: on failure it prints and the caller falls
+    back to whatever is already in the local clinical cache dicts.
 
     Args:
-        db: Firestore client handle (or None to skip dynamic loading).
+        db: Supabase service client (or None to skip dynamic loading).
         optometry_data: Dict receiving domain="optometry" documents.
         medication_data: Dict receiving domain="medication" documents.
         stats_data: Dict receiving domain="statistics" documents.
@@ -248,13 +247,12 @@ def load_dynamic_documents(db, optometry_data, medication_data, stats_data):
     if db is None:
         return 0
     try:
-        docs = db.collection("gozai_rag_data").stream()
+        rows = db.table("rag_documents").select("domain,key,data").execute().data
         loaded_count = 0
-        for doc in docs:
-            data = doc.to_dict()
-            domain = data.get("domain")
-            key = data.get("key")
-            payload = data.get("data")
+        for row in rows or []:
+            domain = row.get("domain")
+            key = row.get("key")
+            payload = row.get("data")
             if domain == "optometry" and key and payload:
                 optometry_data[key] = payload
                 loaded_count += 1
@@ -265,8 +263,8 @@ def load_dynamic_documents(db, optometry_data, medication_data, stats_data):
                 stats_data[key] = payload
                 loaded_count += 1
         if loaded_count > 0:
-            print(f"Successfully loaded {loaded_count} dynamic RAG documents from Firestore.")
+            print(f"Successfully loaded {loaded_count} dynamic RAG documents from Supabase.")
         return loaded_count
     except Exception as e:
-        print(f"Failed to load dynamic RAG from Firestore, falling back to local clinical cache. Error: {e}")
+        print(f"Dynamic RAG loading skipped (falling back to the local clinical cache). Error: {e}")
         return 0
