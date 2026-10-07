@@ -30,7 +30,7 @@ try:
 except Exception:  # pragma: no cover
     genai = None
 
-_SCRIBE_MODEL = os.environ.get("GOZVISION_SCRIBE_MODEL", "gemini-2.5-flash")
+_SCRIBE_MODEL = os.environ.get("GOZVISION_SCRIBE_MODEL", "gemini-3.5-flash")
 
 _SECTIONS = ("subjective", "objective", "assessment", "plan")
 
