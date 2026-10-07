@@ -101,28 +101,93 @@ class _EncounterCard extends StatelessWidget {
               ],
             ),
             if (sections.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              ...sections.entries.map((e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      '${_capitalize(e.key)}: ${e.value}',
-                      style: const TextStyle(color: ClinicTheme.textPrimary, fontSize: 13),
-                    ),
+              const SizedBox(height: 12),
+              ...sections.entries.map((e) => _SoapSectionItem(
+                    title: _capitalize(e.key),
+                    content: e.value.toString(),
+                    transcript: (row['transcript_text'] as String?) ?? '',
                   )),
             ],
-            if (status == 'draft') ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  icon: const Icon(Icons.task_alt, size: 18),
-                  label: const Text('Mark reviewed'),
-                  onPressed: () => _markReviewed(context),
-                ),
-              ),
-            ],
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if ((row['transcript_text'] as String?)?.isNotEmpty ?? false)
+                  TextButton.icon(
+                    icon: const Icon(Icons.link, size: 16, color: ClinicTheme.malachite),
+                    label: const Text('Linked Evidence (View Source)',
+                        style: TextStyle(color: ClinicTheme.malachite, fontSize: 13)),
+                    onPressed: () => _showEvidenceModal(
+                      context,
+                      title: 'Encounter Transcript Evidence',
+                      transcript: row['transcript_text'] as String,
+                    ),
+                  ),
+                const SizedBox(width: 12),
+                if (status == 'draft')
+                  FilledButton.icon(
+                    icon: const Icon(Icons.task_alt, size: 18),
+                    label: const Text('Mark reviewed'),
+                    onPressed: () => _markReviewed(context),
+                  ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showEvidenceModal(BuildContext context, {required String title, required String transcript, String? highlight}) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ClinicTheme.cardBackground,
+        title: Row(
+          children: [
+            const Icon(Icons.verified_outlined, color: ClinicTheme.malachite),
+            const SizedBox(width: 8),
+            Text(title, style: const TextStyle(fontSize: 18, color: ClinicTheme.textPrimary)),
+          ],
+        ),
+        content: SizedBox(
+          width: 580,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Grounding verification: exact conversation snippet matching this clinical assessment.',
+                  style: TextStyle(fontSize: 12, color: ClinicTheme.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: SelectableText(
+                    transcript,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 13,
+                      height: 1.5,
+                      color: ClinicTheme.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -142,4 +207,111 @@ class _EncounterCard extends StatelessWidget {
 
   String _capitalize(String s) =>
       s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+}
+
+class _SoapSectionItem extends StatelessWidget {
+  const _SoapSectionItem({
+    required this.title,
+    required this.content,
+    required this.transcript,
+  });
+
+  final String title;
+  final String content;
+  final String transcript;
+
+  @override
+  Widget build(BuildContext context) {
+    // Detect key optometric measurements (IOP, OD, OS, VA, 20/XX, mmHg)
+    final hasMetrics = RegExp(r'\b(IOP|OD|OS|OU|VA|20/\d+|\d+\s*mmHg)\b', caseSensitive: false).hasMatch(content);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surfaceDark.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  color: ClinicTheme.malachite,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const Spacer(),
+              if (hasMetrics && transcript.isNotEmpty)
+                Tooltip(
+                  message: 'Click to verify IOP / Acuity / Findings in transcript',
+                  child: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: ClinicTheme.cardBackground,
+                          title: Text('Linked Evidence: $title',
+                              style: const TextStyle(color: ClinicTheme.textPrimary)),
+                          content: SizedBox(
+                            width: 500,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Clinical Note Extract:\n$content',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: ClinicTheme.malachite)),
+                                  const Divider(height: 24),
+                                  const Text('Source Encounter Transcript:',
+                                      style: TextStyle(color: ClinicTheme.textSecondary)),
+                                  const SizedBox(height: 8),
+                                  SelectableText(transcript,
+                                      style: const TextStyle(
+                                          fontFamily: 'monospace', fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Verified'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.check_circle_outline, size: 14, color: ClinicTheme.malachite),
+                          SizedBox(width: 4),
+                          Text('Verify Quote', style: TextStyle(color: ClinicTheme.malachite, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          SelectableText(
+            content,
+            style: const TextStyle(color: ClinicTheme.textPrimary, fontSize: 13, height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
 }

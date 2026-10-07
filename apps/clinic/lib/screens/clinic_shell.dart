@@ -8,6 +8,7 @@ import '../modules/front_desk_page.dart';
 import '../modules/insights_page.dart';
 import '../modules/low_vision_hub_page.dart';
 import '../modules/scribe_page.dart';
+import '../modules/clinic_chat_dialog.dart';
 
 /// The clinic suite shell: one rail, four modules. The Low Vision Hub is
 /// the flagship — it closes the referral → device fit → adherence loop.
@@ -74,8 +75,19 @@ class _ClinicShellState extends State<ClinicShell> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline, color: ClinicTheme.malachite),
+            tooltip: 'In-App Care Threads (Push & Email Active)',
+            onPressed: () {
+              ClinicChatDialog.show(
+                context,
+                patientId: 'demo_patient_001',
+                patientName: 'Eleanor Vance (AMD Trial)',
+              );
+            },
+          ),
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 16, left: 8),
             child: Center(
               child: Text(
                 '${scope.displayName}  ·  ${scope.role}',

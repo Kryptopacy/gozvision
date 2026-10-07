@@ -192,6 +192,61 @@ def cv_enhance_accessibility_frame(
         return {"status": "error", "error": str(e)}
 
 
+@mcp.tool()
+def smart_glasses_hud_process(
+    device_model: str = "rokid_max",
+    battery_level_pct: int = 80,
+    head_tilt_degrees: float = 0.0,
+    frame_base64: Optional[str] = None,
+) -> dict[str, Any]:
+    """Process a camera frame tailored for Smart Glasses micro-HUD displays (Ray-Ban Meta, Rokid, Vuzix).
+
+    Args:
+        device_model: Wearable device model ('rayban_meta', 'rokid_max', 'vuzix_blade', etc.)
+        battery_level_pct: Current battery percentage (triggers thermal downsampling when < 25%).
+        head_tilt_degrees: Current pitch of head from IMU sensors (detects floor step hazards when tilted down).
+        frame_base64: Optional base64-encoded frame. If omitted, returns active wearable profile status.
+    """
+    from gozvision_vision.smart_glasses import SmartGlassesTelemetryState, SmartGlassesVisionProcessor
+    import base64
+    import cv2
+    import numpy as np
+
+    telemetry = SmartGlassesTelemetryState(
+        device_model=device_model,
+        battery_level_pct=battery_level_pct,
+        head_tilt_degrees=head_tilt_degrees,
+    )
+    processor = SmartGlassesVisionProcessor(telemetry=telemetry)
+
+    if not frame_base64:
+        return {
+            "status": "configured",
+            "device": device_model,
+            "battery": f"{battery_level_pct}%",
+            "hud_profile": "ultra-sparse transparent micro-OLED",
+            "supported_devices": ["rokid_max", "rayban_meta", "even_realities_g1", "vuzix_blade"],
+        }
+
+    try:
+        img_bytes = base64.b64decode(frame_base64)
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            return {"status": "error", "message": "Failed to decode frame"}
+
+        hud_overlay, meta = processor.generate_hud_sparse_overlay(img)
+        _, buffer = cv2.imencode(".png", hud_overlay)
+        encoded_out = base64.b64encode(buffer).decode("utf-8")
+        return {
+            "status": "success",
+            "wearable_metadata": meta,
+            "hud_overlay_base64": encoded_out,
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
 if __name__ == "__main__":
     # Standard stdio transport for MCP clients (Alexa+ host, Claude, or custom agent orchestrators)
     mcp.run()
