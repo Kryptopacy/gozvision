@@ -202,7 +202,10 @@ def handle_inbound_patient_reply(
     if any(k in clean_text for k in ["confirm", "yes", "i'll be there", "confirmed"]):
         # Update scheduled appointment to confirmed
         if SUPABASE_AVAILABLE and _db is not None:
-            _db.table("appointments").update({"status": "confirmed"}).eq("patient_id", patient_id).eq("status", "scheduled").execute()
+            try:
+                _db.table("appointments").update({"status": "confirmed"}).eq("patient_id", patient_id).eq("status", "scheduled").execute()
+            except Exception:
+                pass
         reply = "Thank you! Your eye appointment is confirmed. We look forward to seeing you."
         _dispatch_aws_message(channel=channel, recipient=sender_phone, message=reply)
         return {"status": "confirmed", "reply": reply}
