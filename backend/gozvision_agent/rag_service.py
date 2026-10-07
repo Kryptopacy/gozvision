@@ -1,4 +1,4 @@
-"""Semantic retrieval machinery for the GozAI clinical knowledge base.
+"""Semantic retrieval machinery for the GozVision clinical knowledge base.
 
 The curated clinical datasets themselves live in `clinical_corpus`; this
 module owns the Gemini embedding client, the on-disk embedding cache, the

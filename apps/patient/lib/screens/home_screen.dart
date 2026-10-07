@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'assets/logos/gozai_premium_lens_1772805910787.png',
+            'assets/logos/gozvision_lens.png',
             height: 32,
             semanticLabel: 'GozAI Premium Lens Logo',
           ),

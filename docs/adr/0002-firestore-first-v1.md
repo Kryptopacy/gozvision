@@ -6,8 +6,7 @@ Date: 2026-10-02 · Status: Superseded by [ADR-0003](0003-supabase-data-layer.md
 
 GozVision needs a data layer for both realtime copilot data (SOS alerts,
 memory, adherence signals) and clinic records (patients, encounters, device
-fits, scheduling). GozAI used Firestore throughout; the team knows it; the
-copilot side genuinely needs realtime streams.
+fits, scheduling). The copilot side genuinely needs realtime streams.
 
 ## Decision
 

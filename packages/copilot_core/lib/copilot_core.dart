@@ -10,7 +10,7 @@
 library;
 
 export 'src/copilot_delegate.dart';
-export 'src/gozai_session_types.dart';
+export 'src/session_types.dart';
 export 'src/gemini_live_service.dart';
 export 'src/service_contracts.dart';
 export 'src/session_config.dart';

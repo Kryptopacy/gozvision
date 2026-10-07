@@ -7,7 +7,7 @@
 library;
 
 /// The current interaction mode of the copilot.
-enum GozAIMode {
+enum CopilotMode {
   scene,      // Continuous scene monitoring
   reading,    // OCR / text reading
   uiNav,      // UI Navigator / digital accessibility

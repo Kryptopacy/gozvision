@@ -1,4 +1,4 @@
-"""GozAI ADK Tools — Backend functions for the agent to call.
+"""GozVision Agent Tools — Backend functions for the agent to call.
 
 All tools return structured dicts and NEVER raise exceptions to the agent.
 Errors are caught, logged, and returned as graceful fallbacks to prevent
@@ -146,7 +146,7 @@ def send_sos_alert(
         "type": "sos",
         "note": message,
         "severity": "High",
-        "timestamp": now,
+        "timestamp": now.isoformat(),
         "location_included": include_location,
         "source": "gemini_live_agent",
         "status": "unacknowledged",
@@ -157,7 +157,7 @@ def send_sos_alert(
         try:
             # Upsert into sos_alerts so the CaregiverDashboard picks it up
             # immediately through its realtime stream (one current alert per
-            # patient — the GozAI contract preserved on Postgres).
+            # patient — contract preserved on Postgres).
             alert_data.update({
                 "patient_id": patient_id,
                 "user_id": patient_id,

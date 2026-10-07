@@ -1,9 +1,9 @@
-"""GozAI clinical corpus: curated datasets and dynamic Firestore merge.
+"""GozVision clinical corpus: curated datasets and dynamic Firestore merge.
 
 Pure data module: imports neither firebase_admin nor google.genai. The three
 datasets below are generated from clinical guidelines (AAO, AOA, WHO) and
 peer-reviewed literature. `load_dynamic_documents` merges live RAG documents
-from the `gozai_rag_data` Firestore collection over the local dicts (see
+from the `rag_data` Firestore collection over the local dicts (see
 seed_rag_firestore.py for the exact document shape: domain/key/data fields).
 """
 
@@ -173,7 +173,7 @@ LOW_VISION_STATS = {
     },
     "assistive technology gap": {
         "statistic": "Only 10% of people who need assistive technology have access to it.",
-        "context": "This 90% gap disproportionately affects low- and middle-income regions, highlighting the urgent need for scalable, smartphone-based AI solutions like GozAI.",
+        "context": "This 90% gap disproportionately affects low- and middle-income regions, highlighting the urgent need for scalable, smartphone-based AI solutions like GozVision.",
         "source": "WHO and UNICEF Global Report on Assistive Technology, 2022"
     },
     "cognitive mapping AI": {

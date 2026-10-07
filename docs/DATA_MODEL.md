@@ -34,21 +34,21 @@ adherence_signals/{id}                    # from the copilot — structured, NO 
 notifications/{id}                        # recall engine output (see gozvision_agent/recall.py)
   clinicId, patientId, appointmentId?, kind: reminder|recovery|recall,
   channel: sms, message, status: queued|sent, createdAt, sentAt?, provider?
-sos_alerts/{patientId}                    # inherited contract from GozAI (same schema + clinicId)
+sos_alerts/{patientId}                    # SOS alert state (active emergency document per patient)
 transcripts/{sessionId}                   # local-only session text (patient-scoped, HIPAA posture)
 ```
 
 ## Reading the model
 
 - `users.assigned_patients` is the caregiver/practitioner → patient link that
-  dashboards resolve (the GozAI `CaregiverDashboard` pattern, generalized).
+  dashboards resolve (`CaregiverDashboard` pattern).
 - `encounters.scribe_draft` is draft-until-reviewed: the Scribe never writes
   final charts autonomously (CONTEXT.md — "Grounding over generation").
 - `device_fits.status` + `adherence_signals` together power the Low Vision
   Hub's abandonment early-warning: a `trialing` fit with declining
   `daily_active_use` is the exact signature of the 29% abandonment leak.
-- Alerts keep the GozAI document shape (`userId`, `resolved`, severity) so
-  the ported `SosService` + backend tool work unchanged; `clinicId` is added.
+- Alerts follow the SOS document shape (`userId`, `resolved`, severity) so
+  the `SosService` + backend tools work uniformly; `clinicId` is added.
 
 ## Deliberately out of scope for v1
 

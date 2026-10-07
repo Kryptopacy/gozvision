@@ -37,7 +37,5 @@ later.
   snapshots to `supabase_flutter` `.stream()` — same UX, different wire.
 - ADR-0002's concern (relational depth vs Firestore) is resolved by adoption
   rather than deferred; its exit-path conditions will not re-trigger.
-- Firestore/Firebase remain only in the frozen GozAI repo and as a *suggested*
-  push-delivery provider in docs (no dependency).
 - Patient-scoped ids are TEXT (auth uid or demo slug) — deliberate, keeps the
   copilot contract uniform; documented in the migration header.

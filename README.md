@@ -1,9 +1,8 @@
 # GozVision — the AI copilot platform for eye care clinics
 
-GozVision expands the GozAI low-vision copilot into a full patient–optometrist
-platform: **Goz**, the empathetic voice-first copilot patients already know,
-prescribed by the clinic and wrapped in the clinic workflow tools optometrists
-actually need.
+GozVision is an end-to-end patient–optometrist platform: **Goz**, the empathetic
+voice-first copilot patients use for daily visual assistance, prescribed by
+the clinic and wrapped in the clinic workflow tools optometrists actually need.
 
 > "GozVision — the AI copilot platform for eye care clinics."
 
@@ -35,14 +34,12 @@ gozvision/
 ├── supabase/
 │   └── migrations/        # Postgres schema + RLS policies (ADR-0003)
 ├── backend/
-│   ├── gozvision_agent/   # ADK agent: clinical RAG + SOS + ambient Scribe (draft_chart)
-│   │                      #   recall.py: recall/no-show outreach engine (notifications queue)
-│   ├── deploy.sh          # Cloud Run deployment (adk api_server gozvision_agent)
+│   ├── gozvision_agent/   # Agentic services: clinical RAG, recall outreach, ambient Scribe
+│   ├── deploy.sh          # Cloud Run deployment
 │   ├── seed_clinic_demo.py# Seeds a full demo clinic world (auth users + data)
 │   └── test_*.py          # Offline test suites (no API keys needed)
 └── docs/
     ├── DATA_MODEL.md      # Multi-tenant data model
-    ├── EXTRACTION.md      # What ports from GozAI vs. what is rebuilt
     └── adr/               # Architecture decision records
 ```
 
@@ -55,13 +52,13 @@ gozvision/
 # 2. Seed the demo world (reads SUPABASE_URL + SUPABASE_SERVICE_KEY from backend/.env)
 cd backend && python seed_clinic_demo.py
 
-# 2. Run the recall sweep — reminders, no-show recovery, annual recalls
+# 3. Run the recall sweep — reminders, no-show recovery, annual recalls
 python -m gozvision_agent.recall --clinic demo_clinic_001
 
-# 3. Draft a scribe chart (or ask the agent: "draft the chart for enc_1")
+# 4. Draft a scribe chart (or ask the agent: "draft the chart for enc_1")
 python -m gozvision_agent.scribe enc_1
 
-# 4. Run the Clinic Suite and sign in (password: gozvision-demo)
+# 5. Run the Clinic Suite and sign in (password: gozvision-demo)
 cd ../apps/clinic && flutter run -d chrome    # practitioner@gozvision.demo
 ```
 
@@ -69,11 +66,5 @@ cd ../apps/clinic && flutter run -d chrome    # practitioner@gozvision.demo
 
 - **Flutter 3.47 stable / Dart 3.13** — PWA-first, mobile-ready
 - **Supabase**: Auth (RBAC), Postgres + RLS (multi-tenant clinic + copilot data), Realtime streams
-- **Google ADK 1.26** on Cloud Run — grounded clinical agents (`POST /run` contract)
-- **Embeddings**: `gemini-embedding-001` (text-embedding-004 is retired and 404s)
-- Node 22 LTS / Python 3.13 for the agent runtime
-
-## Provenance
-
-Extracted from the [GozAI](https://github.com/Kryptopacy/GozAI) hackathon
-submission (Gemini Live Agent Challenge). See [docs/EXTRACTION.md](docs/EXTRACTION.md).
+- **Agentic Engine & Vision Pipeline**: Python 3.13 backend / Cloud Run / AWS, OpenCV visual enhancement, MCP server & voice interface
+- **Embeddings**: `gemini-embedding-001`
