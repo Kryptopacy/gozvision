@@ -108,10 +108,10 @@ class SemanticKnowledgeBase:
         # Firestore handle for dynamic RAG loading (None skips dynamic loading).
         self.db = db
 
-        # gemini-embedding-001 is the current GA embedding model.
-        # text-embedding-004 was retired (embedContent returns 404 for it),
-        # which silently degraded every RAG lookup to "not found".
-        self.embedding_model = "gemini-embedding-001"
+        # Pinned explicitly — embedding models change the vector space, so
+        # "latest" aliases would silently invalidate the cached index.
+        # Bumping this triggers a clean rebuild via the model-namespaced cache.
+        self.embedding_model = "gemini-embedding-2"
 
         # Store dicts of {key: embedding}
         self.optometry_embeddings = {}

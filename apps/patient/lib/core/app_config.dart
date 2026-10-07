@@ -36,7 +36,10 @@ class AppConfig {
 
   /// Gemini model for multimodal live.
   /// bidiGenerateContent endpoint on v1alpha.
-  static const String geminiModel = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
+  /// Bleeding edge: the newest generation speaks the Live API natively
+  /// (bidiGenerateContent). Fallback if needed:
+  /// models/gemini-2.5-flash-native-audio-latest.
+  static const String geminiModel = 'models/gemini-3.8-live';
 
   /// Camera frame rate for continuous monitoring (frames per second)
   static const double cameraFps = 1.0;

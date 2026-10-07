@@ -24,7 +24,7 @@ from .scribe import draft_chart
 
 root_agent = Agent(
     name="gozvision_agent",
-    model="gemini-3.5-flash",
+    model="gemini-flash-latest",
     description=(
         "GozVision backend agent for grounded clinical support. "
         "Handles optometry knowledge queries, medication safety lookups, "
