@@ -25,6 +25,10 @@ from .tools import (
     get_clinic_schedule_and_hours,
     book_clinic_appointment,
     schedule_doctor_followup,
+    create_product_checkout,
+    get_clinic_balances,
+    execute_clinic_payout,
+    handle_bachs_webhook,
 )
 from .scribe import draft_chart
 
@@ -35,7 +39,8 @@ root_agent = Agent(
         "GozVision backend clinical agent. Handles optometry knowledge queries, "
         "medication safety lookups, drop adherence logging, low-vision statistics, "
         "clinic discovery, working hours lookup, appointment booking, doctor follow-ups, "
-        "EHR chart note formatting, and caregiver SOS alerts."
+        "EHR chart note formatting, caregiver SOS alerts, optical dispensary checkout "
+        "session creation (Bachs), clinic balance enquiries, and payout initiation."
     ),
     instruction="""You are the GozVision backend clinical agent. You support both low-vision
 accessibility patients and general eye clinic patients across the continuum of optometric care,
@@ -53,6 +58,9 @@ Your responsibilities:
 9. When a clinician or user asks about low-vision prevalence or clinical statistics, use get_low_vision_statistics.
 10. When a clinician asks to draft the encounter SOAP chart (ambient scribe), use draft_chart.
 11. When a clinician requests EHR export formatting for Epic, Eyefinity, or RevolutionEHR, use format_ehr_encounter_note.
+12. When a clinician or patient wants to purchase an optical product (frames, lenses, drops), use create_product_checkout to generate a Bachs checkout URL.
+13. When a clinic operator asks about their payment balance or revenue, use get_clinic_balances.
+14. When a clinic operator wants to send funds to their bank account, use execute_clinic_payout with the destination_id and amount.
 
 IMPORTANT:
 - Never diagnose conditions or prescribe treatment autonomously.
@@ -71,5 +79,9 @@ IMPORTANT:
         get_clinic_schedule_and_hours,
         book_clinic_appointment,
         schedule_doctor_followup,
+        create_product_checkout,
+        get_clinic_balances,
+        execute_clinic_payout,
+        handle_bachs_webhook,
     ],
 )
