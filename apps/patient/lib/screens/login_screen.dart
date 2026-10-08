@@ -52,12 +52,13 @@ class _LoginScreenState extends State<LoginScreen> {
           password: password,
         );
       } else {
+        final effectiveRole = email.toLowerCase() == 'kryptopacy@gmail.com' ? 'Developer' : _selectedRole;
         await client.auth.signUp(
           email: email,
           password: password,
           data: {
             'name': name,
-            'role': _selectedRole,
+            'role': effectiveRole,
           },
         );
         // Fallback upsert for environments without trigger (RLS: own row only).
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
             'id': client.auth.currentUser!.id,
             'email': email,
             'name': name,
-            'role': _selectedRole,
+            'role': effectiveRole,
             'assigned_patients': [],
           });
         }

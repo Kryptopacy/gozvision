@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -51,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.supabase.gozvision://login-callback',
+        redirectTo: kIsWeb ? null : 'io.supabase.gozvision://login-callback',
       );
     } on AuthApiException catch (e) {
       setState(() => _error = e.message);

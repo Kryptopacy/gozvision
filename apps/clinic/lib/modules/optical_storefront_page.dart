@@ -701,9 +701,11 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                 children: [
                   _buildCatalogTab(paymentService),
                   _buildOrdersTab(),
-                  paymentService.isBachsActive
-                      ? _buildBachsPayoutsTab(scope, paymentService)
-                      : _buildStripeConnectTab(scope, paymentService),
+                  (scope.isClinicManager || scope.isDeveloper)
+                      ? (paymentService.isBachsActive
+                          ? _buildBachsPayoutsTab(scope, paymentService)
+                          : _buildStripeConnectTab(scope, paymentService))
+                      : _buildRestrictedPayoutsView(),
                 ],
               ),
             ),
@@ -1474,6 +1476,44 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
           Text(label, style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRestrictedPayoutsView() {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 480),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: ClinicTheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: ClinicTheme.border),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: ClinicTheme.warningAmber.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.lock_outline_rounded, size: 36, color: ClinicTheme.warningAmber),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Restricted to Clinic Manager & Owner',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Bank accounts, settlement balance buckets, and Bachs instant disbursements are restricted to Practice Owners and Clinic Managers.\n\nFront desk staff and practitioners have full access to product catalogs, prescription fulfillment, and patient order processing.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13, height: 1.5),
+            ),
+          ],
+        ),
       ),
     );
   }

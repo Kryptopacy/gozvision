@@ -13,6 +13,7 @@ import '../modules/doctor_reference_dialog.dart';
 import '../modules/doctor_profile_page.dart';
 import '../modules/clinic_directory_page.dart';
 import '../modules/optical_storefront_page.dart';
+import '../modules/developer_console_page.dart';
 
 /// GozVision Clinic Suite — Enterprise Multi-Tenant Clinical Shell.
 ///
@@ -28,10 +29,20 @@ class ClinicShell extends StatefulWidget {
 
 class _ClinicShellState extends State<ClinicShell> {
   int _index = 0;
+  bool _initializedIndex = false;
 
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<ClinicScope>();
+
+    if (!_initializedIndex && scope.resolved) {
+      if (scope.isDeveloper) {
+        _index = 7; // Open Developer Console directly for developer
+      } else if (scope.isStaff && !scope.isClinicManager) {
+        _index = 1; // Open Front Desk directly for staff
+      }
+      _initializedIndex = true;
+    }
 
     if (!scope.resolved) {
       return const Scaffold(
@@ -42,7 +53,7 @@ class _ClinicShellState extends State<ClinicShell> {
       );
     }
 
-    if (scope.clinicId == null) {
+    if (scope.clinicId == null && !scope.isDeveloper) {
       return Scaffold(
         backgroundColor: ClinicTheme.obsidian,
         body: Center(
@@ -91,6 +102,7 @@ class _ClinicShellState extends State<ClinicShell> {
       DoctorProfilePage(),
       ClinicDirectoryPage(),
       OpticalStorefrontPage(),
+      DeveloperConsolePage(),
     ];
 
     return Scaffold(
@@ -296,6 +308,30 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
           ),
 
+          if (scope.isDeveloper) ...[
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 8),
+              child: Text(
+                'PLATFORM ROOT',
+                style: TextStyle(
+                  color: ClinicTheme.malachite,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            _buildNavItem(
+              index: 7,
+              icon: Icons.terminal_rounded,
+              activeIcon: Icons.terminal,
+              label: 'Developer Console',
+              badgeText: 'Root',
+              badgeColor: ClinicTheme.malachite,
+            ),
+            const SizedBox(height: 16),
+          ],
+
           const Padding(
             padding: EdgeInsets.only(left: 8, bottom: 8),
             child: Text(
@@ -309,34 +345,38 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
           ),
 
-          _buildNavItem(
-            index: 0,
-            icon: Icons.visibility_outlined,
-            activeIcon: Icons.visibility,
-            label: 'Low Vision Hub',
-            badgeText: 'Live',
-            badgeColor: ClinicTheme.malachite,
-          ),
+          if (!scope.isStaff || scope.isClinicManager) ...[
+            _buildNavItem(
+              index: 0,
+              icon: Icons.visibility_outlined,
+              activeIcon: Icons.visibility,
+              label: 'Low Vision Hub',
+              badgeText: 'Live',
+              badgeColor: ClinicTheme.malachite,
+            ),
+          ],
           _buildNavItem(
             index: 1,
             icon: Icons.calendar_month_outlined,
             activeIcon: Icons.calendar_month,
             label: 'Front Desk',
           ),
-          _buildNavItem(
-            index: 2,
-            icon: Icons.edit_note_rounded,
-            activeIcon: Icons.edit_note_rounded,
-            label: 'Scribe Studio',
-            badgeText: 'Drafts',
-            badgeColor: ClinicTheme.warningAmber,
-          ),
-          _buildNavItem(
-            index: 3,
-            icon: Icons.insights_rounded,
-            activeIcon: Icons.insights_rounded,
-            label: 'Practice Insights',
-          ),
+          if (!scope.isStaff || scope.isClinicManager) ...[
+            _buildNavItem(
+              index: 2,
+              icon: Icons.edit_note_rounded,
+              activeIcon: Icons.edit_note_rounded,
+              label: 'Scribe Studio',
+              badgeText: 'Drafts',
+              badgeColor: ClinicTheme.warningAmber,
+            ),
+            _buildNavItem(
+              index: 3,
+              icon: Icons.insights_rounded,
+              activeIcon: Icons.insights_rounded,
+              label: 'Practice Insights',
+            ),
+          ],
 
           const SizedBox(height: 16),
           const Padding(
@@ -352,12 +392,14 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
           ),
 
-          _buildNavItem(
-            index: 4,
-            icon: Icons.badge_outlined,
-            activeIcon: Icons.badge,
-            label: 'Doctor Profile',
-          ),
+          if (!scope.isStaff || scope.isClinicManager) ...[
+            _buildNavItem(
+              index: 4,
+              icon: Icons.badge_outlined,
+              activeIcon: Icons.badge,
+              label: 'Doctor Profile',
+            ),
+          ],
           _buildNavItem(
             index: 5,
             icon: Icons.domain_outlined,

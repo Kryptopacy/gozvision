@@ -10,21 +10,28 @@ typedef ClinicRows = List<Map<String, dynamic>>;
 class ClinicScope extends ChangeNotifier {
   String? clinicId;
   String role = '';
+  String email = '';
   String displayName = '';
   bool resolved = false;
   String? error;
+
+  bool get isDeveloper => role == 'Developer' || email.toLowerCase() == 'kryptopacy@gmail.com';
+  bool get isClinicManager => role == 'ClinicManager' || role == 'Owner' || isDeveloper;
+  bool get isPractitioner => role == 'Practitioner' || isClinicManager;
+  bool get isStaff => role == 'Staff' || isClinicManager;
 
   /// Resolves the profiles row (id = uid) into the tenancy scope.
   Future<void> resolve(String uid) async {
     try {
       final rows = await Supabase.instance.client
           .from('profiles')
-          .select('clinic_id, role, name, assigned_patients')
+          .select('clinic_id, role, email, name, assigned_patients')
           .eq('id', uid)
           .limit(1);
       final data = rows.isEmpty ? const {} : rows.first;
       clinicId = data['clinic_id'] as String?;
-      role = (data['role'] as String?) ?? 'Staff';
+      email = (data['email'] as String?) ?? '';
+      role = (data['role'] as String?) ?? (email.toLowerCase() == 'kryptopacy@gmail.com' ? 'Developer' : 'Staff');
       displayName = (data['name'] as String?) ?? '';
       resolved = true;
     } catch (e) {
