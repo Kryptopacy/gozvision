@@ -8,11 +8,13 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:copilot_core/copilot_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/app_config.dart';
 import '../core/theme.dart';
 import '../services/audio_service.dart';
 import '../services/camera_service.dart';
-
 import '../services/haptic_service.dart';
+import '../services/sos_service.dart';
 import 'profile_screen.dart';
 import 'clinic_discovery_sheet.dart';
 
@@ -136,15 +138,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Column(
       children: [
         _buildStatusBar(),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildHardwareStatusIndicators(),
         const Spacer(flex: 1),
         _buildCentralButton(),
-        const Spacer(flex: 2),
+        const Spacer(flex: 1),
+        _buildQuickAssistDock(),
+        const SizedBox(height: 14),
         _buildGozViewToggleHint(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 14),
         _buildModeSelector(),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -431,82 +435,295 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  /// Central activation button with high-end premium pulse glow.
+  /// Central activation button: Bioluminescent Multimodal Neural Orb with dynamic audio waveforms.
   Widget _buildCentralButton() {
     return Consumer2<GeminiLiveService, AudioService>(
       builder: (context, gemini, audio, _) {
         final isActive = gemini.isConnected && audio.isRecording;
         final isSpeaking = gemini.isModelSpeaking;
 
+        final Color primaryAccent = isSpeaking
+            ? GozAITheme.speakingPulse
+            : (isActive ? GozAITheme.listeningPulse : GozAITheme.primaryBlue);
+
         return GestureDetector(
-          onTap: () => _coordinator?.toggleSession(),
-          onLongPress: () => _coordinator?.captureSnapshot(),
+          onTap: () {
+            HapticService.tap();
+            _coordinator?.toggleSession();
+          },
+          onLongPress: () {
+            HapticService.alert();
+            _coordinator?.captureSnapshot();
+          },
           child: Semantics(
             button: true,
             label: isActive
-                ? 'GozAI is listening. Double-tap to stop.'
-                : 'Start GozAI. Double-tap to activate.',
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    if (isSpeaking) ...[
-                      GozAITheme.speakingPulse.withValues(alpha: 0.9),
-                      GozAITheme.speakingPulse.withValues(alpha: 0.4),
-                    ] else if (isActive) ...[
-                      GozAITheme.listeningPulse.withValues(alpha: 0.9),
-                      GozAITheme.listeningPulse.withValues(alpha: 0.4),
-                    ] else ...[
-                      GozAITheme.surfaceElevated,
-                      GozAITheme.surfacePure,
-                    ],
+                ? 'GozVision is listening. Tap to pause.'
+                : 'Tap to start GozVision Copilot. Long press to describe current scene.',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer diffuse breathing aura ring
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 600),
+                      width: isActive ? 240 : 200,
+                      height: isActive ? 240 : 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: primaryAccent.withValues(alpha: isActive ? 0.08 : 0.03),
+                        boxShadow: [
+                          if (isActive || isSpeaking)
+                            BoxShadow(
+                              color: primaryAccent.withValues(alpha: isSpeaking ? 0.45 : 0.28),
+                              blurRadius: isSpeaking ? 60 : 40,
+                              spreadRadius: isSpeaking ? 16 : 8,
+                            ),
+                        ],
+                      ),
+                    ),
+                    // Specular frosted border ring
+                    Container(
+                      width: 196,
+                      height: 196,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: SweepGradient(
+                          colors: [
+                            primaryAccent.withValues(alpha: 0.8),
+                            primaryAccent.withValues(alpha: 0.1),
+                            primaryAccent.withValues(alpha: 0.6),
+                            primaryAccent.withValues(alpha: 0.8),
+                          ],
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(2.5),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: GozAITheme.backgroundBlack,
+                        ),
+                      ),
+                    ),
+                    // Inner Core Orb with audio reactive visualizer
+                    Container(
+                      width: 178,
+                      height: 178,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          center: const Alignment(-0.25, -0.25),
+                          colors: [
+                            if (isSpeaking) ...[
+                              GozAITheme.speakingPulse,
+                              const Color(0xFF003818),
+                              GozAITheme.backgroundBlack,
+                            ] else if (isActive) ...[
+                              GozAITheme.listeningPulse,
+                              const Color(0xFF383000),
+                              GozAITheme.backgroundBlack,
+                            ] else ...[
+                              const Color(0xFF16251C),
+                              const Color(0xFF09120C),
+                              GozAITheme.backgroundBlack,
+                            ],
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (isActive || isSpeaking) ...[
+                              // Dynamic audio waveform simulation
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  _buildWaveBar(12, 26, 400),
+                                  const SizedBox(width: 4),
+                                  _buildWaveBar(20, 44, 600),
+                                  const SizedBox(width: 4),
+                                  _buildWaveBar(30, 56, 500),
+                                  const SizedBox(width: 4),
+                                  _buildWaveBar(18, 38, 700),
+                                  const SizedBox(width: 4),
+                                  _buildWaveBar(10, 22, 450),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                isSpeaking ? 'SPEAKING' : 'LISTENING',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.5,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ] else ...[
+                              Icon(
+                                Icons.remove_red_eye_rounded,
+                                size: 52,
+                                color: GozAITheme.textPrimary,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'START GOZ',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                boxShadow: [
-                  if (isActive || isSpeaking)
-                    BoxShadow(
-                      color: (isSpeaking ? GozAITheme.speakingPulse : GozAITheme.listeningPulse)
-                          .withValues(alpha: 0.6),
-                      blurRadius: isActive ? 60 : 40,
-                      spreadRadius: isActive ? 20 : 15,
-                    )
-                  else
-                    BoxShadow(
-                      color: GozAITheme.primaryBlue.withValues(alpha: 0.1),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    ),
-                ],
-                border: Border.all(
-                  color: isActive ? Colors.transparent : GozAITheme.borderSubtle,
-                  width: 1,
+                const SizedBox(height: 14),
+                Text(
+                  isActive
+                      ? 'Tap orb to pause · Hold to snapshot scene'
+                      : 'Tap to start hands-free copilot session',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: GozAITheme.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              child: Icon(
-                isActive ? Icons.graphic_eq : Icons.power_settings_new_rounded,
-                size: 80,
-                color: isActive ? Colors.white : GozAITheme.textPrimary,
-                semanticLabel: isActive ? 'Listening' : 'Start',
-              ),
-            )
-            // Spring activation scaling
-            .animate(target: isActive ? 1 : 0)
-            .scaleXY(end: 1.15, curve: Curves.easeOutBack, duration: 600.ms)
-            .shimmer(duration: 1500.ms, color: Colors.white24)
-            // Reactive pulse for AI speaking state
-            .animate(
-              target: isSpeaking ? 1 : 0,
-              onPlay: (controller) => controller.repeat(reverse: true),
-            )
-            .scaleXY(end: 1.05, curve: Curves.easeInOutSine, duration: 800.ms)
-            .tint(color: GozAITheme.speakingPulse.withValues(alpha: 0.3), duration: 400.ms),
+              ],
+            ),
           ),
         );
       },
     );
+  }
+
+  Widget _buildWaveBar(double minH, double maxH, int ms) {
+    return Container(
+      width: 4,
+      height: maxH,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    )
+        .animate(onPlay: (controller) => controller.repeat(reverse: true))
+        .scaleY(
+          begin: minH / maxH,
+          end: 1.0,
+          duration: Duration(milliseconds: ms),
+          curve: Curves.easeInOut,
+        );
+  }
+
+  /// Tactile accessibility quick-dock
+  Widget _buildQuickAssistDock() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildTactileDockButton(
+            icon: Icons.camera_alt_outlined,
+            label: 'Snapshot',
+            tooltip: 'Capture & Describe Scene',
+            onTap: () {
+              HapticService.tap();
+              _coordinator?.captureSnapshot();
+            },
+          ),
+          const SizedBox(width: 10),
+          _buildTactileDockButton(
+            icon: Icons.document_scanner_outlined,
+            label: 'Read Text',
+            tooltip: 'Read Prescription or Document',
+            onTap: () {
+              HapticService.tap();
+              _coordinator?.selectMode(GozAIMode.reading, fromUserTap: true);
+            },
+          ),
+          const SizedBox(width: 10),
+          _buildTactileDockButton(
+            icon: Icons.sos_outlined,
+            label: 'Emergency',
+            color: GozAITheme.hazardAlert,
+            tooltip: 'Trigger Caregiver Alert',
+            onTap: _triggerEmergencySos,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTactileDockButton({
+    required IconData icon,
+    required String label,
+    required String tooltip,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final effectiveColor = color ?? GozAITheme.accentCyan;
+    return Expanded(
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 6),
+            decoration: BoxDecoration(
+              color: GozAITheme.backgroundBlack,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: effectiveColor.withValues(alpha: 0.35), width: 1.5),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 20, color: effectiveColor),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: effectiveColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _triggerEmergencySos() async {
+    HapticService.hazardWarning();
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final uid = user?.id ?? AppConfig.patientId;
+      await context.read<SosService>().sendAlert(
+        userId: uid,
+        message: 'Patient requested immediate assistance via Copilot Emergency trigger',
+        severity: 'critical',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🚨 SOS Alert Dispatched to Caregiver & Clinic Desk'),
+            backgroundColor: GozAITheme.hazardAlert,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {}
   }
 
   /// Mode selector buttons utilizing high-contrast interaction guidelines.
