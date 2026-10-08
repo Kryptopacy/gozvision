@@ -657,7 +657,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
     );
   }
 
-  // ── Tab 4: Reputation & 5-Star Reviews ────────────────────────────────────
+  // ── Tab 4: Native In-App Verified Reviews & Smart Service Recovery ─────────
   Widget _buildReputationTab() {
     return ListView(
       children: [
@@ -677,19 +677,23 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text('AUTOMATED GOOGLE & REPUTATION ENGINE', style: TextStyle(color: ClinicTheme.malachite, fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text(
+                        'NATIVE IN-APP VERIFIED REVIEWS & SMART NPS FUNNEL',
+                        style: TextStyle(color: ClinicTheme.malachite, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
                       SizedBox(height: 4),
-                      Text('Automatically prompts satisfied patients to leave a 5-star Google review after completed visits.', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12)),
+                      Text(
+                        'Zero-friction in-app rating: Patients & caregivers rate encounters directly in Goz Copilot.\nPositive reviews publish to your clinic profile; negative ratings trigger private service recovery.',
+                        style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                      ),
                     ],
                   ),
                   FilledButton.icon(
-                    icon: const Icon(Icons.auto_awesome, size: 16),
-                    label: const Text('Send Review Prompts (3 Today)'),
+                    icon: const Icon(Icons.feedback_outlined, size: 16),
+                    label: const Text('Simulate In-App Prompt'),
                     style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('✓ 3 Google review requests dispatched to recently completed encounters.')),
-                      );
+                      _showInAppReviewSimulator(context);
                     },
                   ),
                 ],
@@ -697,17 +701,253 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
               const SizedBox(height: 20),
               Row(
                 children: [
-                  _buildReviewMetric('4.9 / 5.0', 'Current Google Rating', Icons.star, Colors.amber),
+                  _buildReviewMetric('4.9 / 5.0', 'Verified In-App Score', Icons.star, Colors.amber),
                   const SizedBox(width: 12),
-                  _buildReviewMetric('128 Reviews', 'Verified Patient Reviews', Icons.rate_review_outlined, Colors.blueAccent),
+                  _buildReviewMetric('142 Reviews', 'Native In-App Testimonials', Icons.verified_outlined, ClinicTheme.malachite),
                   const SizedBox(width: 12),
-                  _buildReviewMetric('38% Response', 'Review Conversion Rate', Icons.pie_chart_outline, ClinicTheme.malachite),
+                  _buildReviewMetric('1 Intercepted', 'Private Service Recovery', Icons.shield_outlined, Colors.orangeAccent),
+                  const SizedBox(width: 12),
+                  _buildReviewMetric('42% Opt-In', 'Google Cross-Post Rate', Icons.share_outlined, Colors.blueAccent),
                 ],
               ),
             ],
           ),
         ),
+        const SizedBox(height: 16),
+
+        // Recent In-App Reviews Feed
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: ClinicTheme.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ClinicTheme.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('RECENT IN-APP VERIFIED PATIENT & CAREGIVER REVIEWS', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 14),
+
+              // Review 1: 5-Star Published
+              _buildReviewFeedItem(
+                author: 'Eleanor Vance (Patient) • Low-Vision Assist',
+                stars: 5,
+                doctor: 'Dr. Miller, OD',
+                date: '2 hours ago',
+                comment: '“Dr. Miller explained my macular changes with so much patience. The Goz smart frame fitting was seamless, and the voice copilot gives me my independence back.”',
+                tags: ['Gentle Exam', 'Clear Explanations', 'Life-Changing Tech'],
+                status: 'Published to Clinic Wall',
+                statusColor: ClinicTheme.malachite,
+                isPrivateRecovery: false,
+              ),
+              const Divider(color: ClinicTheme.border, height: 24),
+
+              // Review 2: 5-Star Caregiver
+              _buildReviewFeedItem(
+                author: 'Sarah Vance (Caregiver / Daughter)',
+                stars: 5,
+                doctor: 'Front Desk & Optical Team',
+                date: 'Yesterday',
+                comment: '“The automated drop reminder is brilliant. As her caregiver, seeing her 14-day Latanoprost compliance streak gives me peace of mind.”',
+                tags: ['Caregiver Friendly', 'Quick Handoff'],
+                status: 'Published to Clinic Wall',
+                statusColor: ClinicTheme.malachite,
+                isPrivateRecovery: false,
+              ),
+              const Divider(color: ClinicTheme.border, height: 24),
+
+              // Review 3: 2-Star Intercepted (Private Service Recovery - Never sent to Google!)
+              _buildReviewFeedItem(
+                author: 'Anonymous Patient • Refraction Visit',
+                stars: 2,
+                doctor: 'Optical Dispensary Counter',
+                date: '2 days ago',
+                comment: '“Wait time at the dispensary counter was over 35 minutes to adjust my nose pads. The frame itself is great, but waiting so long with low vision was tiring.”',
+                tags: ['Long Wait Time', 'Queue Friction'],
+                status: 'Private Service Recovery Ticket',
+                statusColor: Colors.orangeAccent,
+                isPrivateRecovery: true,
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildReviewFeedItem({
+    required String author,
+    required int stars,
+    required String doctor,
+    required String date,
+    required String comment,
+    required List<String> tags,
+    required String status,
+    required Color statusColor,
+    required bool isPrivateRecovery,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(author, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(width: 8),
+                Text('• Seen: $doctor', style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+              ),
+              child: Text(status, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            ...List.generate(5, (i) => Icon(
+              i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
+              size: 16,
+              color: i < stars ? Colors.amber : ClinicTheme.textSecondary,
+            )),
+            const SizedBox(width: 8),
+            Text(date, style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(comment, style: const TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.4)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            ...tags.map((t) => Container(
+              margin: const EdgeInsets.only(right: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: ClinicTheme.obsidian,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: ClinicTheme.border),
+              ),
+              child: Text(t, style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 10)),
+            )),
+            const Spacer(),
+            if (isPrivateRecovery) ...[
+              FilledButton.tonal(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                  foregroundColor: Colors.orangeAccent,
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Service recovery action logged: Manager follow-up scheduled')),
+                  );
+                },
+                child: const Text('Resolve Service Ticket', style: TextStyle(fontSize: 11)),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showInAppReviewSimulator(BuildContext context) {
+    int rating = 5;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: ClinicTheme.cardBackground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: ClinicTheme.border),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.star_rate_rounded, color: Colors.amber),
+              SizedBox(width: 10),
+              Text('In-App Visit Review (Patient View)', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'How was your encounter with Dr. Miller today?',
+                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  final starVal = index + 1;
+                  return IconButton(
+                    icon: Icon(
+                      starVal <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                      color: starVal <= rating ? Colors.amber : ClinicTheme.textSecondary,
+                      size: 32,
+                    ),
+                    onPressed: () => setDialogState(() => rating = starVal),
+                  );
+                }),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  rating >= 4 ? 'Great Experience! (Will publish to Clinic Wall)' : 'We want to make this right. (Private Manager Ticket)',
+                  style: TextStyle(
+                    color: rating >= 4 ? ClinicTheme.malachite : Colors.orangeAccent,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const TextField(
+                style: TextStyle(color: Colors.white, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Share a few words or speak via Goz Copilot...',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: ClinicTheme.textSecondary)),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
+              child: const Text('Submit In-App Review', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      rating >= 4
+                          ? '✓ 5-Star review published to GozVision Clinic Wall! Optional Google share prompt displayed.'
+                          : '✓ Feedback intercepted as a private service ticket for Clinic Manager.',
+                    ),
+                    backgroundColor: rating >= 4 ? ClinicTheme.malachite : Colors.orange,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
