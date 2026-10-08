@@ -67,7 +67,7 @@ class LowVisionEnhancer:
 
         # 5. Recombine and convert back to BGR
         composite_lab = cv2.merge((composite_l, a, b))
-        return cv2.cvtColor(composite_lab, cv2.COLOR_BGR2LAB)
+        return cv2.cvtColor(composite_lab, cv2.COLOR_LAB2BGR)
 
     def suppress_glare(self, frame: np.ndarray) -> np.ndarray:
         """Reduces blinding specular highlights for cataract and photophobia sufferers."""
