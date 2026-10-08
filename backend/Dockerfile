@@ -19,4 +19,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Run ADK in API server mode
-CMD ["adk", "api_server", "--port", "8080", "gozvision_agent"]
+CMD ["adk", "api_server", "--host", "0.0.0.0", "--port", "8080", "gozvision_agent"]
