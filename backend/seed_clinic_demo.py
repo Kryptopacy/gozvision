@@ -71,7 +71,7 @@ def main() -> None:
                 "email_confirm": True,
                 "user_metadata": {"name": name},
             })
-            uids[email] = user.id
+            uids[email] = getattr(user, "user", user).id
             print(f"  auth user created: {email}")
 
     practitioner = uids["practitioner@gozvision.demo"]
@@ -147,18 +147,22 @@ def main() -> None:
         "appt_5": ("demo_patient_002", "completed", NOW - timedelta(days=45), "Comprehensive exam"),
         "appt_6": ("demo_patient_003", "completed", NOW - timedelta(days=400), "Comprehensive exam"),
     }
-    db.table("appointments").delete().in_("id", list(appointments)).execute()
+    def to_uuid(s: str) -> str:
+        return str(uuid.uuid5(uuid.NAMESPACE_DNS, s))
+
+    appt_ids = [to_uuid(k) for k in appointments]
+    db.table("appointments").delete().in_("id", appt_ids).execute()
     for aid, (pid, status, start, type_) in appointments.items():
         db.table("appointments").insert({
-            "id": aid, "clinic_id": clinic, "patient_id": pid,
+            "id": to_uuid(aid), "clinic_id": clinic, "patient_id": pid,
             "practitioner_id": practitioner, "status": status,
             "start_at": start.isoformat(), "type": type_,
         }).execute()
     print("appointments seeded")
 
     # ---- Referrals (every status, so the Hub panel shows the real picture) --
-    db.table("low_vision_referrals").delete().in_(
-        "id", ["ref_1", "ref_2", "ref_3", "ref_4"]).execute()
+    ref_ids = [to_uuid(k) for k in ["ref_1", "ref_2", "ref_3", "ref_4"]]
+    db.table("low_vision_referrals").delete().in_("id", ref_ids).execute()
     referrals = {
         "ref_1": (demo_patient_uid, "attended"),
         "ref_2": ("demo_patient_002", "made"),
@@ -167,15 +171,15 @@ def main() -> None:
     }
     for rid, (pid, status) in referrals.items():
         db.table("low_vision_referrals").insert({
-            "id": rid, "clinic_id": clinic, "patient_id": pid,
+            "id": to_uuid(rid), "clinic_id": clinic, "patient_id": pid,
             "status": status, "from_practitioner_id": practitioner,
             "created_at": (NOW - timedelta(days=30)).isoformat(),
         }).execute()
     print("referrals seeded")
 
     # ---- Device fits (engineered for the abandonment-risk engine) ----------
-    db.table("device_fits").delete().in_(
-        "id", ["fit_1", "fit_2", "fit_3", "fit_4", "fit_5"]).execute()
+    fit_ids = [to_uuid(k) for k in ["fit_1", "fit_2", "fit_3", "fit_4", "fit_5"]]
+    db.table("device_fits").delete().in_("id", fit_ids).execute()
     fits = {
         # healthy: trialing with rich recent copilot activity
         "fit_1": (demo_patient_uid, "trialing", "handheld magnifier", "Optelec PowerMag 3", 12),
@@ -188,7 +192,7 @@ def main() -> None:
     }
     for fid, (pid, status, dtype, model, signals) in fits.items():
         db.table("device_fits").insert({
-            "id": fid, "clinic_id": clinic, "patient_id": pid, "status": status,
+            "id": to_uuid(fid), "clinic_id": clinic, "patient_id": pid, "status": status,
             "device": {"type": dtype, "model": model},
             "trial_ends_at": (NOW + timedelta(days=45)).isoformat(),
             "recent_signal_count": signals,  # denormalized by the backend job
@@ -200,14 +204,15 @@ def main() -> None:
     for i in range(10):
         db.table("adherence_signals").insert({
             "clinic_id": clinic, "patient_id": demo_patient_uid,
-            "device_fit_id": "fit_1",
+            "device_fit_id": to_uuid("fit_1"),
             "kind": ["daily_active_use", "task_completion", "session_duration"][i % 3],
             "value": 1, "at": (NOW - timedelta(days=i)).isoformat(),
         }).execute()
     print("adherence signals seeded")
 
     # ---- Encounters with transcripts (so the Scribe has real input) ---------
-    db.table("encounters").delete().in_("id", ["enc_1", "enc_2"]).execute()
+    enc_ids = [to_uuid("enc_1"), to_uuid("enc_2")]
+    db.table("encounters").delete().in_("id", enc_ids).execute()
     encounters = {
         "enc_1": (demo_patient_uid, "Low vision assessment",
                   "Patient: I struggle to read my medication bottles even with my glasses. "
@@ -224,7 +229,7 @@ def main() -> None:
     }
     for eid, (pid, type_, transcript) in encounters.items():
         db.table("encounters").insert({
-            "id": eid, "clinic_id": clinic, "patient_id": pid,
+            "id": to_uuid(eid), "clinic_id": clinic, "patient_id": pid,
             "practitioner_id": practitioner, "type": type_, "status": "completed",
             "transcript_text": transcript,
             "scribe_draft": {"status": "none"},
