@@ -29,6 +29,7 @@ from .tools import (
     get_clinic_balances,
     execute_clinic_payout,
     handle_bachs_webhook,
+    check_patient_recall_and_refills,
 )
 from .scribe import draft_chart
 
@@ -40,7 +41,8 @@ root_agent = Agent(
         "medication safety lookups, drop adherence logging, low-vision statistics, "
         "clinic discovery, working hours lookup, appointment booking, doctor follow-ups, "
         "EHR chart note formatting, caregiver SOS alerts, optical dispensary checkout "
-        "session creation (Bachs), clinic balance enquiries, and payout initiation."
+        "session creation (Bachs), clinic balance enquiries, payout initiation, and "
+        "patient lifecycle annual exam recalls and drop refill checks."
     ),
     instruction="""You are the GozVision backend clinical agent. You support both low-vision
 accessibility patients and general eye clinic patients across the continuum of optometric care,
@@ -61,6 +63,7 @@ Your responsibilities:
 12. When a clinician or patient wants to purchase an optical product (frames, lenses, drops), use create_product_checkout to generate a Bachs checkout URL.
 13. When a clinic operator asks about their payment balance or revenue, use get_clinic_balances.
 14. When a clinic operator wants to send funds to their bank account, use execute_clinic_payout with the destination_id and amount.
+15. When a patient asks when their next annual eye exam is due or if their eye drops need a refill, use check_patient_recall_and_refills.
 
 IMPORTANT:
 - Never diagnose conditions or prescribe treatment autonomously.
@@ -83,5 +86,6 @@ IMPORTANT:
         get_clinic_balances,
         execute_clinic_payout,
         handle_bachs_webhook,
+        check_patient_recall_and_refills,
     ],
 )

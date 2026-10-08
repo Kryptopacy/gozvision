@@ -14,6 +14,7 @@ import '../modules/doctor_profile_page.dart';
 import '../modules/clinic_directory_page.dart';
 import '../modules/optical_storefront_page.dart';
 import '../modules/developer_console_page.dart';
+import '../modules/clinic_crm_page.dart';
 
 /// GozVision Clinic Suite — Enterprise Multi-Tenant Clinical Shell.
 ///
@@ -103,6 +104,7 @@ class _ClinicShellState extends State<ClinicShell> {
       ClinicDirectoryPage(),
       OpticalStorefrontPage(),
       DeveloperConsolePage(),
+      ClinicCrmPage(),
     ];
 
     return Scaffold(
@@ -426,6 +428,28 @@ class _ClinicShellState extends State<ClinicShell> {
             activeIcon: Icons.storefront_rounded,
             label: 'Optical Dispensary',
             badgeText: 'Bachs',
+            badgeColor: ClinicTheme.malachite,
+          ),
+
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 8),
+            child: Text(
+              'PATIENT ENGAGEMENT & CRM',
+              style: TextStyle(
+                color: ClinicTheme.textSecondary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+          _buildNavItem(
+            index: 8,
+            icon: Icons.people_alt_outlined,
+            activeIcon: Icons.people_alt_rounded,
+            label: 'Patient Recall & CRM',
+            badgeText: 'Active',
             badgeColor: ClinicTheme.malachite,
           ),
 
