@@ -138,6 +138,130 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildLowVisionAssistLayout() {
     return Column(
       children: [
+        // ── Greeting Header ──────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+          child: Consumer<GeminiLiveService>(
+            builder: (context, gemini, _) {
+              final isActive = gemini.isConnected;
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Left: greeting text block
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Good morning',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white.withValues(alpha: 0.70),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'GozVision Copilot',
+                          style: TextStyle(
+                            fontFamily: 'Syncopate',
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Right: animated AI status pill
+                  Semantics(
+                    label: isActive ? 'AI status: Active' : 'AI status: Ready',
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? GozAITheme.malachite.withValues(alpha: 0.15)
+                            : GozAITheme.surfacePure,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isActive
+                              ? GozAITheme.proBorderGlow
+                              : GozAITheme.borderSubtle,
+                          width: 1,
+                        ),
+                        boxShadow: isActive
+                            ? [
+                                BoxShadow(
+                                  color: GozAITheme.malachite.withValues(alpha: 0.20),
+                                  blurRadius: 12,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Pulsing dot
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isActive ? GozAITheme.malachite : GozAITheme.textSecondary,
+                              boxShadow: isActive
+                                  ? [
+                                      BoxShadow(
+                                        color: GozAITheme.malachite.withValues(alpha: 0.6),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          )
+                              .animate(onPlay: (c) => c.repeat())
+                              .scaleXY(
+                                begin: 1.0,
+                                end: isActive ? 1.4 : 1.0,
+                                duration: 900.ms,
+                                curve: Curves.easeInOut,
+                              )
+                              .then()
+                              .scaleXY(
+                                begin: 1.4,
+                                end: 1.0,
+                                duration: 900.ms,
+                                curve: Curves.easeInOut,
+                              ),
+                          const SizedBox(width: 7),
+                          Text(
+                            isActive ? 'ACTIVE' : 'AI READY',
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.1,
+                              color: isActive ? GozAITheme.malachite : GozAITheme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+        // ── Existing flow (unchanged) ─────────────────────────────────────
         _buildStatusBar(),
         const SizedBox(height: 6),
         _buildHardwareStatusIndicators(),

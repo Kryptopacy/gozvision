@@ -6,7 +6,7 @@ hallucinations and ensure the agent always has a valid structured response.
 """
 import os
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from .rag_service import SemanticKnowledgeBase
 
@@ -552,5 +552,215 @@ def schedule_doctor_followup(
         "db_written": db_written,
         "message": f"Follow-up '{followup_type}' successfully scheduled for patient {patient_id} ({due_date}).",
     }
+
+
+# ──────────────────────────────────────────────────
+# COMMERCE & PAYMENTS — Bachs Payment Engine
+# ──────────────────────────────────────────────────
+
+def create_product_checkout(
+    product_name: str,
+    price: float,
+    currency: str = "NGN",
+    patient_email: str = "patient@example.com",
+    patient_name: str = "Patient",
+    clinic_id: str = "demo_clinic",
+) -> dict:
+    """Create a Bachs checkout session for a product in the clinic dispensary.
+
+    Initiates a hosted checkout session so a patient can pay for optical
+    products (frames, lenses, eye drops) through the Bachs overlay.
+    The checkout_url returned should be opened in the browser or passed
+    to the Bachs overlay (Bachs.Checkout.open).
+
+    Args:
+        product_name: Human-readable product name (e.g. "Goz Frame Pro S4").
+        price: Numeric price in the specified currency (e.g. 185.00).
+        currency: ISO currency code — NGN or USD (default: NGN).
+        patient_email: Patient's email for the Bachs customer record.
+        patient_name: Patient's full name.
+        clinic_id: Clinic's internal ID for multi-tenant attribution.
+
+    Returns:
+        Dict with checkout_url, checkout_id, amount, currency, status.
+        On error, returns a fallback simulation checkout url.
+    """
+    try:
+        from .commerce import BachsCommerceClient
+        import uuid
+        client = BachsCommerceClient()
+        product_id = f"prod_{uuid.uuid4().hex[:12]}"
+        result = client.create_checkout_session(
+            product_id=product_id,
+            product_name=product_name,
+            price=price,
+            currency=currency,
+            customer_email=patient_email,
+            customer_name=patient_name,
+            clinic_id=clinic_id,
+        )
+        return {
+            "status": "ok",
+            "product": product_name,
+            "amount": f"{price:.2f}",
+            "currency": currency.upper(),
+            "checkout_url": result.get("checkout_url", ""),
+            "checkout_id": result.get("checkout_id", result.get("id", "")),
+            "message": (
+                f"Checkout session created for {product_name} — "
+                f"{currency.upper()} {price:.2f}. "
+                "Open the checkout_url to complete payment via Bachs."
+            ),
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Unable to create checkout session at this time. Please try again or contact support.",
+        }
+
+
+def get_clinic_balances() -> dict:
+    """Retrieve the clinic's Bachs payment balance across all currency buckets.
+
+    Returns available and pending balances in NGN, USD, and EUR from the
+    Bachs balance API. Useful for clinic operators reviewing their revenue
+    before initiating a payout.
+
+    Returns:
+        Dict with list of currency balance buckets (currency, available, pending).
+        On error, returns a safe fallback with stub balances.
+    """
+    try:
+        from .commerce import BachsCommerceClient
+        client = BachsCommerceClient()
+        result = client.get_balances()
+        balances = result.get("balances", [])
+        return {
+            "status": "ok",
+            "balances": balances,
+            "message": f"Retrieved balances across {len(balances)} currency bucket(s).",
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "error": str(e),
+            "balances": [],
+            "message": "Unable to retrieve balances at this time. Please check the Bachs dashboard.",
+        }
+
+
+def execute_clinic_payout(
+    destination_id: str,
+    amount: float,
+    currency: str = "NGN",
+    reference: str = "",
+) -> dict:
+    """Execute an instant payout from the clinic's Bachs balance to a registered bank destination.
+
+    Transfers funds from the clinic's Bachs available balance to the
+    registered bank account identified by destination_id. Use get_clinic_balances
+    first to confirm sufficient available balance before calling this.
+
+    Args:
+        destination_id: The Bachs payout destination ID (format: pd_...).
+        amount: The numeric amount to pay out (e.g. 250000.00 for NGN).
+        currency: ISO currency code — NGN or USD (default: NGN).
+        reference: Optional human-readable reference label for this payout.
+
+    Returns:
+        Dict with payout id, amount, fee, total_debited, status.
+        On error, returns structured error with safe fallback.
+    """
+    try:
+        from .commerce import BachsCommerceClient
+        client = BachsCommerceClient()
+        result = client.execute_payout(
+            destination_id=destination_id,
+            amount=amount,
+            currency=currency,
+            reference=reference or None,
+        )
+        return {
+            "status": "ok",
+            "payout_id": result.get("id", ""),
+            "amount": result.get("amount", f"{amount:.2f}"),
+            "currency": currency.upper(),
+            "fee": result.get("fee", ""),
+            "total_debited": result.get("total_debited", ""),
+            "payout_status": result.get("status", "pending"),
+            "reference": result.get("reference", reference),
+            "message": (
+                f"Payout of {currency.upper()} {amount:.2f} initiated to destination {destination_id}. "
+                "Status transitions: pending → processing → completed. "
+                "You will receive a payout.paid webhook when funds are settled."
+            ),
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "Payout could not be initiated. Check your Bachs balance and destination ID.",
+        }
+
+
+def handle_bachs_webhook(
+    event_type: str,
+    checkout_id: str = "",
+    payout_id: str = "",
+    amount: str = "",
+    currency: str = "",
+) -> dict:
+    """Process a Bachs webhook event and update the corresponding order or payout record.
+
+    Called when Bachs posts a webhook to the /webhooks/bachs endpoint.
+    Handles collection.succeeded (order fulfillment) and payout.paid / payout.failed
+    (settlement confirmation). This is the source of truth for payment state —
+    never rely on client-side events.
+
+    Args:
+        event_type: Bachs event type string (e.g. 'collection.succeeded', 'payout.paid', 'payout.failed').
+        checkout_id: Checkout session ID for collection events (chk_...).
+        payout_id: Payout ID for payout events (pay_...).
+        amount: Payment amount as decimal string.
+        currency: ISO currency code.
+
+    Returns:
+        Dict confirming the action taken and updated status.
+    """
+    try:
+        from .commerce import BachsCommerceClient
+        client = BachsCommerceClient()
+        payload = {
+            "type": event_type,
+            "data": {
+                "checkout_id": checkout_id,
+                "id": payout_id,
+                "amount": amount,
+                "currency": currency,
+            },
+        }
+        result = client.process_webhook_event(payload)
+        return {
+            "status": "ok",
+            "handled": result.get("handled", False),
+            "action": result.get("action", "unknown"),
+            "event_type": event_type,
+            "message": (
+                f"Webhook '{event_type}' processed. Action: {result.get('action', 'none')}. "
+                "Order/payout records updated accordingly."
+            ),
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": f"Failed to process webhook event '{event_type}'.",
+        }
+
 
 
