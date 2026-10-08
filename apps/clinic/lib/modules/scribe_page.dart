@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -127,6 +128,16 @@ class _EncounterCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                if (sections.isNotEmpty)
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.copy_all_outlined, size: 16, color: ClinicTheme.malachite),
+                    label: const Text('Copy EHR Note', style: TextStyle(color: ClinicTheme.malachite, fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: ClinicTheme.malachite),
+                    ),
+                    onPressed: () => _copyEhrFormat(context, sections, patient),
+                  ),
+                const SizedBox(width: 8),
                 if ((row['transcript_text'] as String?)?.isNotEmpty ?? false)
                   TextButton.icon(
                     icon: const Icon(Icons.link, size: 16, color: ClinicTheme.malachite),
@@ -138,7 +149,7 @@ class _EncounterCard extends StatelessWidget {
                       transcript: row['transcript_text'] as String,
                     ),
                   ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 if (status == 'draft')
                   FilledButton.icon(
                     icon: const Icon(Icons.task_alt, size: 18),
@@ -149,6 +160,41 @@ class _EncounterCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _copyEhrFormat(BuildContext context, Map<String, dynamic> sections, String patientId) {
+    final sub = sections['subjective'] ?? 'Not documented';
+    final obj = sections['objective'] ?? 'Not documented';
+    final ass = sections['assessment'] ?? 'Not documented';
+    final pln = sections['plan'] ?? 'Not documented';
+
+    final text = '''=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===
+Patient ID: $patientId
+Date: ${DateTime.now().toLocal().toString().split('.')[0]}
+Provider: Dr. Miller, OD
+
+[SUBJECTIVE]
+$sub
+
+[OBJECTIVE]
+$obj
+
+[ASSESSMENT]
+$ass
+
+[PLAN]
+$pln
+
+Electronically signed via GozVision Ambient Scribe.''';
+
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✓ Copied to clipboard in EHR format (Epic / Eyefinity ready)'),
+        backgroundColor: ClinicTheme.malachite,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

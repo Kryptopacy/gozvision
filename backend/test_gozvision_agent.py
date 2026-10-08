@@ -17,6 +17,8 @@ from gozvision_agent.rag_service import (  # noqa: E402
 from gozvision_agent.tools import (  # noqa: E402
     _resolve_patient_id,
     send_sos_alert,
+    log_adherence_event,
+    format_ehr_encounter_note,
 )
 
 
@@ -61,10 +63,33 @@ def test_singleton_identity():
     assert kb is SemanticKnowledgeBase()
 
 
+def test_log_adherence_event():
+    res = log_adherence_event("Latanoprost 0.005%", status="taken", tool_context=None)
+    assert res["status"] == "recorded"
+    assert res["medication"] == "Latanoprost 0.005%"
+    assert res["patient_id"] == "demo_patient_001"
+
+
+def test_format_ehr_encounter_note():
+    sections = {
+        "subjective": "Vision blurry right eye",
+        "objective": "IOP 16 mmHg OU",
+        "assessment": "Glaucoma stable",
+        "plan": "Continue drops",
+    }
+    note = format_ehr_encounter_note(sections, patient_id="p123")
+    assert "=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===" in note
+    assert "IOP 16 mmHg OU" in note
+    assert "p123" in note
+
+
 if __name__ == "__main__":
     test_corpus_integrity()
     test_patient_id_from_session()
     test_patient_id_fallbacks()
     test_sos_stub_response_shape()
     test_singleton_identity()
+    test_log_adherence_event()
+    test_format_ehr_encounter_note()
     print("All GozVision agent tests passed.")
+

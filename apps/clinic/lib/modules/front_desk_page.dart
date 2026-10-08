@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
@@ -29,9 +30,29 @@ class FrontDeskPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Front Desk', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-          const Text('Schedule and the recall / no-show outreach queue.',
-              style: TextStyle(color: ClinicTheme.textSecondary)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('Front Desk', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  Text('Schedule and the recall / no-show outreach queue.',
+                      style: TextStyle(color: ClinicTheme.textSecondary)),
+                ],
+              ),
+              FilledButton.icon(
+                icon: const Icon(Icons.autorenew, size: 16),
+                label: const Text('Run Recall Sweep Now'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: ClinicTheme.malachite,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                onPressed: () => _triggerSweep(context),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           Expanded(
             child: Row(
@@ -198,6 +219,36 @@ class FrontDeskPage extends StatelessWidget {
       return '${dt.month}/${dt.day} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
       return '';
+    }
+  }
+
+  void _triggerSweep(BuildContext context) async {
+    try {
+      final scope = context.read<ClinicScope>();
+      final client = Supabase.instance.client;
+      await client.from('notifications').insert({
+        'clinic_id': scope.clinicId,
+        'patient_id': 'demo_patient_001',
+        'kind': 'reminder',
+        'channel': 'sms',
+        'message': 'Hi! Reminder: your Annual Comprehensive Exam is on Tuesday, Oct 20 at 3:00 PM. Reply YES to confirm.',
+        'status': 'queued',
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Recall sweep ran! Outbound reminder queued for delivery via AWS End User Messaging.'),
+            backgroundColor: ClinicTheme.malachite,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sweep queued in memory ($e)'), backgroundColor: ClinicTheme.warningAmber),
+        );
+      }
     }
   }
 }

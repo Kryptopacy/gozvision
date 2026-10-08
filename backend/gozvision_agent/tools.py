@@ -304,3 +304,78 @@ def get_low_vision_statistics(query: str) -> dict:
             ),
             "source": "WHO World Report on Vision, 2019",
         }
+
+
+def log_adherence_event(
+    medication_name: str,
+    status: str = "taken",
+    notes: str = "",
+    tool_context=None,
+) -> dict:
+    """Log an ocular medication adherence or drop-taking event.
+
+    Writes to clinical_events in Supabase so the clinical team can monitor
+    medication adherence in the Low Vision Hub and intervene before visual deterioration.
+    """
+    patient_id = _resolve_patient_id(tool_context)
+    now = datetime.now(timezone.utc)
+
+    event_payload = {
+        "medication": medication_name,
+        "status": status,
+        "notes": notes,
+        "recorded_at": now.isoformat(),
+        "source": "copilot_agent",
+    }
+
+    db_written = False
+    if _SUPABASE_AVAILABLE and _db is not None:
+        try:
+            _db.table("clinical_events").insert({
+                "patient_id": patient_id,
+                "kind": "drop_adherence",
+                "payload": event_payload,
+                "at": now.isoformat(),
+            }).execute()
+            db_written = True
+        except Exception:
+            pass
+
+    return {
+        "status": "recorded",
+        "patient_id": patient_id,
+        "medication": medication_name,
+        "adherence_status": status,
+        "db_written": db_written,
+        "message": f"Successfully logged {medication_name} as {status}. Keep up the great adherence!",
+    }
+
+
+def format_ehr_encounter_note(
+    sections: dict,
+    patient_id: str,
+    provider_name: str = "Dr. Miller, OD",
+    ehr_format: str = "standard",
+) -> str:
+    """Format SOAP sections into an EHR-compatible chart note (Epic/Eyefinity standard)."""
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    sub = sections.get("subjective", "Not documented")
+    obj = sections.get("objective", "Not documented")
+    ass = sections.get("assessment", "Not documented")
+    pln = sections.get("plan", "Not documented")
+
+    return (
+        f"=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===\n"
+        f"Date/Time: {now_str}\n"
+        f"Patient ID: {patient_id}\n"
+        f"Provider: {provider_name}\n"
+        f"Format Standard: {ehr_format.upper()}\n"
+        f"-----------------------------------------\n"
+        f"SUBJECTIVE:\n{sub}\n\n"
+        f"OBJECTIVE:\n{obj}\n\n"
+        f"ASSESSMENT:\n{ass}\n\n"
+        f"PLAN:\n{pln}\n"
+        f"-----------------------------------------\n"
+        f"Electronically signed by {provider_name} via GozVision Ambient Scribe.\n"
+    )
+

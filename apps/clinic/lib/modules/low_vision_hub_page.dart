@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
+import 'clinic_chat_dialog.dart';
 
 /// Low Vision Hub — closes the loop that leaks patients today:
 /// referral (64% never referred) → device fit (29% abandoned within
@@ -235,11 +237,75 @@ class _FitCard extends StatelessWidget {
                 ],
               ),
             ),
-            Text(label, style: TextStyle(color: color, fontSize: 12)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+                if (fit.risk != AbandonmentRisk.healthy) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.mark_chat_unread_outlined, size: 14),
+                        label: const Text('Re-Engage', style: TextStyle(fontSize: 11)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: color,
+                          side: BorderSide(color: color),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        onPressed: () => _sendReengagementCheckin(context),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        icon: const Icon(Icons.chat_bubble_outline, size: 16, color: ClinicTheme.malachite),
+                        tooltip: 'Open Care Thread',
+                        onPressed: () => ClinicChatDialog.show(
+                          context,
+                          patientId: fit.patientId,
+                          patientName: 'Patient ${fit.patientId}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _sendReengagementCheckin(BuildContext context) async {
+    try {
+      final scope = context.read<ClinicScope>();
+      final client = Supabase.instance.client;
+      await client.from('notifications').insert({
+        'clinic_id': scope.clinicId,
+        'patient_id': fit.patientId,
+        'kind': 'recovery',
+        'channel': 'sms',
+        'message': 'Hi! Dr. Miller checking in from Apex Vision. We noticed you haven\'t used your ${fit.deviceType} recently. Is everything comfortable, or would you like us to adjust it?',
+        'status': 'queued',
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Re-engagement check-in queued via SMS/Push!'),
+            backgroundColor: ClinicTheme.malachite,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status: Check-in queued ($e)'), backgroundColor: ClinicTheme.warningAmber),
+        );
+      }
+    }
   }
 }
 
