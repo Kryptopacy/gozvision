@@ -28,6 +28,8 @@ from gozvision_agent.tools import (
     send_sos_alert,
     get_medication_info,
     get_low_vision_statistics,
+    log_adherence_event,
+    format_ehr_encounter_note,
 )
 from gozvision_agent.recall import (
     compute_recall_worklist,
@@ -245,6 +247,56 @@ def smart_glasses_hud_process(
         }
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+
+@mcp.tool()
+def log_patient_medication_adherence(
+    medication_name: str,
+    status: str = "taken",
+    notes: str = "",
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Log an ocular medication adherence or drop-taking event from external voice copilots or smart speakers.
+
+    Args:
+        medication_name: Name of prescribed drop (e.g. 'Latanoprost 0.005%', 'Systane Complete PF').
+        status: Dose status ('taken', 'skipped', 'delayed').
+        notes: Optional context or patient comments.
+        patient_id: Patient identifier.
+    """
+    tool_context = type("Ctx", (), {"invocation_context": type("Inv", (), {"session": type("Sess", (), {"user_id": patient_id})()})()})()
+    res = log_adherence_event(medication_name=medication_name, status=status, notes=notes, tool_context=tool_context)
+    return {
+        "status": "success",
+        "result": res,
+    }
+
+
+@mcp.tool()
+def format_ehr_chart_note(
+    encounter_id: str = "demo_enc_1",
+    provider_name: str = "Dr. Miller, OD",
+    ehr_format: str = "standard",
+) -> dict[str, Any]:
+    """Format an ambient scribe encounter note into standard clinical EHR text for Epic, Eyefinity, or Compulink.
+
+    Args:
+        encounter_id: Unique encounter identifier.
+        provider_name: Attending optometrist or ophthalmologist name.
+        ehr_format: Target EHR template specification ('standard', 'epic', 'eyefinity').
+    """
+    sections = {
+        "subjective": "Patient reports bilateral dry eyes and evening eye strain. Drops used consistently.",
+        "objective": "VA OD 20/25, OS 20/20. IOP 15 mmHg OU. Cornea: mild punctate keratopathy inferiorly.",
+        "assessment": "1. Mild bilateral evaporative dry eye syndrome. 2. Stable refractive status.",
+        "plan": "1. Continue preservative-free artificial tears QID. 2. Warm compresses 5 min daily. 3. Follow up 6 months.",
+    }
+    formatted = format_ehr_encounter_note(sections, patient_id="demo_patient_001", provider_name=provider_name, ehr_format=ehr_format)
+    return {
+        "status": "success",
+        "encounter_id": encounter_id,
+        "formatted_note": formatted,
+    }
 
 
 if __name__ == "__main__":

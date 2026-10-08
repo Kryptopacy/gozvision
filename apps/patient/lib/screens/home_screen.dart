@@ -100,6 +100,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final profileService = context.watch<ProfileService>();
+    final isLowVision = profileService.isLowVision;
+
     return Focus(
       onKeyEvent: _handleKeyEvent,
       autofocus: true,
@@ -112,22 +115,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // Immersive ambient background layer
             _buildAmbientGlowBackground(),
 
-            // UI Layer
+            // UI Layer: Morph based on active vision profile
             SafeArea(
-              child: Column(
-                children: [
-                  _buildStatusBar(),
-                  const SizedBox(height: 8),
-                  _buildHardwareStatusIndicators(),
-                  const Spacer(flex: 1),
-                  _buildCentralButton(),
-                  const Spacer(flex: 2),
-                  _buildGozViewToggleHint(),
-                  const SizedBox(height: 24),
-                  _buildModeSelector(),
-                  const SizedBox(height: 24),
-                ],
-              ),
+              child: isLowVision
+                  ? _buildLowVisionAssistLayout()
+                  : _buildClinicCompanionLayout(context, profileService),
             ),
 
             // Debug Camera Overlay (Floating Window - Topmost Layer)
@@ -136,6 +128,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLowVisionAssistLayout() {
+    return Column(
+      children: [
+        _buildStatusBar(),
+        const SizedBox(height: 8),
+        _buildHardwareStatusIndicators(),
+        const Spacer(flex: 1),
+        _buildCentralButton(),
+        const Spacer(flex: 2),
+        _buildGozViewToggleHint(),
+        const SizedBox(height: 24),
+        _buildModeSelector(),
+        const SizedBox(height: 24),
+      ],
     );
   }
 
@@ -867,6 +876,241 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
         );
+  }
+
+  Widget _buildClinicCompanionLayout(BuildContext context, ProfileService service) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildStatusBar(),
+          const SizedBox(height: 12),
+          // Active Profile Banner & Quick Toggle
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: GozAITheme.primaryBlue.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: GozAITheme.accentCyan.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.remove_red_eye_outlined, color: GozAITheme.accentCyan, size: 18),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Clinic Companion • Quiet On-Demand',
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    HapticService.tap();
+                    service.toggleProfile(VisionProfile.lowVisionAssist);
+                  },
+                  child: const Text('Low-Vision Mode', style: TextStyle(color: GozAITheme.accentCyan, fontSize: 11)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Scrollable Care Cards
+          Expanded(
+            child: ListView(
+              children: [
+                // Card 1: Today's Eye Care & Adherence Status
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: GozAITheme.surfaceElevated,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: GozAITheme.borderSubtle),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Today's Eye Health",
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('14-Day Streak', style: TextStyle(fontSize: 11, color: Colors.amber, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(Icons.medication_outlined, color: Colors.tealAccent, size: 20),
+                          const SizedBox(width: 10),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Latanoprost 0.005%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                                Text('1 drop OU at bedtime • Glaucoma IOP', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            onPressed: () => context.push('/profile'),
+                            child: const Text('View Drops', style: TextStyle(fontSize: 11)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Card 2: Upcoming Clinical Appointment
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: GozAITheme.surfaceElevated,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: GozAITheme.borderSubtle),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.event_available, color: Colors.lightBlueAccent, size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Annual Comprehensive Exam', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
+                            SizedBox(height: 2),
+                            Text('Tuesday, Oct 20 at 3:00 PM • Dr. Miller', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.lightBlueAccent),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        onPressed: () => context.push('/profile'),
+                        child: const Text('Manage', style: TextStyle(color: Colors.lightBlueAccent, fontSize: 11)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Card 3: Instant Clinical Questions
+                const Text(
+                  'QUICK EYE CARE QUESTIONS',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: Colors.white54),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildCompanionChip('Why take drops at bedtime?'),
+                    _buildCompanionChip('Relief for dry tired eyes'),
+                    _buildCompanionChip('What does 20/20 mean?'),
+                    _buildCompanionChip('Explain my cylinder prescription'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom On-Demand Voice Activation Bar
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: GozAITheme.surfaceElevated,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: GozAITheme.borderSubtle),
+            ),
+            child: Row(
+              children: [
+                Consumer2<GeminiLiveService, AudioService>(
+                  builder: (context, gemini, audio, _) {
+                    final isListening = gemini.isConnected && audio.isRecording;
+                    return InkWell(
+                      onTap: () => _coordinator?.toggleSession(),
+                      borderRadius: BorderRadius.circular(25),
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isListening ? Colors.redAccent : GozAITheme.primaryBlue,
+                          boxShadow: isListening ? [
+                            BoxShadow(color: Colors.redAccent.withValues(alpha: 0.5), blurRadius: 16, spreadRadius: 2)
+                          ] : null,
+                        ),
+                        child: Icon(
+                          isListening ? Icons.mic : Icons.mic_none,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Ask Goz Anything', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)),
+                      Text('Voice-activated clinical assistance on demand', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.document_scanner_outlined, color: GozAITheme.accentCyan),
+                  tooltip: 'High-Res OCR Reader',
+                  onPressed: () => _coordinator?.captureSnapshot(),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompanionChip(String label) {
+    return ActionChip(
+      backgroundColor: Colors.white.withValues(alpha: 0.05),
+      side: const BorderSide(color: Colors.white12),
+      label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+      onPressed: () {
+        HapticService.tap();
+        _coordinator?.gemini.sendText('User tapped quick inquiry: "$label". Provide a brief, supportive, clinically grounded answer.');
+      },
+    );
   }
 }
 

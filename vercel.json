@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bash vercel-build.sh",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/clinic/:path*",
+      "destination": "/clinic/index.html"
+    },
+    {
+      "source": "/patient/:path*",
+      "destination": "/patient/index.html"
+    }
+  ]
+}
