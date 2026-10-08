@@ -14,6 +14,7 @@ import '../services/camera_service.dart';
 
 import '../services/haptic_service.dart';
 import 'profile_screen.dart';
+import 'clinic_discovery_sheet.dart';
 
 
 /// The main GozAI interface.
@@ -236,6 +237,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.domain_outlined, color: GozAITheme.accentCyan),
+          tooltip: 'Find Clinics, Working Hours & Appointments',
+          onPressed: () => ClinicDiscoverySheet.show(context),
+        ),
         IconButton(
           icon: const Icon(Icons.account_circle_outlined, color: GozAITheme.accentCyan),
           tooltip: 'Patient Profile & Care Hub',
@@ -1031,10 +1037,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
+                    _buildCompanionChip('Find eye clinics nearby', action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Clinic working hours & doctors', action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Book doctor appointment', action: () => ClinicDiscoverySheet.show(context)),
                     _buildCompanionChip('Why take drops at bedtime?'),
                     _buildCompanionChip('Relief for dry tired eyes'),
                     _buildCompanionChip('What does 20/20 mean?'),
-                    _buildCompanionChip('Explain my cylinder prescription'),
                   ],
                 ),
               ],
@@ -1101,14 +1109,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCompanionChip(String label) {
+  Widget _buildCompanionChip(String label, {VoidCallback? action}) {
     return ActionChip(
       backgroundColor: Colors.white.withValues(alpha: 0.05),
       side: const BorderSide(color: Colors.white12),
       label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
       onPressed: () {
         HapticService.tap();
-        _coordinator?.gemini.sendText('User tapped quick inquiry: "$label". Provide a brief, supportive, clinically grounded answer.');
+        if (action != null) {
+          action();
+        } else {
+          _coordinator?.gemini.sendText('User tapped quick inquiry: "$label". Provide a brief, supportive, clinically grounded answer.');
+        }
       },
     );
   }

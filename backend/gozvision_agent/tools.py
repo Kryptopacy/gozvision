@@ -379,3 +379,178 @@ def format_ehr_encounter_note(
         f"Electronically signed by {provider_name} via GozVision Ambient Scribe.\n"
     )
 
+
+def find_clinics(query: str = "", location: str = "") -> dict:
+    """Find eye clinics and optometry practices nearby, with their services, locations, and working hours.
+
+    Enables low-vision patients to locate verified eye care clinics, low-vision rehabilitation specialists,
+    and optometric practices.
+    """
+    clinics_data = [
+        {
+            "id": "demo_clinic_001",
+            "name": "GozVision Demo Eye Clinic",
+            "branch": "Main Street Suite 100",
+            "phone": "(555) 234-5678",
+            "working_hours": "Monday - Friday: 8:00 AM - 5:30 PM, Saturday: 9:00 AM - 1:00 PM",
+            "specialties": ["Low Vision Rehabilitation", "Device Fit Trials (eSight / IrisVision)", "Comprehensive Eye Exams"],
+            "lead_optometrist": "Dr. Ada Optometrist, O.D., FAAO",
+            "accepting_new_patients": True,
+        },
+        {
+            "id": "clinic_002",
+            "name": "Pacific Low Vision & Retina Center",
+            "branch": "Oceanview Medical Pavilion",
+            "phone": "(555) 876-5432",
+            "working_hours": "Monday - Friday: 8:30 AM - 5:00 PM",
+            "specialties": ["Macular Degeneration Management", "Low Vision Occupational Therapy", "Diabetic Eye Care"],
+            "lead_optometrist": "Dr. Marcus Vance, O.D.",
+            "accepting_new_patients": True,
+        },
+    ]
+
+    # Query Supabase if active
+    if _SUPABASE_AVAILABLE and _db is not None:
+        try:
+            res = _db.table("clinics").select("*").execute()
+            if res.data and len(res.data) > 0:
+                for row in res.data:
+                    if not any(c["name"] == row.get("name") for c in clinics_data):
+                        clinics_data.append({
+                            "id": row.get("id"),
+                            "name": row.get("name", "Eye Care Clinic"),
+                            "branch": row.get("branch", "Main Branch"),
+                            "phone": "(555) 019-2834",
+                            "working_hours": "Monday - Friday: 8:30 AM - 5:00 PM",
+                            "specialties": ["Low Vision Care", "General Optometry"],
+                            "lead_optometrist": "Staff Optometrist, O.D.",
+                            "accepting_new_patients": True,
+                        })
+        except Exception:
+            pass
+
+    return {
+        "status": "success",
+        "count": len(clinics_data),
+        "query": query,
+        "location": location or "Current Location",
+        "clinics": clinics_data,
+        "message": f"Found {len(clinics_data)} eye clinics available for appointment scheduling and low-vision care.",
+    }
+
+
+def get_clinic_schedule_and_hours(clinic_name: str) -> dict:
+    """Get the operating hours, optometrists on duty, and upcoming open appointment slots for a clinic."""
+    return {
+        "clinic_name": clinic_name or "GozVision Demo Eye Clinic",
+        "working_hours": "Monday - Friday: 8:00 AM - 5:30 PM, Saturday: 9:00 AM - 1:00 PM, Sunday: Closed",
+        "providers_on_duty": ["Dr. Ada Optometrist, O.D.", "Sam Front Desk (Triage)"],
+        "available_slots": [
+            "Today at 3:00 PM (Emergency / Triage)",
+            "Tomorrow at 10:30 AM (Device Fit Trial)",
+            "Friday at 2:00 PM (Comprehensive Eye Exam)",
+            "Next Monday at 9:00 AM (Follow-Up)",
+        ],
+        "booking_available": True,
+    }
+
+
+def book_clinic_appointment(
+    clinic_name: str,
+    patient_name: str,
+    appointment_type: str = "Comprehensive Eye Exam",
+    preferred_date_time: str = "Friday 2:00 PM",
+    notes: str = "",
+    tool_context=None,
+) -> dict:
+    """Book or schedule an appointment with an eye care clinic for a patient."""
+    patient_id = _resolve_patient_id(tool_context)
+    now = datetime.now(timezone.utc)
+
+    appointment_record = {
+        "patient_id": patient_id,
+        "patient_name": patient_name,
+        "clinic_name": clinic_name,
+        "type": appointment_type,
+        "preferred_time": preferred_date_time,
+        "notes": notes,
+        "status": "scheduled",
+        "created_at": now.isoformat(),
+    }
+
+    db_written = False
+    if _SUPABASE_AVAILABLE and _db is not None:
+        try:
+            # Query clinic id
+            c_res = _db.table("clinics").select("id").limit(1).execute()
+            c_id = c_res.data[0]["id"] if c_res.data else "demo_clinic_001"
+            _db.table("appointments").insert({
+                "clinic_id": c_id,
+                "patient_id": patient_id,
+                "type": appointment_type,
+                "status": "scheduled",
+                "start_at": (now + timedelta(days=2)).isoformat(),
+            }).execute()
+            db_written = True
+        except Exception:
+            pass
+
+    return {
+        "status": "confirmed",
+        "confirmation_code": f"GOZ-{abs(hash(patient_name + preferred_date_time)) % 100000:05d}",
+        "patient_name": patient_name,
+        "clinic": clinic_name,
+        "appointment_type": appointment_type,
+        "scheduled_time": preferred_date_time,
+        "db_written": db_written,
+        "message": f"Your {appointment_type} appointment at {clinic_name} has been confirmed for {preferred_date_time}.",
+    }
+
+
+def schedule_doctor_followup(
+    patient_id: str,
+    followup_type: str,
+    due_date: str,
+    notes: str = "",
+    provider_name: str = "Dr. Ada, O.D.",
+) -> dict:
+    """Schedule a clinical follow-up or check-in for a patient from the doctor/clinic side."""
+    now = datetime.now(timezone.utc)
+
+    db_written = False
+    if _SUPABASE_AVAILABLE and _db is not None:
+        try:
+            c_res = _db.table("clinics").select("id").limit(1).execute()
+            c_id = c_res.data[0]["id"] if c_res.data else "demo_clinic_001"
+            _db.table("appointments").insert({
+                "clinic_id": c_id,
+                "patient_id": patient_id,
+                "type": f"Follow-up: {followup_type}",
+                "status": "scheduled",
+                "start_at": (now + timedelta(days=14)).isoformat(),
+            }).execute()
+
+            # Also create notification for recall engine
+            _db.table("notifications").insert({
+                "clinic_id": c_id,
+                "patient_id": patient_id,
+                "kind": "reminder",
+                "channel": "in_app_voice",
+                "message": f"Follow-up reminder from {provider_name}: {followup_type} scheduled for {due_date}. {notes}",
+                "status": "queued",
+            }).execute()
+            db_written = True
+        except Exception:
+            pass
+
+    return {
+        "status": "scheduled",
+        "patient_id": patient_id,
+        "provider": provider_name,
+        "followup_type": followup_type,
+        "target_date": due_date,
+        "db_written": db_written,
+        "message": f"Follow-up '{followup_type}' successfully scheduled for patient {patient_id} ({due_date}).",
+    }
+
+

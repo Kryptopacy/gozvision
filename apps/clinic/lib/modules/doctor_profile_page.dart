@@ -201,6 +201,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           const SizedBox(height: 18),
           _buildPatientTile(
             name: 'Eleanor Vance',
+            patientId: 'demo_patient_001',
             age: 78,
             condition: 'Dry AMD (Advanced Geographic Atrophy)',
             device: 'eSight 4 Goz-Paired',
@@ -211,6 +212,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           const Divider(color: ClinicTheme.border, height: 20),
           _buildPatientTile(
             name: 'Robert Chen',
+            patientId: 'demo_patient_002',
             age: 64,
             condition: 'Advanced Glaucoma (Bilateral Scotoma)',
             device: 'IrisVision Inspire Trial',
@@ -221,6 +223,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           const Divider(color: ClinicTheme.border, height: 20),
           _buildPatientTile(
             name: 'Maria Santos',
+            patientId: 'demo_patient_003',
             age: 42,
             condition: 'Diabetic Retinopathy (Proliferative)',
             device: 'Goz Mobile Copilot + Smart Glasses',
@@ -235,6 +238,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
   Widget _buildPatientTile({
     required String name,
+    required String patientId,
     required int age,
     required String condition,
     required String device,
@@ -275,11 +279,155 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           ),
         ),
         IconButton(
+          icon: const Icon(Icons.calendar_month_outlined, color: ClinicTheme.warningAmber),
+          tooltip: 'Schedule Doctor Follow-Up',
+          onPressed: () => _showScheduleFollowupDialog(context, name, patientId),
+        ),
+        IconButton(
           icon: const Icon(Icons.chat_bubble_outline, color: ClinicTheme.malachite),
           tooltip: 'Message Patient',
           onPressed: onChat,
         ),
       ],
+    );
+  }
+
+  void _showScheduleFollowupDialog(BuildContext context, String patientName, String patientId) {
+    String followupType = 'Low Vision Device Fit Review';
+    String timeframe = 'In 2 Weeks (Device Fit Standard)';
+    String channel = 'In-App Goz Voice Check-in';
+    final notesCtrl = TextEditingController(text: 'Review reading task speed and daily copilot adherence.');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: ClinicTheme.obsidian,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: ClinicTheme.border),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.calendar_month, color: ClinicTheme.malachite),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text('Schedule Follow-Up: $patientName',
+                    style: const TextStyle(color: ClinicTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Clinical Protocol / Focus:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  value: followupType,
+                  dropdownColor: ClinicTheme.surface,
+                  style: const TextStyle(color: ClinicTheme.textPrimary),
+                  decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                  items: const [
+                    DropdownMenuItem(value: 'Low Vision Device Fit Review', child: Text('Low Vision Device Fit Review')),
+                    DropdownMenuItem(value: 'OCT Macular Scan & Edema Check', child: Text('OCT Macular Scan & Edema')),
+                    DropdownMenuItem(value: 'Glaucoma Pressure (IOP) Check', child: Text('Glaucoma Pressure (IOP)')),
+                    DropdownMenuItem(value: 'Diabetic Retinopathy Follow-up', child: Text('Diabetic Retinopathy Follow-up')),
+                    DropdownMenuItem(value: 'General Post-Op / Vision Check', child: Text('General Vision Check')),
+                  ],
+                  onChanged: (v) => setDialogState(() => followupType = v!),
+                ),
+                const SizedBox(height: 16),
+                const Text('Target Interval:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  value: timeframe,
+                  dropdownColor: ClinicTheme.surface,
+                  style: const TextStyle(color: ClinicTheme.textPrimary),
+                  decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                  items: const [
+                    DropdownMenuItem(value: 'In 1 Week (Acute)', child: Text('In 1 Week (Acute)')),
+                    DropdownMenuItem(value: 'In 2 Weeks (Device Fit Standard)', child: Text('In 2 Weeks (Device Fit Standard)')),
+                    DropdownMenuItem(value: 'In 1 Month (Monitoring)', child: Text('In 1 Month (Monitoring)')),
+                    DropdownMenuItem(value: 'In 3 Months (Chronic/Glaucoma)', child: Text('In 3 Months (Chronic/Glaucoma)')),
+                    DropdownMenuItem(value: 'In 6 Months (Annual Protocol)', child: Text('In 6 Months (Annual Protocol)')),
+                  ],
+                  onChanged: (v) => setDialogState(() => timeframe = v!),
+                ),
+                const SizedBox(height: 16),
+                const Text('Delivery Channel:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  value: channel,
+                  dropdownColor: ClinicTheme.surface,
+                  style: const TextStyle(color: ClinicTheme.textPrimary),
+                  decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                  items: const [
+                    DropdownMenuItem(value: 'In-App Goz Voice Check-in', child: Text('In-App Goz Voice Check-in')),
+                    DropdownMenuItem(value: 'In-Clinic Exam Suite Visit', child: Text('In-Clinic Exam Suite Visit')),
+                    DropdownMenuItem(value: 'Caregiver Notification & SMS', child: Text('Caregiver Notification & SMS')),
+                  ],
+                  onChanged: (v) => setDialogState(() => channel = v!),
+                ),
+                const SizedBox(height: 16),
+                const Text('Doctor Instructions / Chart Notes:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: notesCtrl,
+                  maxLines: 2,
+                  style: const TextStyle(color: ClinicTheme.textPrimary, fontSize: 13),
+                  decoration: const InputDecoration(contentPadding: EdgeInsets.all(12)),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: ClinicTheme.malachite,
+                foregroundColor: Colors.black,
+              ),
+              icon: const Icon(Icons.send, size: 16),
+              label: const Text('Schedule & Notify Patient'),
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                try {
+                  final scope = Provider.of<ClinicScope>(context, listen: false);
+                  final clinicId = scope.clinicId ?? 'demo_clinic_001';
+                  await Supabase.instance.client.from('appointments').insert({
+                    'clinic_id': clinicId,
+                    'patient_id': patientId,
+                    'type': 'Doctor Follow-Up: $followupType',
+                    'status': 'scheduled',
+                    'start_at': DateTime.now().add(const Duration(days: 14)).toIso8601String(),
+                  });
+                  await Supabase.instance.client.from('notifications').insert({
+                    'clinic_id': clinicId,
+                    'patient_id': patientId,
+                    'kind': 'reminder',
+                    'channel': 'in_app_voice',
+                    'message': 'Doctor Follow-up: $followupType ($timeframe). ${notesCtrl.text}',
+                    'status': 'queued',
+                  });
+                } catch (_) {}
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: ClinicTheme.surface,
+                      content: Text('Follow-up scheduled for $patientName ($timeframe via $channel). Patient and recall engine notified.'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

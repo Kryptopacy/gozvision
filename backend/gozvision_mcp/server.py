@@ -30,6 +30,10 @@ from gozvision_agent.tools import (
     get_low_vision_statistics,
     log_adherence_event,
     format_ehr_encounter_note,
+    find_clinics,
+    get_clinic_schedule_and_hours,
+    book_clinic_appointment,
+    schedule_doctor_followup,
 )
 from gozvision_agent.recall import (
     compute_recall_worklist,
@@ -297,6 +301,77 @@ def format_ehr_chart_note(
         "encounter_id": encounter_id,
         "formatted_note": formatted,
     }
+
+
+@mcp.tool()
+def search_eye_clinics_and_hours(location: str = "nearby", specialty: str = "low vision") -> dict[str, Any]:
+    """Find verified eye care clinics, operating hours, and optometrists on duty for a patient.
+
+    Args:
+        location: City, zip, or neighborhood query (e.g. 'Main Street', 'downtown').
+        specialty: Clinical specialty filter (e.g. 'low vision rehabilitation', 'glaucoma', 'exams').
+    """
+    res = find_clinics(query=specialty, location=location)
+    return {
+        "status": "success",
+        "clinics": res.get("clinics", []),
+        "count": res.get("count", 0),
+        "message": res.get("message", ""),
+    }
+
+
+@mcp.tool()
+def book_patient_appointment(
+    clinic_name: str,
+    patient_name: str,
+    appointment_type: str = "Comprehensive Eye Exam",
+    preferred_time: str = "Next available",
+    notes: str = "",
+) -> dict[str, Any]:
+    """Book or schedule an eye clinic appointment on behalf of a patient via voice or assistant.
+
+    Args:
+        clinic_name: Name of the eye clinic.
+        patient_name: Full name of the patient.
+        appointment_type: 'Comprehensive Eye Exam', 'Low Vision Device Fit Trial', or 'Follow-up'.
+        preferred_time: Preferred day and time slot.
+        notes: Reason for visit or special visual accommodations needed.
+    """
+    res = book_clinic_appointment(
+        clinic_name=clinic_name,
+        patient_name=patient_name,
+        appointment_type=appointment_type,
+        preferred_date_time=preferred_time,
+        notes=notes,
+    )
+    return res
+
+
+@mcp.tool()
+def trigger_doctor_followup(
+    patient_id: str,
+    followup_type: str,
+    due_date: str,
+    notes: str = "",
+    provider_name: str = "Dr. Ada, O.D.",
+) -> dict[str, Any]:
+    """Schedule a clinical follow-up review for a patient from the optometrist side.
+
+    Args:
+        patient_id: The unique patient identifier (e.g., 'demo_patient_001').
+        followup_type: Clinical reason (e.g., '2-Week Device Fit Check', 'Macular OCT Scan').
+        due_date: Expected time or interval (e.g., 'In 2 weeks', '2026-10-22').
+        notes: Specific instructions or questions for the patient.
+        provider_name: The clinician scheduling the follow-up.
+    """
+    res = schedule_doctor_followup(
+        patient_id=patient_id,
+        followup_type=followup_type,
+        due_date=due_date,
+        notes=notes,
+        provider_name=provider_name,
+    )
+    return res
 
 
 if __name__ == "__main__":
