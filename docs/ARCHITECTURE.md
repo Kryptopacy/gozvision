@@ -1,6 +1,6 @@
-# GozVision Architecture & Hackathon Specification
+# GozVision Platform Architecture
 
-GozVision is an assistive visual copilot and clinical workflow automation platform engineered for low-vision patients and eye care practices.
+GozVision is an enterprise-grade assistive visual copilot and clinical workflow automation platform engineered for eye care practices and patients across the full continuum of vision care.
 
 ```mermaid
 flowchart TB
@@ -17,7 +17,7 @@ flowchart TB
 
     subgraph AgenticCore["Agentic & Protocol Layer"]
         MCP["Model Context Protocol (FastMCP / MCPServer)<br/>• Port: stdio / SSE<br/>• Alexa+ Agent Skills Interface<br/>• Tooling Seams"]
-        RAG["Clinical Knowledge Retrieval (RAG)<br/>• AAO, AOA & WHO guidelines<br/>• Embeddings: gemini-embedding-001"]
+        RAG["Clinical Knowledge Retrieval (RAG)<br/>• AAO, AOA & WHO guidelines<br/>• Embeddings: gemini-embedding-2<br/>• Supabase dynamic rag_documents"]
         SCRIBE["Ambient Scribe Engine<br/>• SOAP clinical draft generation"]
         RECALL["Front Desk Recall Engine<br/>• Worklist generator & no-show recovery"]
     end
@@ -43,21 +43,29 @@ flowchart TB
 
 ---
 
-## Hackathon Track Alignments
+## Core Platform Components
 
-### 1. Amazon Developer Hackathon: Build, Ship, Shape (Deadline: Oct 23, 2026)
-* **Track:** **Alexa+ Track** (Agentic experiences, Agent Skills, and self-hosted MCP servers).
-* **Mini-Challenges:** **AWS Builder** & **Open Source** challenges.
-* **Component:** `backend/gozvision_mcp/server.py` exposing:
-  - `clinical_knowledge_lookup`
-  - `trigger_emergency_sos`
-  - `front_desk_recall_sweep`
-  - `draft_ambient_scribe_chart`
-  - `cv_enhance_accessibility_frame`
+### 1. Dual-Mode Patient Experience (`apps/patient/`)
+- **Low-Vision Assist Mode (`lowVisionAssist`)**: Voice-first, continuous edge-CV filtering, proactive obstacle haptics, hands-free operation.
+- **Clinic Companion Mode (`clinicCompanion`)**: Visual-first UI, quiet on-demand assistant, medication/drop tracking, appointment scheduling, clinical Q&A.
+- **Dynamic Profile Switching**: Hands-free voice tool call (`switchVisionProfile`) or visual profile switcher in Patient Profile screen.
 
-### 2. OpenCV AI Competition 2026 (Deadline: Oct 26, 2026)
-* **Track:** **Healthcare & Accessibility** and **Agentic Vision Award**.
-* **Component:** `backend/gozvision_vision/cv_pipeline.py` implementing:
-  - `enhanced_contrast`: LAB CLAHE + Canny morphological boundaries for AMD patients.
-  - `glare_suppression`: Specular highlight attenuation for cataracts/photophobia.
-  - `reading`: Text detection via morphological gradient bounding boxes.
+### 2. Clinic Suite (`apps/clinic/`)
+- **Low Vision Hub**: Manages referrals, device fittings, functional vision goals, and live adherence telemetry.
+- **Front Desk Recall**: Automated scheduling recovery, no-show outreach, two-way SMS/WhatsApp conversational booking.
+- **Ambient Scribe with Linked Evidence**: Generates structured SOAP drafts grounded directly in encounter audio, with 1-click transcript verification.
+- **Doctor Clinical Copilot & Quick-Reference**: Real-time guideline lookup (AAO PPP, AOA, TFOS DEWS II, NEI), drug contraindication checks, and dynamic clinical RAG.
+
+### 3. Edge Computer Vision Pipeline (`backend/gozvision_vision/cv_pipeline.py`)
+- **Enhanced Contrast**: LAB CLAHE + Canny morphological boundaries for AMD and low contrast sensitivity.
+- **Glare Suppression**: Specular highlight attenuation for cataracts and photophobia.
+- **Reading Zone Detection**: Targeted text isolation and morphological gradient bounding boxes.
+- **Smart Glasses Profile**: Lightweight, power-efficient streaming profile for Ray-Ban Meta and Rokid eyewear.
+
+### 4. Agentic Model Context Protocol (`backend/gozvision_mcp/server.py`)
+- Standardized MCP server exposing `clinical_knowledge_lookup`, `trigger_emergency_sos`, `front_desk_recall_sweep`, `draft_ambient_scribe_chart`, and `cv_enhance_accessibility_frame`.
+
+### 5. Multi-Tier Clinical Knowledge Base (RAG)
+- **Static Core Corpus**: Curated evidence-based guidelines from AAO, AOA, WHO, and peer-reviewed ophthalmic trials.
+- **Dynamic PostgreSQL Store (`rag_documents`)**: Clinic-specific protocols and real-time guideline updates loaded without downtime.
+- **Vector Embeddings**: Powered by `gemini-embedding-2` with SHA-256 fingerprint caching (`.embedding_cache.json`).

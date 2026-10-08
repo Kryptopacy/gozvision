@@ -6,13 +6,13 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'adk_bridge_service.dart';
 import 'copilot_delegate.dart';
-import 'gozai_session_types.dart';
+import 'session_types.dart';
 import 'service_contracts.dart';
 import 'session_config.dart';
 
 // Re-exported so consumers can keep importing the modes and
 // connection state from this library.
-export 'gozai_session_types.dart';
+export 'session_types.dart';
 
 /// The core service managing the WebSocket connection to Gemini Multimodal Live API.
 ///
@@ -209,6 +209,21 @@ class GeminiLiveService extends ChangeNotifier {
                     }
                   },
                   'required': ['mode']
+                }
+              },
+              {
+                'name': 'switchVisionProfile',
+                'description': 'Switches the patient user profile and copilot assist level between "lowVisionAssist" (continuous scene descriptions, high haptics, obstacle detection) and "clinicCompanion" (silent on-demand assistant, subdued haptics, visual appointment hub). Call this when the user asks to switch to seeing mode, quiet mode, companion mode, or back to low-vision/assist mode.',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'profile': {
+                      'type': 'STRING',
+                      'description': 'The target profile: "lowVisionAssist" or "clinicCompanion".',
+                      'enum': ['lowVisionAssist', 'clinicCompanion']
+                    }
+                  },
+                  'required': ['profile']
                 }
               },
               {
@@ -626,6 +641,10 @@ class GeminiLiveService extends ChangeNotifier {
               orElse: () => _currentMode,
             );
             delegate?.onSwitchMode(newMode);
+            break;
+          case 'switchVisionProfile':
+            final profileStr = args['profile'] as String? ?? 'lowVisionAssist';
+            delegate?.onSwitchVisionProfile(profileStr);
             break;
           case 'captureSnapshot':
             delegate?.onCaptureSnapshot();

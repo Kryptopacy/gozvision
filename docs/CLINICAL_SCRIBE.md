@@ -48,3 +48,53 @@ In [`apps/clinic/lib/modules/scribe_page.dart`](file:///d:/pacy_labs/gozvision/a
 ```
 
 Clinicians can verify critical measurements in seconds with a single click, eliminating "black box" hesitation before signing off on charts.
+
+---
+
+## 4. Doctor Clinical Copilot & Quick Reference
+
+Integrated directly into [`apps/clinic/lib/screens/clinic_shell.dart`](file:///d:/pacy_labs/gozvision/apps/clinic/lib/screens/clinic_shell.dart) and [`apps/clinic/lib/modules/scribe_page.dart`](file:///d:/pacy_labs/gozvision/apps/clinic/lib/modules/scribe_page.dart), the **Doctor Quick-Reference (`DoctorReferenceDialog`)** provides practitioners with real-time, evidence-based clinical guidance during exam reviews:
+- **Instant Guideline Lookups:** AAO Preferred Practice Patterns (PPP 2025/2026), AOA Clinical Practice Guidelines, TFOS DEWS II, and NEI AREDS2 trials.
+- **Critical Pharmacology Checks:** Absolute contraindications for ocular medications (e.g., Timolol in asthma/COPD or severe sinus bradycardia; Prostaglandin analogs in active uveitis).
+- **Metric Risk Algorithms:** Target IOP calculations based on baseline pressure and CCT (pachymetry), C/D ratio asymmetry thresholds (>0.2), and diabetic retinopathy screening horizons.
+
+---
+
+## 5. Clinical Knowledge Base Architecture & Scaling
+
+GozVision utilizes a hybrid static-dynamic Retrieval-Augmented Generation (RAG) architecture engineered to keep clinical information current without service interruption:
+
+```
+┌────────────────────────────────────────────────────────┐
+│ CLINICAL KNOWLEDGE SOURCES                             │
+│ • AAO Preferred Practice Patterns                      │
+│ • AOA Clinical Practice Guidelines                     │
+│ • TFOS DEWS II / NEI AREDS2                            │
+│ • Clinic-Specific Practice Protocols                   │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ DYNAMIC POSTGRESQL STORE (`rag_documents`)             │
+│ • Columns: domain ('optometry'|'medication'|'stats')   │
+│ • Key: Unique clinical descriptor                      │
+│ • Data: {answer, source, action, contraindications}    │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ VECTOR INDEXING & EMBEDDINGS                           │
+│ • Model: gemini-embedding-2                            │
+│ • Cache: .embedding_cache.json (SHA-256 Fingerprinted) │
+│ • Semantic Search: Cosine similarity with 0.55 cutoff  │
+└────────────────────────────────────────────────────────┘
+```
+
+### How to Expand and Update the Knowledge Base:
+1. **Dynamic Ingestion (Zero-Downtime):**
+   - Insert new guideline records into the PostgreSQL `rag_documents` table via Supabase dashboard or API.
+   - On backend startup or manual refresh, `SemanticKnowledgeBase` queries `rag_documents` and embeds new entries into the vector space.
+2. **Deterministic Cache Invalidation:**
+   - Embeddings are cached in `.embedding_cache.json` alongside their SHA-256 payload hashes. When guideline text is updated, the hash changes, prompting `gemini-embedding-2` to re-embed only the modified entries while preserving cached vectors.
+3. **Clinician Correction Feedback Loop:**
+   - Any edits made by clinicians in the Scribe note review screen are recorded in `encounters.scribe_draft` to flag potential gaps in prompt guidelines and feed back into practice-level protocols.

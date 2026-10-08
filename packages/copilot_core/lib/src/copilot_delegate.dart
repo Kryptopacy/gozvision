@@ -1,4 +1,4 @@
-import 'gozai_session_types.dart';
+import 'session_types.dart';
 
 /// The single seam between the Gemini session and the app.
 ///
@@ -14,6 +14,7 @@ abstract class CopilotDelegate {
   // --- Camera & vision ---
   void onSwitchCamera();
   void onSwitchMode(GozAIMode mode);
+  void onSwitchVisionProfile(String profile); // lowVisionAssist vs clinicCompanion
   void onCaptureSnapshot();
   void onAnalyzeDocument();        // High-res OCR request for micro text
   void onToggleDebugCamera(bool visible); // Voice-activated video feed
@@ -45,6 +46,7 @@ abstract class CopilotDelegate {
 abstract class CopilotUiHooks {
   void setShowDebugCamera(bool visible);
   void openTranscripts();
+  void onVisionProfileChanged(String profile);
 
   /// Metrics used to scale the model's 1080x1920 tap coordinates onto the
   /// actual device. Read from the screen's MediaQuery.

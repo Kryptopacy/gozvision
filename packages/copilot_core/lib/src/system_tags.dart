@@ -30,6 +30,7 @@ class SystemTags {
       'OCR Context — do not read this aloud unless the user asks';
   static const String medicationLabelTag = 'MEDICATION LABEL';
   static const String nutritionLabelTag = 'NUTRITION LABEL';
+  static const String profileSwitchedTag = 'SYSTEM - VISION PROFILE SWITCHED';
 
   // Internal pipeline tags (session machinery, not model behavior rules)
   static const String _internalTag = 'SYSTEM - INTERNAL';
@@ -125,4 +126,11 @@ class SystemTags {
 
   static String welcomeBack(String userName) =>
       '[$autoLaunchTag]\nWelcome $userName back to GozAI.';
+
+  /// User switched between low-vision assist and clinic companion modes.
+  static String profileSwitched(String profile) =>
+      '[$profileSwitchedTag]: Vision profile switched to "$profile". '
+      'If "clinicCompanion", transition to visual-first, quiet companion behavior (no continuous scene narrations). '
+      'If "lowVisionAssist", transition to voice-first, proactive obstacle warning, high-accessibility behavior.';
 }
+

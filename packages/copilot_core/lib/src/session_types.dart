@@ -14,6 +14,9 @@ enum CopilotMode {
   lightMeter, // Offline light meter
 }
 
+/// Backwards compatibility alias
+typedef GozAIMode = CopilotMode;
+
 /// Connection state for the Gemini Live session.
 enum GeminiConnectionState {
   disconnected,

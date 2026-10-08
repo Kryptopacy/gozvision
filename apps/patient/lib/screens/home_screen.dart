@@ -13,6 +13,7 @@ import '../services/audio_service.dart';
 import '../services/camera_service.dart';
 
 import '../services/haptic_service.dart';
+import 'profile_screen.dart';
 
 
 /// The main GozAI interface.
@@ -70,6 +71,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _openTranscripts() {
     if (!mounted) return;
     context.push('/transcripts');
+  }
+
+  void _onVisionProfileChanged(String profile) {
+    if (!mounted) return;
+    final target = (profile == 'clinicCompanion')
+        ? VisionProfile.clinicCompanion
+        : VisionProfile.lowVisionAssist;
+    context.read<ProfileService>().setProfile(target);
   }
 
   /// Handle physical volume button presses for hands-free control.
@@ -212,21 +221,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 8),
           Text(
-            'GozAI',
+            'GozVision',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
       ),
       actions: [
         IconButton(
+          icon: const Icon(Icons.account_circle_outlined, color: GozAITheme.accentCyan),
+          tooltip: 'Patient Profile & Care Hub',
+          onPressed: () => context.push('/profile'),
+        ),
+        IconButton(
           icon: const Icon(Icons.monitor_heart_outlined),
           tooltip: 'Caregiver Dashboard',
           onPressed: () => context.push('/caregiver'),
-        ),
-        IconButton(
-          icon: const Icon(Icons.medical_services_outlined),
-          tooltip: 'Doctor Dashboard',
-          onPressed: () => context.push('/doctor'),
         ),
         const SizedBox(width: 8),
       ],
@@ -874,6 +883,9 @@ class _HomeUiHooks implements CopilotUiHooks {
 
   @override
   void openTranscripts() => _state._openTranscripts();
+
+  @override
+  void onVisionProfileChanged(String profile) => _state._onVisionProfileChanged(profile);
 
   @override
   ({double width, double height, double pixelRatio}) uiMetrics() {

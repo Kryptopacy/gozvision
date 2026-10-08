@@ -441,6 +441,14 @@ class SessionCoordinator implements CopilotDelegate {
   }
 
   @override
+  void onSwitchVisionProfile(String profile) {
+    debugPrint('GozAI: AI requested to switch vision profile to: $profile');
+    haptics.safePathConfirm();
+    _uiHooks?.onVisionProfileChanged(profile);
+    gemini.sendText(SystemTags.profileSwitched(profile));
+  }
+
+  @override
   void onCaptureSnapshot() {
     captureSnapshot();
   }

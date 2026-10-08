@@ -9,6 +9,7 @@ import '../modules/insights_page.dart';
 import '../modules/low_vision_hub_page.dart';
 import '../modules/scribe_page.dart';
 import '../modules/clinic_chat_dialog.dart';
+import '../modules/doctor_reference_dialog.dart';
 
 /// The clinic suite shell: one rail, four modules. The Low Vision Hub is
 /// the flagship — it closes the referral → device fit → adherence loop.
@@ -75,6 +76,11 @@ class _ClinicShellState extends State<ClinicShell> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book_outlined, color: ClinicTheme.malachite),
+            tooltip: 'Doctor Quick-Reference & Guidelines (Goz Clinical Copilot)',
+            onPressed: () => DoctorReferenceDialog.show(context),
+          ),
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline, color: ClinicTheme.malachite),
             tooltip: 'In-App Care Threads (Push & Email Active)',

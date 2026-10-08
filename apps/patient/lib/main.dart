@@ -11,6 +11,7 @@ import 'core/theme.dart';
 import 'screens/caregiver_dashboard.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/profile_screen.dart';
 import 'screens/transcripts_screen.dart';
 import 'services/app_haptics.dart';
 import 'services/audio_service.dart';
@@ -82,6 +83,10 @@ final GoRouter _router = GoRouter(
       path: '/transcripts',
       builder: (context, state) => const TranscriptsScreen(),
     ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const PatientProfileScreen(),
+    ),
   ],
 );
 
@@ -97,6 +102,7 @@ class GozVisionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ProfileService()),
         ChangeNotifierProvider(create: (_) => GeminiLiveService(
           config: SessionConfig(
             geminiLiveWsUrl: AppConfig.geminiLiveWsUrl,
