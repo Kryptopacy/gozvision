@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -51,15 +52,24 @@ class _LoginScreenState extends State<LoginScreen> {
           password: password,
         );
       } else {
-        await client.auth.signUp(email: email, password: password);
-        // On registration, create the RBAC profile row (RLS: own row only).
-        await client.from('profiles').upsert({
-          'id': client.auth.currentUser!.id,
-          'email': email,
-          'name': name,
-          'role': _selectedRole,
-          'assigned_patients': [],
-        });
+        await client.auth.signUp(
+          email: email,
+          password: password,
+          data: {
+            'name': name,
+            'role': _selectedRole,
+          },
+        );
+        // Fallback upsert for environments without trigger (RLS: own row only).
+        if (client.auth.currentUser != null) {
+          await client.from('profiles').upsert({
+            'id': client.auth.currentUser!.id,
+            'email': email,
+            'name': name,
+            'role': _selectedRole,
+            'assigned_patients': [],
+          });
+        }
       }
 
       final profile = await client
@@ -78,6 +88,29 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         context.go('/');
       }
+    } on AuthApiException catch (e) {
+      setState(() => _errorMessage = e.message);
+    } catch (e) {
+      setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final client = Supabase.instance.client;
+      await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'io.supabase.gozvision://login-callback',
+      );
+      // On OAuth completion, auth state listener navigates, and Postgres
+      // on_auth_user_created trigger automatically provisions the profile row.
     } on AuthApiException catch (e) {
       setState(() => _errorMessage = e.message);
     } catch (e) {
@@ -242,6 +275,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : Text(_isLogin ? 'AUTHENTICATE' : 'CREATE ACCOUNT', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.black, fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 2.0)),
                                 ),
                               ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(child: Divider(color: GozAITheme.proBorder)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Text(
+                                      'OR',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: GozAITheme.textSecondary,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(child: Divider(color: GozAITheme.proBorder)),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: _isLoading ? null : _signInWithGoogle,
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    side: const BorderSide(color: GozAITheme.proBorder, width: 1.5),
+                                    backgroundColor: Colors.white.withValues(alpha: 0.04),
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.g_mobiledata_rounded, size: 28, color: Colors.white),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'CONTINUE WITH GOOGLE',
+                                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 24),
                               Center(
                                 child: TextButton(
@@ -327,16 +407,14 @@ class _LoginScreenState extends State<LoginScreen> {
               setState(() => _selectedRole = newValue);
             }
           },
-          items: <String>['Patient', 'Caregiver', 'Doctor']
+          items: <String>['Patient', 'Caregiver']
               .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Row(
                 children: [
                   Icon(
-                    value == 'Doctor' ? Icons.local_hospital_rounded 
-                    : value == 'Caregiver' ? Icons.handshake_rounded 
-                    : Icons.accessibility_new_rounded,
+                    value == 'Caregiver' ? Icons.handshake_rounded : Icons.accessibility_new_rounded,
                     color: GozAITheme.malachite,
                     size: 20,
                   ),

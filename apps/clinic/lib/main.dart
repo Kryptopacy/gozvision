@@ -7,6 +7,7 @@ import 'core/clinic_theme.dart';
 import 'data/clinic_scope.dart';
 import 'screens/clinic_shell.dart';
 import 'screens/login_screen.dart';
+import 'services/bachs_payment_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,8 +39,11 @@ class ClinicApp extends StatelessWidget {
           }
           final user = snapshot.data?.session?.user;
           if (user == null) return const LoginScreen();
-          return ChangeNotifierProvider(
-            create: (_) => ClinicScope()..resolve(user.id),
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => ClinicScope()..resolve(user.id)),
+              ChangeNotifierProvider(create: (_) => BachsPaymentService()),
+            ],
             child: const ClinicShell(),
           );
         },

@@ -13,6 +13,8 @@ dependencies:
   supabase_flutter: ^2.9.0
   provider: any
   flutter_dotenv: any
+  http: ^1.2.0
+  url_launcher: any
 
 dev_dependencies:
   flutter_test:

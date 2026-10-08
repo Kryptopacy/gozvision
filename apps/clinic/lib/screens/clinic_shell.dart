@@ -12,6 +12,7 @@ import '../modules/clinic_chat_dialog.dart';
 import '../modules/doctor_reference_dialog.dart';
 import '../modules/doctor_profile_page.dart';
 import '../modules/clinic_directory_page.dart';
+import '../modules/optical_storefront_page.dart';
 
 /// GozVision Clinic Suite — Enterprise Multi-Tenant Clinical Shell.
 ///
@@ -89,6 +90,7 @@ class _ClinicShellState extends State<ClinicShell> {
       InsightsPage(),
       DoctorProfilePage(),
       ClinicDirectoryPage(),
+      OpticalStorefrontPage(),
     ];
 
     return Scaffold(
@@ -361,6 +363,28 @@ class _ClinicShellState extends State<ClinicShell> {
             icon: Icons.domain_outlined,
             activeIcon: Icons.domain,
             label: 'Clinic Directory',
+          ),
+
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 8),
+            child: Text(
+              'COMMERCE & DISPENSARY',
+              style: TextStyle(
+                color: ClinicTheme.textSecondary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+          _buildNavItem(
+            index: 6,
+            icon: Icons.storefront_outlined,
+            activeIcon: Icons.storefront_rounded,
+            label: 'Optical Dispensary',
+            badgeText: 'Bachs',
+            badgeColor: ClinicTheme.malachite,
           ),
 
           const Spacer(),

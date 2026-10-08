@@ -22,6 +22,28 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body style="background-color: #050806; margin: 0; padding: 0;">
+  <!-- Bachs Overlay Checkout SDK -->
+  <script src="https://checkout.bachs.io/bachs.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      if (window.Bachs && window.Bachs.Initialize) {
+        window.Bachs.Initialize({
+          onEvent: function(event) {
+            console.log('[Bachs Event]', event.type, event.data);
+            window.dispatchEvent(new CustomEvent('bachs_event', { detail: event }));
+          }
+        });
+      }
+    });
+
+    window.openBachsCheckout = function(checkoutUrl) {
+      if (window.Bachs && window.Bachs.Checkout) {
+        return window.Bachs.Checkout.open({ checkoutUrl: checkoutUrl });
+      } else {
+        window.open(checkoutUrl, '_blank');
+      }
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

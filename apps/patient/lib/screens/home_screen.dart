@@ -17,6 +17,7 @@ import '../services/haptic_service.dart';
 import '../services/sos_service.dart';
 import 'profile_screen.dart';
 import 'clinic_discovery_sheet.dart';
+import 'patient_dispensary_sheet.dart';
 
 
 /// The main GozAI interface.
@@ -241,6 +242,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.storefront_outlined, color: GozAITheme.accentCyan),
+          tooltip: 'Optical Dispensary & Doctor Prescriptions (Bachs)',
+          onPressed: () => PatientDispensarySheet.show(context),
+        ),
         IconButton(
           icon: const Icon(Icons.domain_outlined, color: GozAITheme.accentCyan),
           tooltip: 'Find Clinics, Working Hours & Appointments',
