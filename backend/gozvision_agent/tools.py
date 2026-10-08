@@ -824,5 +824,46 @@ def check_patient_recall_and_refills(patient_id: str = "") -> dict:
             "message": "Routine annual eye examinations are recommended every 12 months for optimal visual health.",
         }
 
+def inspect_ring_doorstep_safety(device_id: str = "front_doorbell") -> dict[str, Any]:
+    """Inspect a Ring doorbell or stick-up camera doorstep feed for low-vision tripping hazards or package obstacles.
 
+    Args:
+        device_id: Ring device ID ('front_doorbell', 'hallway_indoor').
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.inspect_doorstep_safety(device_id=device_id)
+
+
+def triage_ring_caretaker_event(
+    event_type: str,
+    device_id: str = "front_doorbell",
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Triage a Ring motion or ding event for caretaking rules such as nighttime wandering or front door activity.
+
+    Args:
+        event_type: Ring event ('ding', 'motion', 'door_open').
+        device_id: Ring device ID.
+        patient_id: Patient ID to correlate.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.process_caretaker_event(
+        event_type=event_type,
+        device_id=device_id,
+        patient_id=patient_id,
+    )
+
+
+def announce_ring_intercom_message(
+    message: str,
+    device_id: str = "front_doorbell",
+) -> dict[str, Any]:
+    """Broadcast an accessibility spoken announcement or prescription confirmation over Ring Chime or speaker.
+
+    Args:
+        message: Guidance text to announce.
+        device_id: Target Ring chime or doorbell device.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.broadcast_intercom_chime(message=message, device_id=device_id)
 

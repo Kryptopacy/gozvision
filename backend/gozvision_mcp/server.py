@@ -374,6 +374,86 @@ def trigger_doctor_followup(
     return res
 
 
+# ============================================================================
+# Ring Accessibility & Caretaking Tools (Home Safety & Caregiver Monitoring)
+# ============================================================================
+
+
+@mcp.tool()
+def ring_inspect_doorstep_safety(device_id: str = "front_doorbell") -> dict[str, Any]:
+    """Inspect a Ring doorbell or outdoor camera feed for doorstep tripping hazards, curbs, or uncollected packages.
+
+    Args:
+        device_id: Ring device ID ('front_doorbell', 'hallway_indoor').
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.inspect_doorstep_safety(device_id=device_id)
+
+
+@mcp.tool()
+def ring_triage_caretaker_event(
+    event_type: str = "motion",
+    device_id: str = "front_doorbell",
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Triage Ring motion or ding events for non-security caretaking rules (e.g., nighttime wandering or prolonged door open).
+
+    Args:
+        event_type: Ring event kind ('ding', 'motion', 'door_open').
+        device_id: Ring device identifier.
+        patient_id: Associated patient ID.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.process_caretaker_event(
+        event_type=event_type,
+        device_id=device_id,
+        patient_id=patient_id,
+    )
+
+
+@mcp.tool()
+def ring_broadcast_intercom_chime(
+    message: str,
+    device_id: str = "front_doorbell",
+) -> dict[str, Any]:
+    """Broadcast an accessibility spoken announcement or prescription confirmation over Ring Chime or connected Echo speaker.
+
+    Args:
+        message: Spoken guidance text.
+        device_id: Target Ring chime or speaker device.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.broadcast_intercom_chime(message=message, device_id=device_id)
+
+
+@mcp.tool()
+def ring_list_monitored_devices() -> dict[str, Any]:
+    """List all registered Ring doorbells, indoor cameras, and chime devices configured for caretaking monitoring."""
+    from gozvision_ring.ring_client import ring_monitor
+    devices = ring_monitor.list_devices()
+    return {
+        "status": "success",
+        "devices": devices,
+        "count": len(devices),
+    }
+
+
 if __name__ == "__main__":
-    # Standard stdio transport for MCP clients (Alexa+ host, Claude, or custom agent orchestrators)
-    mcp.run()
+    import argparse
+    parser = argparse.ArgumentParser(description="GozVision MCP Server (Alexa+ & Assistive Ecosystem)")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default=os.environ.get("MCP_TRANSPORT", "stdio"),
+        help="Transport protocol: 'stdio' (default), 'streamable-http' (Alexa+ MCP spec 2025-11-25), or 'sse'.",
+    )
+    parser.add_argument("--host", default="0.0.0.0", help="Host address for HTTP/SSE transport")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("MCP_PORT", "8000")), help="Port for HTTP/SSE transport")
+    args = parser.parse_args()
+
+    if args.transport in ["streamable-http", "sse"]:
+        print(f"Starting GozVision MCP Server on {args.host}:{args.port} using transport '{args.transport}' (Alexa+ MCP Spec 2025-11-25)...")
+        mcp.run(transport=args.transport, host=args.host, port=args.port)
+    else:
+        # Standard stdio transport for local MCP hosts
+        mcp.run()

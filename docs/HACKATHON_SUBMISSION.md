@@ -2,10 +2,12 @@
 
 > **Ecosystem:** GozVision (Rebirth of GozAI)  
 > **Tagline:** The Dual-Sided Clinical & Real-Time Computer Vision Copilot for Low-Vision Accessibility.  
-> **Target Tracks:** 
-> - **AWS Global AI & Developer Challenge** (Cloud Infrastructure, ECS Fargate, CloudFront, Amplify, MCP)
-> - **OpenCV AI Competition 2026** (Healthcare & Accessibility / Agentic Computer Vision)
-> - **Google Gemini Multi-Turn & Multimodal Agent Competitions** (Real-time Scribe & Spatial Vision)
+> **Target Tracks (Amazon App Dev 2026):** 
+> - **Primary Track 1: Alexa+** (Self-Hosted Streamable HTTP MCP Server & Agent Skills — Spec 2025-11-25)
+> - **Primary Track 2: Ring** (Non-Security Caretaking Monitoring & Doorstep Accessibility Aid)
+> - **Mini Challenge 1: AWS Builder** (Amazon Bedrock, ECS Fargate, CloudFront, CodeBuild, Amplify)
+> - **Mini Challenge 2: Open Source** (Public Repository, MIT License, Full Test Harnesses)
+> - **Bonus Category (+10% Points):** [Friction Log Entries](file:///d:/pacy_labs/gozvision/docs/FRICTION_LOGS.md) & [Product Feedback](file:///d:/pacy_labs/gozvision/docs/PRODUCT_FEEDBACK.md)
 
 ---
 
@@ -103,32 +105,51 @@ Thank you."
 
 ---
 
-## 4. Deep-Dive Judging Alignment Matrix
+## 4. Deep-Dive Judging Alignment Matrix (Amazon App Dev 2026)
 
-### Track 1: AWS Global Developer Challenge (Cloud & Agentic Infrastructure)
-- **Zero-Downtime Serverless Containers:** Built and deployed on **Amazon ECS Fargate** (`gozvision-cluster`), eliminating manual OS patching while auto-scaling to zero-idle workloads.
-- **Cloud-Native CI/CD:** Complete automated pipeline using **AWS CodeBuild** (`gozvision-container-builder`) compiling multi-package Python wheel artifacts inside Amazon Linux containers and pushing directly to **Amazon ECR** (`202504327910.dkr.ecr.eu-north-1.amazonaws.com/gozvision-backend`).
-- **Global Edge Performance & Security:** Multi-region edge acceleration via **AWS CloudFront** (`d7icpdzxenshi.cloudfront.net`) providing:
-  - Global TLS 1.3/1.2 SSL termination (eliminating mixed-content issues for browser PWAs).
-  - CachingDisabled policy for sub-second dynamic streaming API routes.
-  - Header forwarding preservation (`Managed-AllViewerExceptHostHeader`).
-- **Serverless Frontend Delivery:** Deployed on **AWS Amplify Hosting** with custom Single-Page Application (SPA) routing rewrites for clinical sub-paths (`/clinic/*`) and patient sub-paths (`/patient/*`).
-- **Agent Toolkit for AWS Compliance:** Configured with AWS MCP profiles, native IAM Least Privilege execution roles (`gozvision-ecs-execution-role`), and CloudWatch logging groups (`/ecs/gozvision-backend`).
+### Primary Track 1: Alexa+ (Agent Skills & Self-Hosted Streamable HTTP MCP Server)
+- **Runtime MCP Standard (Spec 2025-11-25+):** Self-hosted Python MCP server (`gozvision_mcp.server`) exposing endpoints over Streamable HTTP (`run_streamable_http_async`) and stdio.
+- **Creative Agentic Workflow (Exceeding the Obvious Bar):** Rather than a basic single-turn Q&A bot, GozVision orchestrates an autonomous, multi-service clinical and accessibility pipeline:
+  - `clinical_knowledge_lookup`: Semantic RAG over verified AAO/AOA/WHO optometric guidelines.
+  - `draft_ambient_scribe_chart`: Converts ambient clinical dialogue into structured SOAP/FHIR EHR notes.
+  - `front_desk_recall_sweep`: Autonomous outreach sweeps for overdue diabetic and glaucoma eye examinations.
+  - `trigger_emergency_sos`: Real-time emergency escalation dispatching geo-located alerts to caregivers and clinics.
+  - `log_patient_medication_adherence`: Cross-session drop compliance streak tracking.
+- **Simulated Voice Experience:** Full agentic interaction simulation ready in the Patient and Clinic web portals.
 
-### Track 2: OpenCV AI Competition 2026 (Healthcare & Accessibility)
-- **Clinical Problem-Specific Computer Vision:** Rather than generic object detection, GozVision targets specific ophthalmologic pathologies:
-  - *Macular Degeneration (AMD):* Contrast Limited Adaptive Histogram Equalization (CLAHE) with Sobel/Canny edge salience overlay to recover lost depth perception on curb edges and stairs.
-  - *Cataracts & Photophobia:* Specular bloom thresholding with morphological dilation to dim blinding reflective glare while preserving background context.
-  - *Reading Rehabilitation:* Morphological gradient filtering with Otsu binarization and rectangular structural kernels to isolate dense text lines on medicine bottles for low-vision patients.
-- **Validated Visual Evidence:** Complete side-by-side comparison graphics generated and committed in `docs/assets/` (`gozvision_opencv_triptych.png`).
+### Primary Track 2: Ring (Non-Security Caretaking Monitoring & Accessibility Aid)
+- **Creative Accessibility & Caretaking Integration:** Rather than a simple security doorbell alert, GozVision repurposes Ring devices for vulnerable low-vision patients:
+  - `ring_inspect_doorstep_safety`: Runs OpenCV CLAHE and edge-salience hazard filters on Ring Doorbell/Stick-Up Cam porch feeds to detect doorstep tripping obstacles, steps, and uncollected packages.
+  - `ring_triage_caretaker_event`: Monitors front door events for nocturnal wandering (flagging nighttime motion between 10 PM and 6 AM for patients with dementia or severe vision loss) and dispatches caregiver alerts.
+  - `ring_broadcast_intercom_chime`: Broadcasts spoken accessibility guidance and visitor descriptions directly through Ring Chime or connected Echo devices.
+  - `ring_list_monitored_devices`: Real-time telemetry monitoring for doorbells, stick-up cams, and indoor sensors.
+- **Simulator & Live Testing:** Includes an automated test suite and simulator (`gozvision_ring/ring_client.py` and `test_ring_pipeline.py`) runnable offline without requiring physical hardware.
 
-### Track 3: Google Gemini Multi-Turn & Multimodal Hackathons
-- **Real-Time Multimodal Audio & Vision:** Interfaces with Gemini Flash models for spatial understanding, reading assistance, and emergency visual triage.
-- **Ambient Clinical Scribe:** Real-time conversational dialogue parsing into standardized clinical SOAP schemas (Subjective, Objective, Assessment, Plan).
-- **Model Context Protocol (MCP):** Connects the Gemini agent to external tools:
-  - `query_clinic_knowledge_base`: Semantic RAG over ophthalmic clinical guidelines.
-  - `trigger_emergency_sos`: Automated dispatch for disoriented or injured low-vision users.
-  - `record_clinical_encounter`: Direct writes to PostgreSQL EHR records.
+### Mini Challenge 1: AWS Builder (Multi-Service Agentic Cloud Infrastructure)
+- **Zero-Downtime Serverless Containers:** Built and deployed on **Amazon ECS Fargate** (`gozvision-cluster`), auto-scaling with least-privilege IAM roles (`gozvision-ecs-execution-role`).
+- **Amazon Bedrock Multi-Service Pipeline:** Implemented in `gozvision_agent/aws_bedrock.py`, orchestrating Claude 3.5 Sonnet / Claude 3 Haiku / Amazon Nova models for clinical reasoning fallback.
+- **Global Edge Performance & Security:** Multi-region edge acceleration via **AWS CloudFront** (`d7icpdzxenshi.cloudfront.net`) providing TLS 1.3 SSL termination and streaming SSE passthrough.
+- **Automated Cloud CI/CD:** Built with **AWS CodeBuild** (`gozvision-container-builder`) compiling wheel artifacts and pushing to **Amazon ECR**.
+- **Frontend Delivery:** Deployed on **AWS Amplify Hosting** (`main.d1lr4zsb46he1m.amplifyapp.com`).
+
+### Mini Challenge 2: Open Source
+- **Public Open-Source Repository:** Hosted on GitHub under the permissive MIT License (`LICENSE`).
+- **Comprehensive Offline Verification:** Clean test suites covering the MCP server (`test_mcp.py`), Ring caretaking (`test_ring_pipeline.py`), AWS Bedrock (`test_aws_bedrock.py`), and computer vision (`test_cv_pipeline.py`).
+
+### Bonus Category: Friction Logs (+10% Judging Score)
+- Full technical friction log submitted in [`docs/FRICTION_LOGS.md`](file:///d:/pacy_labs/gozvision/docs/FRICTION_LOGS.md) and developer product feedback in [`docs/PRODUCT_FEEDBACK.md`](file:///d:/pacy_labs/gozvision/docs/PRODUCT_FEEDBACK.md).
+
+---
+
+## 5. Private Repository Reviewers (If Configured as Private)
+To share this repository with the Amazon judging and DevRel team, the following GitHub accounts must be added under `Settings > Collaborators`:
+- `chris-trag`
+- `knmeiss`
+- `giolaq`
+- `anishamalde`
+- `mosesroth`
+- `emersonsklar`
+- `testing@devpost.com`
 
 ---
 

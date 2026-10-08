@@ -30,6 +30,9 @@ from .tools import (
     execute_clinic_payout,
     handle_bachs_webhook,
     check_patient_recall_and_refills,
+    inspect_ring_doorstep_safety,
+    triage_ring_caretaker_event,
+    announce_ring_intercom_message,
 )
 from .scribe import draft_chart
 
@@ -41,8 +44,9 @@ root_agent = Agent(
         "medication safety lookups, drop adherence logging, low-vision statistics, "
         "clinic discovery, working hours lookup, appointment booking, doctor follow-ups, "
         "EHR chart note formatting, caregiver SOS alerts, optical dispensary checkout "
-        "session creation (Bachs), clinic balance enquiries, payout initiation, and "
-        "patient lifecycle annual exam recalls and drop refill checks."
+        "session creation (Bachs), clinic balance enquiries, payout initiation, "
+        "patient lifecycle annual exam recalls and drop refill checks, and "
+        "Ring smart doorbell/camera caretaking and doorstep accessibility hazard inspection."
     ),
     instruction="""You are the GozVision backend clinical agent. You support both low-vision
 accessibility patients and general eye clinic patients across the continuum of optometric care,
@@ -64,6 +68,9 @@ Your responsibilities:
 13. When a clinic operator asks about their payment balance or revenue, use get_clinic_balances.
 14. When a clinic operator wants to send funds to their bank account, use execute_clinic_payout with the destination_id and amount.
 15. When a patient asks when their next annual eye exam is due or if their eye drops need a refill, use check_patient_recall_and_refills.
+16. When checking if the doorstep or porch has tripping hazards or packages for a low-vision patient, use inspect_ring_doorstep_safety.
+17. When reviewing Ring doorbell or motion events for nighttime wandering or caregiver alerts, use triage_ring_caretaker_event.
+18. When broadcasting spoken audio or announcements over Ring Chime or connected speakers, use announce_ring_intercom_message.
 
 IMPORTANT:
 - Never diagnose conditions or prescribe treatment autonomously.
@@ -87,5 +94,8 @@ IMPORTANT:
         execute_clinic_payout,
         handle_bachs_webhook,
         check_patient_recall_and_refills,
+        inspect_ring_doorstep_safety,
+        triage_ring_caretaker_event,
+        announce_ring_intercom_message,
     ],
 )
