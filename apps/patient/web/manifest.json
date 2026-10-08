@@ -1,11 +1,12 @@
 {
-    "name": "patient_app",
-    "short_name": "patient_app",
-    "start_url": ".",
+    "name": "Goz Copilot — Visual AI Assistant",
+    "short_name": "Goz Copilot",
+    "start_url": "./",
+    "scope": "./",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#050806",
+    "theme_color": "#00FF87",
+    "description": "Goz — The empathetic AI copilot for low-vision patients.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

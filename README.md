@@ -12,7 +12,7 @@ the clinic and wrapped in the clinic workflow tools optometrists actually need.
 |---|---|---|
 | Who | Low-vision patients + their caregivers | Optometrists, clinic owners, staff |
 | What | Eyes-and-hands copilot: scene awareness, reading, UI navigation, SOS | Low Vision Hub, Front Desk, Scribe, Insights |
-| Surfaces | Flutter PWA + mobile | Flutter web |
+| Surfaces | Flutter PWA + Mobile (iOS/Android) | Flutter PWA + Desktop/Tablet Web |
 
 The platform thesis: **the clinic suite distributes the copilot; the copilot
 generates the between-visit adherence data no practice-management system has

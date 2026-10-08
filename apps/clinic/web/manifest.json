@@ -1,12 +1,13 @@
 {
-    "name": "clinic_app",
-    "short_name": "clinic_app",
-    "start_url": ".",
+    "name": "GozVision Clinic Suite",
+    "short_name": "Goz Clinic",
+    "start_url": "./",
+    "scope": "./",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#050806",
+    "theme_color": "#050806",
+    "description": "The practice platform for eye care clinics — Low Vision Hub, Front Desk, Scribe, and Insights.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
