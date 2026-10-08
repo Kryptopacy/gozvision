@@ -17,6 +17,8 @@ class GozAITheme {
   // SHARED FOUNDATION
   // ─────────────────────────────────────────────
   static const Color backgroundBlack = Color(0xFF000000);  // True matte black
+  static const Color backgroundPure  = backgroundBlack;
+  static const Color backgroundDark  = Color(0xFF050806);
   static const Color obsidian       = Color(0xFF050806);   // Pro dashboard bg
   static const Color textPrimary    = Color(0xFFFFFFFF);
   static const Color textSecondary  = Color(0xFF8A8A99);

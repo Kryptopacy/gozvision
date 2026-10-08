@@ -27,6 +27,11 @@ class HapticService {
     }
   }
 
+  /// Notification / Confirmation feedback
+  static Future<void> notification() async {
+    await tap();
+  }
+
   /// Strong single buzz — attention needed
   static Future<void> alert() async {
     if (kIsWeb) {

@@ -5,7 +5,7 @@ import 'package:copilot_core/copilot_core.dart';
 
 import '../core/app_config.dart';
 import '../core/theme.dart';
-import '../services/app_haptics.dart';
+import '../services/haptic_service.dart';
 
 /// VisionProfile: distinguishes low-vision patients from routine seeing patients.
 enum VisionProfile {
@@ -29,6 +29,8 @@ class ProfileService extends ChangeNotifier {
   bool get audioDescriptionsEnabled => _audioDescriptionsEnabled;
   bool get highContrastEnabled => _highContrastEnabled;
   bool get hapticFeedbackEnabled => _hapticFeedbackEnabled;
+
+  void setProfile(VisionProfile newProfile) => toggleProfile(newProfile);
 
   void toggleProfile(VisionProfile newProfile) {
     if (_profile == newProfile) return;
@@ -72,7 +74,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   int _systaneDosesTaken = 2;
 
   void _logDose(String medication) async {
-    AppHaptics.tap();
+    HapticService.tap();
     setState(() {
       if (medication.contains('Latanoprost')) {
         _latanoprostTaken = true;
