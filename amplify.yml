@@ -1,0 +1,29 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "=== GozVision Multi-Tenant AWS Amplify Build ==="
+        - FLUTTER_VERSION="3.29.0"
+        - FLUTTER_DIR="/tmp/flutter_sdk"
+        - if [ ! -d "$FLUTTER_DIR" ]; then mkdir -p "$FLUTTER_DIR" && curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" | tar -xJ -C "$FLUTTER_DIR" --strip-components=1; fi
+        - export PATH="$FLUTTER_DIR/bin:$PATH"
+        - flutter --version
+    build:
+      commands:
+        - export PATH="/tmp/flutter_sdk/bin:$PATH"
+        - cd apps/clinic && flutter pub get && flutter build web --release --base-href "/clinic/" && cd ../..
+        - cd apps/patient && flutter pub get && flutter build web --release --base-href "/patient/" && cd ../..
+        - rm -rf dist && mkdir -p dist/clinic dist/patient
+        - cp -r apps/website/* dist/
+        - cp -r apps/clinic/build/web/* dist/clinic/
+        - cp -r apps/patient/build/web/* dist/patient/
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - /tmp/flutter_sdk/**/*
+      - apps/clinic/.dart_tool/**/*
+      - apps/patient/.dart_tool/**/*
