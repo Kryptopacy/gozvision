@@ -27,8 +27,8 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   /// The patient a logged-in caregiver follows, from their user document's
   /// `assigned_patients` link. Null when unauthenticated or unassigned —
   /// the route's [CaregiverDashboard.patientUid] (the demo patient) is used
-  /// instead. See CONTEXT.md ("Patient").
   String? _assignedPatientUid;
+  List<String> _assignedPatientUids = [];
 
   @override
   void initState() {
@@ -47,11 +47,105 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
           .maybeSingle();
       final assigned = row?['assigned_patients'];
       if (assigned is List && assigned.isNotEmpty && mounted) {
-        setState(() => _assignedPatientUid = assigned.first as String);
+        setState(() {
+          _assignedPatientUids = List<String>.from(assigned);
+          _assignedPatientUid = _assignedPatientUids.first;
+        });
       }
     } catch (e) {
       debugPrint('CaregiverDashboard: Failed to resolve assigned patients: $e');
     }
+  }
+
+  Future<void> _linkNewPatient(String newId) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      final updatedList = List<String>.from(_assignedPatientUids);
+      if (!updatedList.contains(newId)) {
+        updatedList.add(newId);
+      }
+      await Supabase.instance.client.from('profiles').update({
+        'assigned_patients': updatedList,
+      }).eq('id', user.id);
+
+      setState(() {
+        _assignedPatientUids = updatedList;
+        _assignedPatientUid = newId;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✓ Successfully linked patient: $newId'),
+            backgroundColor: GozAITheme.malachite,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to link patient: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    }
+  }
+
+  void _showLinkPatientDialog(BuildContext context) {
+    final codeCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: GozAITheme.obsidian,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: GozAITheme.proBorder),
+        ),
+        title: Row(
+          children: const [
+            Icon(Icons.person_add_alt_1_rounded, color: GozAITheme.malachite),
+            SizedBox(width: 10),
+            Text('Link Patient / Client', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter the patient ID or invite token shared by your patient, family, or care agency (e.g. for professional aides caring for multiple patients):',
+              style: TextStyle(color: GozAITheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: 'Patient ID or Link Code',
+                hintText: 'e.g. demo_patient_001 or GOZ-84920',
+                prefixIcon: Icon(Icons.badge_outlined, color: GozAITheme.malachite),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel', style: TextStyle(color: GozAITheme.textSecondary)),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: GozAITheme.malachite, foregroundColor: Colors.black),
+            child: const Text('Link Patient', style: TextStyle(fontWeight: FontWeight.bold)),
+            onPressed: () async {
+              final newId = codeCtrl.text.trim();
+              if (newId.isEmpty) return;
+              Navigator.pop(ctx);
+              await _linkNewPatient(newId);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   /// The patient id all streams and writes in this dashboard use.
@@ -65,9 +159,37 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
         backgroundColor: GozAITheme.obsidian,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: Text(
-            'Caregiver Overview',
-            style: Theme.of(context).textTheme.labelLarge,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Caregiver Overview',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _assignedPatientUids.length > 1
+                      ? Colors.teal.withValues(alpha: 0.2)
+                      : GozAITheme.malachiteFaint,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: _assignedPatientUids.length > 1
+                        ? Colors.tealAccent.withValues(alpha: 0.4)
+                        : GozAITheme.malachite.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  _assignedPatientUids.length > 1 ? 'Employed / Multi-Client' : 'Family / Guardian',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: _assignedPatientUids.length > 1 ? Colors.tealAccent : GozAITheme.malachite,
+                  ),
+                ),
+              ),
+            ],
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -76,6 +198,41 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
             onPressed: () => context.go('/'),
             tooltip: 'Back to Home',
           ),
+          actions: [
+            if (_assignedPatientUids.length > 1) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: GozAITheme.proBorder),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: patientUid,
+                    dropdownColor: GozAITheme.obsidian,
+                    icon: const Icon(Icons.arrow_drop_down, color: GozAITheme.malachite),
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    items: _assignedPatientUids.map((id) => DropdownMenuItem(
+                      value: id,
+                      child: Text('Client: $id'),
+                    )).toList(),
+                    onChanged: (newId) {
+                      if (newId != null) setState(() => _assignedPatientUid = newId);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            IconButton(
+              icon: const Icon(Icons.person_add_alt_outlined, color: GozAITheme.malachite, size: 20),
+              tooltip: 'Link Another Patient (For Employed / Agency Aides)',
+              onPressed: () => _showLinkPatientDialog(context),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body: Container(
           decoration: BoxDecoration(
