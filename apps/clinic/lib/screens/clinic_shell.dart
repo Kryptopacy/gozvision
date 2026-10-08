@@ -10,6 +10,7 @@ import '../modules/low_vision_hub_page.dart';
 import '../modules/scribe_page.dart';
 import '../modules/clinic_chat_dialog.dart';
 import '../modules/doctor_reference_dialog.dart';
+import '../modules/doctor_profile_page.dart';
 
 /// The clinic suite shell: one rail, four modules. The Low Vision Hub is
 /// the flagship — it closes the referral → device fit → adherence loop.
@@ -63,6 +64,7 @@ class _ClinicShellState extends State<ClinicShell> {
       FrontDeskPage(),
       ScribePage(),
       InsightsPage(),
+      DoctorProfilePage(),
     ];
 
     return Scaffold(
@@ -92,12 +94,24 @@ class _ClinicShellState extends State<ClinicShell> {
               );
             },
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16, left: 8),
-            child: Center(
-              child: Text(
-                '${scope.displayName}  ·  ${scope.role}',
-                style: const TextStyle(color: ClinicTheme.textSecondary),
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () => setState(() => _index = 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 14,
+                    backgroundColor: ClinicTheme.malachiteFaint,
+                    child: const Icon(Icons.person, color: ClinicTheme.malachite, size: 16),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${scope.displayName}  ·  ${scope.role}',
+                    style: const TextStyle(color: ClinicTheme.textSecondary, fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
             ),
           ),
@@ -134,6 +148,11 @@ class _ClinicShellState extends State<ClinicShell> {
                 icon: Icon(Icons.insights_outlined),
                 selectedIcon: Icon(Icons.insights),
                 label: Text('Insights'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.badge_outlined),
+                selectedIcon: Icon(Icons.badge),
+                label: Text('Doctor Profile'),
               ),
             ],
           ),
