@@ -67,4 +67,5 @@ cd ../apps/clinic && flutter run -d chrome    # practitioner@gozvision.demo
 - **Flutter 3.47 stable / Dart 3.13** — PWA-first, mobile-ready
 - **Supabase**: Auth (RBAC), Postgres + RLS (multi-tenant clinic + copilot data), Realtime streams
 - **Agentic Engine & Vision Pipeline**: Python 3.13 backend / Cloud Run / AWS, OpenCV visual enhancement, MCP server & voice interface
-- **Embeddings**: `gemini-embedding-001`
+- **Embeddings**: `gemini-embedding-2` (multimodal clinical vector retrieval)
+- **Agent Models**: Gemini 3.8 Flash + AWS Bedrock (Claude 3.7 Sonnet / Amazon Nova Pro)

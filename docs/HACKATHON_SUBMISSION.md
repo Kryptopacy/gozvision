@@ -77,7 +77,7 @@ Visual: Doctor starts consultation. Live ambient audio waveform activates. Docto
         'Eleanor presents with worsening central scotoma in OS. Visual acuity 20/80. Plan: continue Timolol.'
         In 2 seconds, GozVision generates a structured, ICD-10 coded SOAP clinical note and logs it to Supabase.
 Voiceover:
-"Inside the clinic, GozVision acts as an ambient ophthalmic scribe powered by Gemini 2.5. 
+"Inside the clinic, GozVision acts as an ambient ophthalmic scribe powered by Gemini 3.8 Flash. 
 Doctors simply speak with their patients. GozVision captures the dialogue and synthesizes structured SOAP 
 notes, visual acuity metrics, and prescription refills directly into the clinical EHR.
 Clinic managers can oversee multi-branch facilities, license rosters, and optometric technician lanes 
@@ -127,7 +127,7 @@ Thank you."
 
 ### Mini Challenge 1: AWS Builder (Multi-Service Agentic Cloud Infrastructure)
 - **Zero-Downtime Serverless Containers:** Built and deployed on **Amazon ECS Fargate** (`gozvision-cluster`), auto-scaling with least-privilege IAM roles (`gozvision-ecs-execution-role`).
-- **Amazon Bedrock Multi-Service Pipeline:** Implemented in `gozvision_agent/aws_bedrock.py`, orchestrating Claude 3.5 Sonnet / Claude 3 Haiku / Amazon Nova models for clinical reasoning fallback.
+- **Amazon Bedrock & AgentCore Pipeline (2026 Edition):** Implemented in `gozvision_agent/aws_bedrock.py`, orchestrating Anthropic Claude 3.7 Sonnet (Hybrid Reasoning) and Amazon Nova Pro foundation models alongside AWS AgentCore / Strands SDK patterns for multi-agent clinical validation and failover.
 - **Global Edge Performance & Security:** Multi-region edge acceleration via **AWS CloudFront** (`d7icpdzxenshi.cloudfront.net`) providing TLS 1.3 SSL termination and streaming SSE passthrough.
 - **Automated Cloud CI/CD:** Built with **AWS CodeBuild** (`gozvision-container-builder`) compiling wheel artifacts and pushing to **Amazon ECR**.
 - **Frontend Delivery:** Deployed on **AWS Amplify Hosting** (`main.d1lr4zsb46he1m.amplifyapp.com`).

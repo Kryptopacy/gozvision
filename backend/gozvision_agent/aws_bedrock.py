@@ -1,11 +1,12 @@
-"""Amazon Bedrock Clinical Agent Orchestrator.
+"""Amazon Bedrock & AgentCore Clinical Orchestrator (2026 Edition).
 
-Provides AWS Bedrock multi-service agentic reasoning and fallback for clinical
-SOAP charts, low-vision triage, and drug interaction verification.
+Provides multi-service agentic reasoning, cross-model clinical validation, and fallback
+for clinical SOAP charts, low-vision triage, and drug interaction verification.
 
-Supported Bedrock Foundation Models:
-- anthropic.claude-3-5-sonnet-20241022-v2:0 / claude-3-haiku
-- amazon.nova-lite-v1:0
+Supported 2026 Bedrock Foundation Models:
+- anthropic.claude-3-7-sonnet-20250219-v1:0 (Claude 3.7 Sonnet with Hybrid Reasoning)
+- amazon.nova-pro-v1:0 / amazon.nova-premier-v1:0
+- AWS AgentCore & Strands SDK Multi-Agent Orchestration Workflow
 """
 import json
 import logging
@@ -16,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 class BedrockClinicalOrchestrator:
-    """Orchestrates clinical inference through AWS Bedrock Runtime."""
+    """Orchestrates clinical inference through AWS Bedrock Runtime & AgentCore."""
 
     def __init__(
         self,
         region_name: str = "us-east-1",
-        default_model_id: str = "anthropic.claude-3-haiku-20240307-v1:0",
+        default_model_id: str = "anthropic.claude-3-7-sonnet-20250219-v1:0",
     ):
         self.region_name = os.environ.get("AWS_DEFAULT_REGION", region_name)
         self.model_id = os.environ.get("BEDROCK_MODEL_ID", default_model_id)

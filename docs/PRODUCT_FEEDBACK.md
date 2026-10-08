@@ -18,8 +18,8 @@
    * Used for global SSL termination (TLS 1.3), sub-second dynamic API routing, and eliminating browser mixed-content restrictions for the Flutter PWAs.
 5. **AWS Amplify Hosting:**
    * Used for global CDN hosting of the Flutter Web Patient and Clinic Suite PWAs with custom single-page app rewrites.
-6. **Amazon Bedrock Runtime (Claude 3.5 Sonnet / Claude 3 Haiku / Amazon Nova):**
-   * Used as the multi-service clinical fallback engine for complex ophthalmic chart synthesis and drug interaction queries.
+6. **Amazon Bedrock Runtime & AgentCore (Claude 3.7 Sonnet / Amazon Nova Pro / Strands SDK):**
+   * Used as the multi-service clinical fallback engine and cross-agent orchestrator for complex ophthalmic chart synthesis and drug interaction queries.
 
 ---
 
