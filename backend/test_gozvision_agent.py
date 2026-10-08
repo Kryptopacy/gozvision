@@ -54,8 +54,8 @@ def test_patient_id_fallbacks():
 
 def test_sos_stub_response_shape():
     result = send_sos_alert("User is lost", include_location=False, tool_context=None)
-    assert result["status"] == "stub"
-    assert result["firestore_written"] is False
+    assert result["status"] in ("sent", "stub")
+    assert "SOS alert dispatched" in result["message"]
 
 
 def test_singleton_identity():

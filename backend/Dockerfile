@@ -8,6 +8,8 @@ RUN pip install uv
 # Copy project files
 COPY pyproject.toml .
 COPY gozvision_agent/ gozvision_agent/
+COPY gozvision_mcp/ gozvision_mcp/
+COPY gozvision_vision/ gozvision_vision/
 
 # Install dependencies with uv
 RUN uv pip install --system .

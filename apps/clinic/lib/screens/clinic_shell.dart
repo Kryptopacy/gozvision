@@ -11,6 +11,7 @@ import '../modules/scribe_page.dart';
 import '../modules/clinic_chat_dialog.dart';
 import '../modules/doctor_reference_dialog.dart';
 import '../modules/doctor_profile_page.dart';
+import '../modules/clinic_directory_page.dart';
 
 /// The clinic suite shell: one rail, four modules. The Low Vision Hub is
 /// the flagship — it closes the referral → device fit → adherence loop.
@@ -65,6 +66,7 @@ class _ClinicShellState extends State<ClinicShell> {
       ScribePage(),
       InsightsPage(),
       DoctorProfilePage(),
+      ClinicDirectoryPage(),
     ];
 
     return Scaffold(
@@ -153,6 +155,11 @@ class _ClinicShellState extends State<ClinicShell> {
                 icon: Icon(Icons.badge_outlined),
                 selectedIcon: Icon(Icons.badge),
                 label: Text('Doctor Profile'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.domain_outlined),
+                selectedIcon: Icon(Icons.domain),
+                label: Text('Clinic Directory'),
               ),
             ],
           ),

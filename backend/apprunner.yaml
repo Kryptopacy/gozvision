@@ -1,0 +1,12 @@
+version: 1.0
+runtime: python3
+build:
+  commands:
+    build:
+      - pip install uv
+      - uv pip install --system .
+run:
+  command: python -m adk api_server --port 8080 gozvision_agent
+  network:
+    port: 8080
+    env: PORT

@@ -83,7 +83,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       decoration: BoxDecoration(
         color: ClinicTheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.pad(Border.all(color: ClinicTheme.border)),
+        border: Border.all(color: ClinicTheme.border),
       ),
       child: Row(
         children: [
