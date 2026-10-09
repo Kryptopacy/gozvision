@@ -33,6 +33,9 @@ from .tools import (
     inspect_ring_doorstep_safety,
     triage_ring_caretaker_event,
     announce_ring_intercom_message,
+    execute_agentic_hazard_inspection,
+    execute_agentic_medication_guardrail,
+    get_cool_graviton_telemetry,
 )
 from .scribe import draft_chart
 
@@ -45,8 +48,10 @@ root_agent = Agent(
         "clinic discovery, working hours lookup, appointment booking, doctor follow-ups, "
         "EHR chart note formatting, caregiver SOS alerts, optical dispensary checkout "
         "session creation (Bachs), clinic balance enquiries, payout initiation, "
-        "patient lifecycle annual exam recalls and drop refill checks, and "
-        "Ring smart doorbell/camera caretaking and doorstep accessibility hazard inspection."
+        "patient lifecycle annual exam recalls and drop refill checks, "
+        "Ring smart doorbell/camera caretaking and doorstep accessibility hazard inspection, "
+        "OpenCV 5 Agentic Vision closed-loop perception and emergency escalation, and "
+        "AWS Graviton COOL performance acceleration telemetry."
     ),
     instruction="""You are the GozVision backend clinical agent. You support both low-vision
 accessibility patients and general eye clinic patients across the continuum of optometric care,
@@ -71,6 +76,9 @@ Your responsibilities:
 16. When checking if the doorstep or porch has tripping hazards or packages for a low-vision patient, use inspect_ring_doorstep_safety.
 17. When reviewing Ring doorbell or motion events for nighttime wandering or caregiver alerts, use triage_ring_caretaker_event.
 18. When broadcasting spoken audio or announcements over Ring Chime or connected speakers, use announce_ring_intercom_message.
+19. When executing an active perception-decision-action visual inspection loop with OpenCV 5, use execute_agentic_hazard_inspection.
+20. When verifying medication labels using OpenCV 5 closed-loop clinical guardrails, use execute_agentic_medication_guardrail.
+21. When querying AWS Graviton or COOL acceleration metrics, use get_cool_graviton_telemetry.
 
 IMPORTANT:
 - Never diagnose conditions or prescribe treatment autonomously.
@@ -97,5 +105,8 @@ IMPORTANT:
         inspect_ring_doorstep_safety,
         triage_ring_caretaker_event,
         announce_ring_intercom_message,
+        execute_agentic_hazard_inspection,
+        execute_agentic_medication_guardrail,
+        get_cool_graviton_telemetry,
     ],
 )

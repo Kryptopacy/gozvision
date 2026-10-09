@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Expanded(child: Divider(color: ClinicTheme.stroke)),
+                    const Expanded(child: Divider(color: ClinicTheme.border)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
@@ -135,14 +135,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const Expanded(child: Divider(color: ClinicTheme.stroke)),
+                    const Expanded(child: Divider(color: ClinicTheme.border)),
                   ],
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: _busy ? null : _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: ClinicTheme.stroke),
+                    side: const BorderSide(color: ClinicTheme.border),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: const Row(

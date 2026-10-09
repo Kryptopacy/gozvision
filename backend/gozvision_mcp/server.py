@@ -438,6 +438,58 @@ def ring_list_monitored_devices() -> dict[str, Any]:
     }
 
 
+# ============================================================================
+# OpenCV 5 & AWS Graviton COOL Agentic Vision Tools
+# ============================================================================
+
+
+@mcp.tool()
+def agentic_vision_hazard_loop(
+    patient_id: str = "demo_patient_001",
+    telemetry_stumble_detected: bool = False,
+    location: str = "Market St & 4th Ave, Curb Transition",
+) -> dict[str, Any]:
+    """Run OpenCV 5 Agentic Vision loop: edge hazard detection driving adaptive guidance & emergency SOS dispatch.
+
+    Args:
+        patient_id: Identifier of the low-vision patient.
+        telemetry_stumble_detected: Simulated IMU pitch threshold confirming a stumble/fall.
+        location: GPS or street intersection.
+    """
+    from gozvision_agent.tools import execute_agentic_hazard_inspection
+    return execute_agentic_hazard_inspection(
+        patient_id=patient_id,
+        telemetry_stumble_detected=telemetry_stumble_detected,
+        location=location,
+    )
+
+
+@mcp.tool()
+def agentic_vision_medication_guardrail(
+    ocr_extracted_text: str = "Alphagan P 0.15% (Brimonidine Tartrate)",
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Run OpenCV 5 closed-loop medication verification, halting conflicting drops and drafting clinician review.
+
+    Args:
+        ocr_extracted_text: Drug name localized by OpenCV morphological pipeline.
+        patient_id: Patient ID to check against active clinical records.
+    """
+    from gozvision_agent.tools import execute_agentic_medication_guardrail
+    return execute_agentic_medication_guardrail(
+        ocr_extracted_text=ocr_extracted_text,
+        patient_id=patient_id,
+    )
+
+
+@mcp.tool()
+def cool_graviton_telemetry() -> dict[str, Any]:
+    """Retrieve AWS Graviton and Cloud-Optimized OpenCV Library (COOL) runtime performance metrics."""
+    from gozvision_agent.tools import get_cool_graviton_telemetry
+    return get_cool_graviton_telemetry()
+
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="GozVision MCP Server (Alexa+ & Assistive Ecosystem)")

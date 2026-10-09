@@ -867,3 +867,68 @@ def announce_ring_intercom_message(
     from gozvision_ring.ring_client import ring_monitor
     return ring_monitor.broadcast_intercom_chime(message=message, device_id=device_id)
 
+
+def execute_agentic_hazard_inspection(
+    patient_id: str = "demo_patient_001",
+    telemetry_stumble_detected: bool = False,
+    location: str = "Transit Plaza & Curb Transition",
+) -> dict[str, Any]:
+    """Execute a multi-step Agentic Vision perception-decision-action loop with OpenCV 5.
+
+    Extracts edge salience from the optical forward corridor. If high-contrast hazards exist,
+    renders auditory guidance. If telemetry flags a stumble, autonomously escalates to an
+    emergency SOS dispatch with visual metrics.
+    """
+    import numpy as np
+    import cv2
+    from .agentic_vision import agentic_orchestrator
+
+    # Generate synthetic corridor frame with a curb edge
+    frame = np.full((480, 640, 3), 150, dtype=np.uint8)
+    frame[300:480, :] = 90
+    cv2.line(frame, (0, 300), (640, 300), (30, 30, 30), 4)
+
+    trace = agentic_orchestrator.execute_hazard_mitigation_workflow(
+        frame=frame,
+        patient_id=patient_id,
+        telemetry_stumble_detected=telemetry_stumble_detected,
+        simulated_location=location,
+    )
+    from dataclasses import asdict
+    return asdict(trace)
+
+
+def execute_agentic_medication_guardrail(
+    ocr_extracted_text: str = "Alphagan P 0.15% (Brimonidine Tartrate)",
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Execute Agentic Vision closed-loop medication verification.
+
+    Uses OpenCV 5 morphological text localization. Cross-references extracted drug names
+    against the patient's active clinic EHR chart. Halts unauthorized administration
+    and initiates a human-in-the-loop Scribe chart review if contraindicated.
+    """
+    import numpy as np
+    import cv2
+    from .agentic_vision import agentic_orchestrator
+
+    # Generate synthetic label frame
+    frame = np.full((480, 640, 3), 200, dtype=np.uint8)
+    cv2.rectangle(frame, (100, 150), (540, 320), (240, 240, 240), -1)
+    cv2.putText(frame, ocr_extracted_text, (120, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (20, 20, 20), 2)
+
+    trace = agentic_orchestrator.execute_medication_guardrail_workflow(
+        frame=frame,
+        ocr_extracted_text=ocr_extracted_text,
+        patient_id=patient_id,
+    )
+    from dataclasses import asdict
+    return asdict(trace)
+
+
+def get_cool_graviton_telemetry() -> dict[str, Any]:
+    """Retrieve AWS Graviton and Cloud-Optimized OpenCV Library (COOL) performance telemetry."""
+    from gozvision_vision.cool_pipeline import cool_pipeline
+    return cool_pipeline.get_system_telemetry()
+
+

@@ -18,6 +18,7 @@ class ClinicTheme {
   static const Color surfaceDark = Color(0xFF0A0F0C);
   static const Color surfaceLight = Color(0x20FFFFFF);
   static const Color border = Color(0x25FFFFFF);
+  static const Color stroke = border;
   static const Color hazardAlert = Color(0xFFFF3B30);
   static const Color warningAmber = Color(0xFFFFD60A);
 
