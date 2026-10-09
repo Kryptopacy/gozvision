@@ -742,7 +742,10 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 6,
                       children: [
                         const Text(
                           'Optical Dispensary & Practice Storefront',
@@ -752,7 +755,6 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(width: 12),
                         // Active Provider Badge
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
