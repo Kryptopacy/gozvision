@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
+import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 
 /// Front Desk — the schedule plus the recall/no-show outreach queue.
@@ -46,7 +47,10 @@ class FrontDeskPage extends StatelessWidget {
                 label: const Text('Run Recall Sweep Now'),
                 style: FilledButton.styleFrom(
                   backgroundColor: ClinicTheme.malachite,
-                  foregroundColor: Colors.black,
+                  foregroundColor: const Color(0xFF070B11),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
                 onPressed: () => _triggerSweep(context),
@@ -101,7 +105,7 @@ class FrontDeskPage extends StatelessWidget {
                                 },
                               ),
                               title: Text(
-                                  '${data['type'] ?? 'appointment'} — patient ${data['patient_id'] ?? '?'}'),
+                                  '${data['type'] ?? 'Appointment'} — ${PatientUtils.formatName(data['patient_id'])}'),
                               subtitle: Text(
                                   'status: $status${start != null ? '  ·  starts ${_fmt(start)}' : ''}'),
                             ),
@@ -152,8 +156,7 @@ class FrontDeskPage extends StatelessWidget {
                               const SizedBox(height: 12),
                               if (rows.isEmpty)
                                 const Text(
-                                  'Queue empty. Run the sweep:\n'
-                                  'python -m gozvision_agent.recall --clinic <id>',
+                                  'Queue clear. All scheduled patient reminders, no-show outreach, and annual recalls are up to date.',
                                   style: TextStyle(
                                       color: ClinicTheme.textSecondary, fontSize: 12),
                                 )

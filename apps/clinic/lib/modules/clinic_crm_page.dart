@@ -343,7 +343,13 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
         FilledButton.icon(
           icon: const Icon(Icons.bolt, size: 16),
           label: const Text('Run Automated Recall Sweep'),
-          style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
+          style: FilledButton.styleFrom(
+            backgroundColor: ClinicTheme.malachite,
+            foregroundColor: const Color(0xFF070B11),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -471,7 +477,10 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
                     FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: r['status'] == 'Contacted' ? ClinicTheme.surface : ClinicTheme.malachite,
-                        foregroundColor: r['status'] == 'Contacted' ? ClinicTheme.malachite : Colors.black,
+                        foregroundColor: r['status'] == 'Contacted' ? ClinicTheme.malachite : const Color(0xFF070B11),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w700),
                         visualDensity: VisualDensity.compact,
                       ),
                       onPressed: () => _dispatchRecall(r),

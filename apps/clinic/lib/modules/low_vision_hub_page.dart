@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
+import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 import 'clinic_chat_dialog.dart';
 
@@ -231,7 +232,7 @@ class _FitCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Patient ${fit.patientId}  ·  ${fit.status}  ·  signals: ${fit.recentSignalCount}',
+                    '${PatientUtils.formatName(fit.patientId)}  ·  ${fit.status}  ·  signals: ${fit.recentSignalCount}',
                     style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
                   ),
                 ],

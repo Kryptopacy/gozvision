@@ -64,111 +64,217 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 380),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Image.asset(
-                    'assets/gozvision_logo.png',
-                    height: 64,
-                    fit: BoxFit.contain,
+      backgroundColor: ClinicTheme.obsidian,
+      body: Stack(
+        children: [
+          // Subtle atmospheric background halo
+          Center(
+            child: IgnorePointer(
+              child: Container(
+                width: 600,
+                height: 600,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      ClinicTheme.malachite.withValues(alpha: 0.08),
+                      Colors.transparent,
+                    ],
+                    radius: 0.5,
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'GozVision',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 40),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0F17),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.65),
+                        blurRadius: 48,
+                        spreadRadius: 4,
+                        offset: const Offset(0, 16),
+                      ),
+                    ],
                   ),
-                ),
-                const Text(
-                  'Clinic Suite',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 15),
-                ),
-                const SizedBox(height: 36),
-                TextField(
-                  controller: _email,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _password,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  onSubmitted: (_) => _signIn(),
-                ),
-                const SizedBox(height: 24),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: ClinicTheme.hazardAlert),
-                    ),
-                  ),
-                FilledButton(
-                  onPressed: _busy ? null : _signIn,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: _busy
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign in'),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: ClinicTheme.border)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(
-                          color: ClinicTheme.textSecondary,
-                          fontSize: 12,
-                          letterSpacing: 1.2,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                          ),
+                          child: Image.asset(
+                            'assets/gozvision_logo.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                    const Expanded(child: Divider(color: ClinicTheme.border)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: _busy ? null : _signInWithGoogle,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: ClinicTheme.border),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.g_mobiledata_rounded, size: 28),
-                      SizedBox(width: 8),
-                      Text('Sign in with Google'),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'GozVision',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Enterprise Clinic Suite',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: ClinicTheme.textSecondary,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      TextField(
+                        controller: _email,
+                        decoration: InputDecoration(
+                          labelText: 'Work Email',
+                          hintText: 'dr.smith@clinic.com',
+                          labelStyle: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13),
+                          fillColor: const Color(0xFF06090F),
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: ClinicTheme.malachite, width: 1.5),
+                          ),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _password,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13),
+                          fillColor: const Color(0xFF06090F),
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: ClinicTheme.malachite, width: 1.5),
+                          ),
+                        ),
+                        obscureText: true,
+                        onSubmitted: (_) => _signIn(),
+                      ),
+                      const SizedBox(height: 22),
+                      if (_error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: ClinicTheme.hazardAlert, fontSize: 13),
+                          ),
+                        ),
+                      FilledButton(
+                        onPressed: _busy ? null : _signIn,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF08090D),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: _busy
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF08090D),
+                                ),
+                              )
+                            : const Text(
+                                'Sign In to Practice',
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                              ),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              'OR',
+                              style: TextStyle(
+                                color: ClinicTheme.textSecondary.withValues(alpha: 0.6),
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      OutlinedButton(
+                        onPressed: _busy ? null : _signInWithGoogle,
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.02),
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.g_mobiledata_rounded, size: 28),
+                            SizedBox(width: 8),
+                            Text(
+                              'Continue with Google Workspace',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

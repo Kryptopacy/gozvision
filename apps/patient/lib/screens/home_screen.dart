@@ -980,73 +980,82 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  /// Immersive ambient glowing orbs that react to Gemini state
+  /// Immersive ambient glowing atmosphere that reacts to Gemini state
   Widget _buildAmbientGlowBackground() {
-    return Consumer2<GeminiLiveService, AudioService>(
-      builder: (context, gemini, audio, _) {
-        final isActive = gemini.isConnected && audio.isRecording;
-        final isSpeaking = gemini.isModelSpeaking;
+    return IgnorePointer(
+      child: Consumer2<GeminiLiveService, AudioService>(
+        builder: (context, gemini, audio, _) {
+          final isActive = gemini.isConnected && audio.isRecording;
+          final isSpeaking = gemini.isModelSpeaking;
 
-        Color mainGlow;
-        if (isSpeaking) {
-          mainGlow = GozAITheme.speakingPulse;
-        } else if (isActive) {
-          mainGlow = GozAITheme.listeningPulse;
-        } else {
-          mainGlow = GozAITheme.primaryBlue;
-        }
+          Color mainGlow;
+          if (isSpeaking) {
+            mainGlow = GozAITheme.speakingPulse;
+          } else if (isActive) {
+            mainGlow = GozAITheme.listeningPulse;
+          } else {
+            mainGlow = GozAITheme.primaryBlue;
+          }
 
-        return Stack(
-          children: [
-            // Top Right Orb
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeInOutSine,
-              top: isActive ? 20 : -100,
-              right: isActive ? -20 : -150,
-              child: AnimatedContainer(
+          final topAlpha = isSpeaking ? 0.20 : (isActive ? 0.14 : 0.03);
+          final bottomAlpha = isSpeaking ? 0.18 : (isActive ? 0.10 : 0.02);
+
+          return Stack(
+            children: [
+              // Top Right Atmospheric Aura
+              AnimatedPositioned(
                 duration: const Duration(milliseconds: 1500),
-                width: 350,
-                height: 350,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: mainGlow.withValues(alpha: 0.15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: mainGlow.withValues(alpha: 0.2),
-                      blurRadius: 120,
-                      spreadRadius: 40,
-                    )
-                  ],
+                curve: Curves.easeInOutSine,
+                top: -120,
+                right: -120,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 1500),
+                  width: 500,
+                  height: 500,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      center: Alignment.center,
+                      radius: 0.5,
+                      colors: [
+                        mainGlow.withValues(alpha: topAlpha),
+                        mainGlow.withValues(alpha: topAlpha * 0.35),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                    ),
+                  ),
                 ),
               ),
-            ),
-            // Bottom Left Orb
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 2000),
-              curve: Curves.easeInOutSine,
-              bottom: isSpeaking ? 0 : -80,
-              left: isSpeaking ? -30 : -100,
-              child: AnimatedContainer(
+              // Bottom Left Atmospheric Aura
+              AnimatedPositioned(
                 duration: const Duration(milliseconds: 2000),
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: GozAITheme.accentCyan.withValues(alpha: isSpeaking ? 0.2 : 0.05),
-                  boxShadow: [
-                    BoxShadow(
-                      color: GozAITheme.accentCyan.withValues(alpha: isSpeaking ? 0.2 : 0.05),
-                      blurRadius: 100,
-                      spreadRadius: 30,
-                    )
-                  ],
+                curve: Curves.easeInOutSine,
+                bottom: -100,
+                left: -100,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 2000),
+                  width: 420,
+                  height: 420,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      center: Alignment.center,
+                      radius: 0.5,
+                      colors: [
+                        GozAITheme.accentCyan.withValues(alpha: bottomAlpha),
+                        GozAITheme.accentCyan.withValues(alpha: bottomAlpha * 0.3),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 

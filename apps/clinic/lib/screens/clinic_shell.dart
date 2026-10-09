@@ -142,7 +142,7 @@ class _ClinicShellState extends State<ClinicShell> {
             decoration: BoxDecoration(
               color: ClinicTheme.malachiteFaint,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: ClinicTheme.malachite.withOpacity(0.3)),
+              border: Border.all(color: ClinicTheme.malachite.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -157,7 +157,7 @@ class _ClinicShellState extends State<ClinicShell> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'TENANT: ${scope.clinicId?.toUpperCase() ?? "CLINIC"}',
+                  scope.clinicName.toUpperCase(),
                   style: const TextStyle(
                     color: ClinicTheme.malachite,
                     fontSize: 11,
@@ -170,7 +170,7 @@ class _ClinicShellState extends State<ClinicShell> {
           ),
           const SizedBox(width: 14),
           const Text(
-            'GozVision Practice Suite',
+            'Practice Suite',
             style: TextStyle(
               color: ClinicTheme.textPrimary,
               fontSize: 16,

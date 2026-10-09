@@ -9,6 +9,7 @@ typedef ClinicRows = List<Map<String, dynamic>>;
 /// what role they hold. Everything in the suite queries through this scope.
 class ClinicScope extends ChangeNotifier {
   String? clinicId;
+  String clinicName = 'GozVision Demo Eye Clinic';
   String role = '';
   String email = '';
   String displayName = '';
@@ -33,6 +34,20 @@ class ClinicScope extends ChangeNotifier {
       email = (data['email'] as String?) ?? '';
       role = (data['role'] as String?) ?? (email.toLowerCase() == 'kryptopacy@gmail.com' ? 'Developer' : 'Staff');
       displayName = (data['name'] as String?) ?? '';
+
+      if (clinicId != null) {
+        try {
+          final cRows = await Supabase.instance.client
+              .from('clinics')
+              .select('name')
+              .eq('id', clinicId!)
+              .limit(1);
+          if (cRows.isNotEmpty && cRows.first['name'] != null) {
+            clinicName = cRows.first['name'] as String;
+          }
+        } catch (_) {}
+      }
+
       resolved = true;
     } catch (e) {
       error = e.toString();

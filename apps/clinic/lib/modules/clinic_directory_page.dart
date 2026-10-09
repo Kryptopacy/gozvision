@@ -332,7 +332,10 @@ class _ClinicDirectoryPageState extends State<ClinicDirectoryPage> with SingleTi
               FilledButton.icon(
                 style: FilledButton.styleFrom(
                   backgroundColor: ClinicTheme.malachite,
-                  foregroundColor: Colors.black,
+                  foregroundColor: const Color(0xFF070B11),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 ),
                 icon: const Icon(Icons.add_moderator_outlined, size: 18),

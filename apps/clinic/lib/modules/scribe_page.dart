@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/clinic_theme.dart';
+import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 import 'doctor_reference_dialog.dart';
 
@@ -110,7 +111,7 @@ class _EncounterCard extends StatelessWidget {
                 Icon(icon, color: color),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text('$type — patient $patient',
+                  child: Text('$type — ${PatientUtils.formatName(patient)}',
                       style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
                 Text(label, style: TextStyle(color: color, fontSize: 12)),
