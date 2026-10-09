@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -232,8 +233,7 @@ Electronically signed via GozVision Ambient Scribe.''';
                   ),
                   child: SelectableText(
                     transcript,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
+                    style: GoogleFonts.jetbrainsMono(
                       fontSize: 13,
                       height: 1.5,
                       color: ClinicTheme.textPrimary,
@@ -336,8 +336,9 @@ class _SoapSectionItem extends StatelessWidget {
                                       style: TextStyle(color: ClinicTheme.textSecondary)),
                                   const SizedBox(height: 8),
                                   SelectableText(transcript,
-                                      style: const TextStyle(
-                                          fontFamily: 'monospace', fontSize: 13)),
+                                      style: GoogleFonts.jetbrainsMono(
+                                          fontSize: 13,
+                                          color: ClinicTheme.textPrimary)),
                                 ],
                               ),
                             ),

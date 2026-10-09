@@ -10,6 +10,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:copilot_core/copilot_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
 import '../services/audio_service.dart';
 import '../services/camera_service.dart';
@@ -155,23 +156,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       children: [
                         Text(
                           'Good morning',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
+                          style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
-                            fontWeight: FontWeight.w300,
+                            fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.70),
                             letterSpacing: 0.2,
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'GozVision Copilot',
-                          style: TextStyle(
-                            fontFamily: 'Syncopate',
-                            fontSize: 17,
+                          style: GoogleFonts.sora(
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            letterSpacing: 0.5,
+                            letterSpacing: -0.3,
                           ),
                         ),
                       ],
@@ -243,12 +242,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const SizedBox(width: 7),
                           Text(
                             isActive ? 'ACTIVE' : 'AI READY',
-                            style: TextStyle(
-                              fontFamily: 'Outfit',
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: isActive ? GozAITheme.malachite : GozAITheme.textSecondary,
+                              color: isActive ? GozAITheme.brandAccent : GozAITheme.textSecondary,
                             ),
                           ),
                         ],

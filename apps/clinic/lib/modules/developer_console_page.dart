@@ -453,8 +453,8 @@ class _DeveloperConsolePageState extends State<DeveloperConsolePage> with Single
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: const CircleAvatar(
-              backgroundColor: Color(0x2200FF87),
-              child: Icon(Icons.domain, color: ClinicTheme.malachite),
+              backgroundColor: ClinicTheme.brandAccentFaint,
+              child: Icon(Icons.domain, color: ClinicTheme.brandAccent),
             ),
             title: Text(c['name'] ?? 'Clinic', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             subtitle: Text('${c['branch'] ?? 'Main'} • Bachs Verified Account', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12)),

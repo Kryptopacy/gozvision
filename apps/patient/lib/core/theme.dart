@@ -1,85 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// GozAI Design System — Dual-Aesthetic Architecture
+/// GozVision Patient Copilot — Unified Design System
 ///
-/// [Patient App]     True Matte Black + High-Visibility Yellow
-///                   Brutalist-accessible. Maximum contrast. Zero ambiguity.
-///                   Designed for users with macular degeneration, cataracts,
-///                   and severe low vision. Thick borders. Massive touch targets.
-///
-/// [Pro Dashboards]  Obsidian + Bioluminescent Malachite Green
-///                   Sleek, premium "Clinical Intelligence" interface.
-///                   For sighted caregivers and doctors. Glassmorphism.
-///                   Data-dense but breathable. D&AD aesthetic.
+/// Strictly aligned with the GozVision design tokens:
+/// - True obsidian background: #08090C
+/// - Panels & cards: #131722 with 1px border rgba(255,255,255,0.08)
+/// - Precision optical sky azure: #38BDF8 (Primary optical accent)
+/// - Safety accent: #FFD600 (High-visibility tactile controls for low-vision)
+/// - Typography: Sora (Display & Headings) + Plus Jakarta Sans (Body & UI)
 class GozAITheme {
   // ─────────────────────────────────────────────
   // SHARED FOUNDATION
   // ─────────────────────────────────────────────
-  static const Color backgroundBlack = Color(0xFF000000);  // True matte black
+  static const Color backgroundBlack = Color(0xFF08090C);  // True Obsidian
   static const Color backgroundPure  = backgroundBlack;
-  static const Color backgroundDark  = Color(0xFF050806);
-  static const Color obsidian       = Color(0xFF050806);   // Pro dashboard bg
-  static const Color textPrimary    = Color(0xFFFFFFFF);
-  static const Color textSecondary  = Color(0xFF8A8A99);
-  static const Color hazardAlert    = Color(0xFFFF3B30);   // Danger red
+  static const Color backgroundDark  = Color(0xFF08090C);
+  static const Color obsidian        = Color(0xFF08090C);
+  static const Color obsidianElevated = Color(0xFF0E1117);
+  static const Color textPrimary     = Color(0xFFF8FAFC);
+  static const Color textSecondary   = Color(0xFF94A3B8);
+  static const Color textMuted       = Color(0xFF64748B);
+  static const Color hazardAlert     = Color(0xFFEF4444);
 
   // ─────────────────────────────────────────────
-  // PATIENT APP — High-Visibility Yellow
+  // PATIENT ACCESSIBILITY (Tactile & High-Contrast)
   // ─────────────────────────────────────────────
-  static const Color patientAccent  = Color(0xFFFFD600);   // Safety Yellow
-  static const Color patientBorder  = Color(0xFFFFD600);
-  static const Color patientSurface = Color(0xFF111100);   // Warm near-black
+  static const Color patientAccent   = Color(0xFFFFD600);  // Safety Yellow
+  static const Color patientBorder   = Color(0xFFFFD600);
+  static const Color patientSurface  = Color(0xFF131722);
 
   // ─────────────────────────────────────────────
-  // PRO DASHBOARDS & OPTICAL LENS PALETTE
+  // BRAND OPTICAL PALETTE (#38BDF8 - Precision Sky Azure)
   // ─────────────────────────────────────────────
-  static const Color malachite      = Color(0xFF00D2FF);   // Precision Optical Cyan
-  static const Color opticalCyan    = malachite;
-  static const Color malachiteDim   = Color(0xFF0284C7);   // Laser Azure
-  static const Color opticalAzure   = malachiteDim;
-  static const Color malachiteFaint = Color(0x1A00D2FF);   // Surface tint
-  static const Color proSurface     = Color(0x12FFFFFF);   // Glassmorphic panel
-  static const Color proBorder      = Color(0x25FFFFFF);
-  static const Color proBorderGlow  = Color(0x4000D2FF);   // Active border
+  static const Color brandAccent     = Color(0xFF38BDF8);  // Optical Sky Azure
+  static const Color brandAccentDim  = Color(0xFF0284C7);  // Laser Azure
+  static const Color brandAccentGlow = Color(0x3038BDF8);
+  static const Color brandAccentFaint= Color(0x1438BDF8);
 
-  // Legacy aliases kept for backward-compat across existing widgets
-  static const Color primaryBlue    = malachite;
-  static const Color accentCyan     = malachite;
-  static const Color electricPink   = patientAccent;
-  static const Color success        = malachite;
-  static const Color surfacePure    = proSurface;
-  static const Color surfaceGlass   = proSurface;
-  static const Color surfaceElevated = Color(0x0DFFFFFF);
-  static const Color borderSubtle   = proBorder;
-  static const Color borderHover    = proBorderGlow;
-  static const Color listeningPulse = patientAccent;
-  static const Color speakingPulse  = malachite;
+  // Backward-compatible aliases mapped to unified brand tokens
+  static const Color malachite       = brandAccent;
+  static const Color opticalCyan     = brandAccent;
+  static const Color malachiteDim    = brandAccentDim;
+  static const Color opticalAzure    = brandAccentDim;
+  static const Color malachiteFaint  = brandAccentFaint;
+  static const Color primaryBlue     = brandAccent;
+  static const Color accentCyan      = brandAccent;
+  static const Color electricPink    = brandAccent;
+  static const Color success         = Color(0xFF10B981);
+
+  static const Color proSurface      = Color(0xFF131722);
+  static const Color proBorder       = Color(0x14FFFFFF);
+  static const Color proBorderGlow   = Color(0x4038BDF8);
+
+  static const Color surfacePure     = proSurface;
+  static const Color surfaceGlass    = proSurface;
+  static const Color surfaceElevated = Color(0xFF0E1117);
+  static const Color borderSubtle    = proBorder;
+  static const Color borderHover     = proBorderGlow;
+  static const Color listeningPulse  = patientAccent;
+  static const Color speakingPulse   = brandAccent;
 
   // ─────────────────────────────────────────────
-  // PATIENT APP THEME
+  // THEMES
   // ─────────────────────────────────────────────
   static ThemeData get patientTheme => _buildTheme(
     bg: backgroundBlack,
-    primary: patientAccent,
+    primary: brandAccent,
     secondary: textPrimary,
   );
 
-  // ─────────────────────────────────────────────
-  // PRO DASHBOARD THEME (caregiver, doctor)
-  // ─────────────────────────────────────────────
   static ThemeData get proTheme => _buildTheme(
     bg: obsidian,
-    primary: malachite,
-    secondary: malachiteDim,
+    primary: brandAccent,
+    secondary: brandAccentDim,
   );
 
-  // Main entry point — for MaterialApp.theme
   static ThemeData get darkTheme => patientTheme;
 
-  // ─────────────────────────────────────────────
-  // INTERNAL BUILDER
-  // ─────────────────────────────────────────────
   static ThemeData _buildTheme({
     required Color bg,
     required Color primary,
@@ -94,55 +92,55 @@ class GozAITheme {
       colorScheme: ColorScheme.dark(
         primary: primary,
         secondary: secondary,
-        surface: const Color(0x1AFFFFFF),
+        surface: const Color(0xFF131722),
         error: hazardAlert,
-        onPrimary: Colors.black,
-        onSecondary: Colors.black,
+        onPrimary: obsidian,
+        onSecondary: obsidian,
         onSurface: textPrimary,
       ),
     );
 
-    // Typography: Syncopate for display gravitas, Outfit for body legibility
-    final displayFont = GoogleFonts.syncopateTextTheme(baseTheme.textTheme);
-    final bodyFont    = GoogleFonts.outfitTextTheme(baseTheme.textTheme);
+    // Premium Typography: Sora for display & headings, Plus Jakarta Sans for body
+    final displayFont = GoogleFonts.soraTextTheme(baseTheme.textTheme);
+    final bodyFont    = GoogleFonts.plusJakartaSansTextTheme(baseTheme.textTheme);
 
     final textTheme = bodyFont.copyWith(
       displayLarge: displayFont.displayLarge?.copyWith(
-        fontSize: 48,
-        fontWeight: FontWeight.w900,
-        color: textPrimary,
-        letterSpacing: -1.5,
-        height: 1.1,
-      ),
-      headlineMedium: displayFont.headlineMedium?.copyWith(
-        fontSize: 28,
+        fontSize: 44,
         fontWeight: FontWeight.w800,
         color: textPrimary,
-        letterSpacing: -0.5,
+        letterSpacing: -1.0,
+        height: 1.15,
+      ),
+      headlineMedium: displayFont.headlineMedium?.copyWith(
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+        color: textPrimary,
+        letterSpacing: -0.4,
       ),
       titleLarge: displayFont.titleLarge?.copyWith(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: textPrimary,
-        letterSpacing: 1.0,
+        letterSpacing: -0.2,
       ),
       bodyLarge: bodyFont.bodyLarge?.copyWith(
-        fontSize: 18,
-        fontWeight: FontWeight.w300,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
         color: textPrimary,
-        height: 1.6,
+        height: 1.55,
       ),
       bodyMedium: bodyFont.bodyMedium?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w300,
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
         color: textSecondary,
         height: 1.5,
       ),
       labelLarge: bodyFont.labelLarge?.copyWith(
-        fontSize: 14,
-        fontWeight: FontWeight.w800,
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
         color: textPrimary,
-        letterSpacing: 2.0,
+        letterSpacing: 0.3,
       ),
     );
 
@@ -152,25 +150,25 @@ class GozAITheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: Colors.black,
+          foregroundColor: obsidian,
           elevation: 0,
-          minimumSize: const Size(double.infinity, 64),
+          minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: bodyFont.labelLarge?.copyWith(
-            fontSize: 17,
+            fontSize: 15,
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
+            letterSpacing: 0.3,
           ),
         ),
       ),
       cardTheme: CardThemeData(
-        color: const Color(0x0DFFFFFF),
+        color: const Color(0xFF131722),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: primary.withValues(alpha: 0.2), width: 1),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0x14FFFFFF), width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -180,15 +178,15 @@ class GozAITheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: displayFont.titleLarge?.copyWith(
-          fontSize: 20,
+          fontSize: 19,
           fontWeight: FontWeight.w700,
           color: textPrimary,
-          letterSpacing: -0.5,
+          letterSpacing: -0.3,
         ),
       ),
       iconTheme: IconThemeData(color: primary, size: 24),
-      dividerTheme: DividerThemeData(
-        color: primary.withValues(alpha: 0.15),
+      dividerTheme: const DividerThemeData(
+        color: Color(0x14FFFFFF),
         thickness: 1,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: primary),
