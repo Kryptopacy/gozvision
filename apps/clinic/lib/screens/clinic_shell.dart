@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -49,7 +50,7 @@ class _ClinicShellState extends State<ClinicShell> {
       return const Scaffold(
         backgroundColor: ClinicTheme.obsidian,
         body: Center(
-          child: CircularProgressIndicator(color: ClinicTheme.malachite),
+          child: CircularProgressIndicator(color: ClinicTheme.brandAccent),
         ),
       );
     }
@@ -83,7 +84,7 @@ class _ClinicShellState extends State<ClinicShell> {
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
-                  style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
+                  style: FilledButton.styleFrom(backgroundColor: ClinicTheme.brandAccent, foregroundColor: ClinicTheme.obsidian),
                   icon: const Icon(Icons.logout, size: 16),
                   label: const Text('Sign Out'),
                   onPressed: () => Supabase.instance.client.auth.signOut(),
@@ -109,20 +110,28 @@ class _ClinicShellState extends State<ClinicShell> {
 
     return Scaffold(
       backgroundColor: ClinicTheme.obsidian,
-      appBar: _buildTopUtilityBar(context, scope),
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Professional B2B Sidebar
+          // Professional Full-Height B2B Sidebar
           _buildSidebar(context, scope),
           const VerticalDivider(width: 1, thickness: 1, color: ClinicTheme.border),
-          // Main Clinical Module Content Area with smooth transition
+          // Main Clinical Module Content Area
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: KeyedSubtree(
-                key: ValueKey<int>(_index),
-                child: pages[_index],
-              ),
+            child: Column(
+              children: [
+                _buildContentHeader(context, scope),
+                const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(_index),
+                      child: pages[_index],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -130,153 +139,118 @@ class _ClinicShellState extends State<ClinicShell> {
     );
   }
 
-  PreferredSizeWidget _buildTopUtilityBar(BuildContext context, ClinicScope scope) {
-    return AppBar(
-      backgroundColor: ClinicTheme.obsidian,
-      elevation: 0,
-      titleSpacing: 20,
-      title: Row(
+  Widget _buildContentHeader(BuildContext context, ClinicScope scope) {
+    const titles = [
+      'Low Vision Hub',
+      'Front Desk',
+      'Scribe Studio',
+      'Practice Insights',
+      'Doctor Profile',
+      'Clinic Directory',
+      'Optical Dispensary',
+      'Developer Console',
+      'Patient Recall & CRM',
+    ];
+
+    final currentTitle = (_index >= 0 && _index < titles.length) ? titles[_index] : 'Practice Suite';
+
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      color: ClinicTheme.obsidian,
+      child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: ClinicTheme.malachiteFaint,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: ClinicTheme.malachite.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: ClinicTheme.malachite,
+          // Executive Breadcrumb Trail
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Practice Suite',
+                style: GoogleFonts.plusJakartaSans(
+                  color: ClinicTheme.textMuted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '/',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: ClinicTheme.textMuted.withValues(alpha: 0.5),
+                    fontSize: 13,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  scope.clinicName.toUpperCase(),
-                  style: const TextStyle(
-                    color: ClinicTheme.malachite,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
+              ),
+              Text(
+                currentTitle,
+                style: GoogleFonts.sora(
+                  color: ClinicTheme.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          const Text(
-            'Practice Suite',
-            style: TextStyle(
-              color: ClinicTheme.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+          const Spacer(),
+          // Clinical Copilot RAG Guidelines Button
+          FilledButton.tonalIcon(
+            style: FilledButton.styleFrom(
+              backgroundColor: ClinicTheme.cardBackground,
+              foregroundColor: ClinicTheme.brandAccent,
+              side: const BorderSide(color: ClinicTheme.border),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
+            icon: const Icon(Icons.auto_stories_outlined, size: 16),
+            label: Text(
+              'Clinical Copilot RAG',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            onPressed: () => DoctorReferenceDialog.show(context),
+          ),
+          const SizedBox(width: 10),
+          // In-App Care Thread Chat Button
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: ClinicTheme.cardBackground,
+              side: const BorderSide(color: ClinicTheme.border),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            icon: const Badge(
+              backgroundColor: ClinicTheme.brandAccent,
+              smallSize: 7,
+              child: Icon(Icons.chat_bubble_outline_rounded, color: ClinicTheme.textSecondary, size: 18),
+            ),
+            tooltip: 'In-App Care Threads (Active)',
+            onPressed: () {
+              ClinicChatDialog.show(
+                context,
+                patientId: 'demo_patient_001',
+                patientName: 'Eleanor Vance (AMD Trial)',
+              );
+            },
           ),
         ],
       ),
-      actions: [
-        // Clinical Copilot RAG Guidelines Button
-        FilledButton.tonalIcon(
-          style: FilledButton.styleFrom(
-            backgroundColor: ClinicTheme.cardBackground,
-            foregroundColor: ClinicTheme.malachite,
-            side: const BorderSide(color: ClinicTheme.border),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          ),
-          icon: const Icon(Icons.menu_book_outlined, size: 16),
-          label: const Text('Clinical Copilot RAG', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-          onPressed: () => DoctorReferenceDialog.show(context),
-        ),
-        const SizedBox(width: 10),
-        // In-App Care Thread Chat
-        IconButton(
-          icon: const Badge(
-            backgroundColor: ClinicTheme.malachite,
-            smallSize: 8,
-            child: Icon(Icons.chat_bubble_outline_rounded, color: ClinicTheme.textPrimary, size: 20),
-          ),
-          tooltip: 'In-App Care Threads (Active)',
-          onPressed: () {
-            ClinicChatDialog.show(
-              context,
-              patientId: 'demo_patient_001',
-              patientName: 'Eleanor Vance (AMD Trial)',
-            );
-          },
-        ),
-        const SizedBox(width: 6),
-        // Practitioner Profile Pill
-        InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => setState(() => _index = 4),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: ClinicTheme.cardBackground,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: ClinicTheme.border),
-            ),
-            child: Row(
-              children: [
-                const CircleAvatar(
-                  radius: 12,
-                  backgroundColor: ClinicTheme.malachiteFaint,
-                  child: Icon(Icons.person, color: ClinicTheme.malachite, size: 14),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      scope.displayName,
-                      style: const TextStyle(
-                        color: ClinicTheme.textPrimary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      scope.role.toUpperCase(),
-                      style: const TextStyle(
-                        color: ClinicTheme.malachiteDim,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        IconButton(
-          icon: const Icon(Icons.logout_rounded, color: ClinicTheme.textSecondary, size: 19),
-          tooltip: 'Sign Out',
-          onPressed: () => Supabase.instance.client.auth.signOut(),
-        ),
-        const SizedBox(width: 14),
-      ],
     );
   }
 
   Widget _buildSidebar(BuildContext context, ClinicScope scope) {
     return Container(
-      width: 230,
+      width: 256,
       color: ClinicTheme.obsidian,
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Sidebar Practice Brand
           Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 18),
+            padding: const EdgeInsets.only(left: 6, bottom: 16),
             child: Row(
               children: [
                 ClipRRect(
@@ -289,13 +263,63 @@ class _ClinicShellState extends State<ClinicShell> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'GozVision',
-                  style: TextStyle(
+                  style: GoogleFonts.sora(
                     color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    letterSpacing: -0.3,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Workspace Practice Card
+          Container(
+            margin: const EdgeInsets.only(bottom: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: ClinicTheme.cardBackground,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.brandAccentFaint,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.domain_rounded, color: ClinicTheme.brandAccent, size: 14),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        scope.clinicName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: ClinicTheme.textPrimary,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Verified Clinic Branch',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: ClinicTheme.textMuted,
+                          fontSize: 9.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -308,7 +332,7 @@ class _ClinicShellState extends State<ClinicShell> {
               child: Text(
                 'PLATFORM ROOT',
                 style: TextStyle(
-                  color: ClinicTheme.malachite,
+                  color: ClinicTheme.brandAccent,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -321,7 +345,7 @@ class _ClinicShellState extends State<ClinicShell> {
               activeIcon: Icons.terminal,
               label: 'Developer Console',
               badgeText: 'Root',
-              badgeColor: ClinicTheme.malachite,
+              badgeColor: ClinicTheme.brandAccent,
             ),
             const SizedBox(height: 16),
           ],
@@ -346,7 +370,7 @@ class _ClinicShellState extends State<ClinicShell> {
               activeIcon: Icons.visibility,
               label: 'Low Vision Hub',
               badgeText: 'Live',
-              badgeColor: ClinicTheme.malachite,
+              badgeColor: ClinicTheme.brandAccent,
             ),
           ],
           _buildNavItem(
@@ -420,7 +444,7 @@ class _ClinicShellState extends State<ClinicShell> {
             activeIcon: Icons.storefront_rounded,
             label: 'Optical Dispensary',
             badgeText: 'Bachs',
-            badgeColor: ClinicTheme.malachite,
+            badgeColor: ClinicTheme.brandAccent,
           ),
 
           const SizedBox(height: 16),
@@ -442,35 +466,104 @@ class _ClinicShellState extends State<ClinicShell> {
             activeIcon: Icons.people_alt_rounded,
             label: 'Patient Recall & CRM',
             badgeText: 'Active',
-            badgeColor: ClinicTheme.malachite,
+            badgeColor: ClinicTheme.brandAccent,
           ),
 
           const Spacer(),
 
-          // Bottom Quick Status Indicator
+          // Practitioner Profile Card
           Container(
-            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
               color: ClinicTheme.cardBackground,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () => setState(() => _index = 4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: ClinicTheme.brandAccentFaint,
+                        child: const Icon(Icons.person, color: ClinicTheme.brandAccent, size: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              scope.displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: ClinicTheme.textPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              scope.role.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                color: ClinicTheme.brandAccentDim,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.logout_rounded, color: ClinicTheme.textMuted, size: 16),
+                        tooltip: 'Sign Out',
+                        onPressed: () => Supabase.instance.client.auth.signOut(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom EHR Status Indicator
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: ClinicTheme.cardBackground.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: ClinicTheme.border),
             ),
             child: Row(
               children: [
-                const Icon(Icons.shield_outlined, size: 16, color: ClinicTheme.malachite),
+                const Icon(Icons.shield_outlined, size: 14, color: ClinicTheme.brandAccent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Text(
-                        'EHR Sync Active',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                        'EHR Bridge Active',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: ClinicTheme.textPrimary,
+                        ),
                       ),
                       Text(
-                        'Epic & Eyefinity Bridge',
-                        style: TextStyle(fontSize: 9.5, color: ClinicTheme.textSecondary),
+                        'Epic & Eyefinity Sync',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 9,
+                          color: ClinicTheme.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -502,10 +595,10 @@ class _ClinicShellState extends State<ClinicShell> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
           decoration: BoxDecoration(
-            color: isSelected ? ClinicTheme.malachiteFaint : Colors.transparent,
+            color: isSelected ? ClinicTheme.brandAccentFaint : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? ClinicTheme.malachite.withOpacity(0.3) : Colors.transparent,
+              color: isSelected ? ClinicTheme.brandAccent.withValues(alpha: 0.3) : Colors.transparent,
             ),
           ),
           child: Row(
@@ -513,13 +606,13 @@ class _ClinicShellState extends State<ClinicShell> {
               Icon(
                 isSelected ? activeIcon : icon,
                 size: 19,
-                color: isSelected ? ClinicTheme.malachite : ClinicTheme.textSecondary,
+                color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.textSecondary,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected ? Colors.white : ClinicTheme.textSecondary,
@@ -530,18 +623,18 @@ class _ClinicShellState extends State<ClinicShell> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: (badgeColor ?? ClinicTheme.malachite).withOpacity(0.15),
+                    color: (badgeColor ?? ClinicTheme.brandAccent).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: (badgeColor ?? ClinicTheme.malachite).withOpacity(0.4),
+                      color: (badgeColor ?? ClinicTheme.brandAccent).withValues(alpha: 0.4),
                     ),
                   ),
                   child: Text(
                     badgeText,
-                    style: TextStyle(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w800,
-                      color: badgeColor ?? ClinicTheme.malachite,
+                      color: badgeColor ?? ClinicTheme.brandAccent,
                     ),
                   ),
                 ),

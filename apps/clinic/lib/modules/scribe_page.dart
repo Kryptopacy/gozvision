@@ -30,20 +30,9 @@ class ScribePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Scribe', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.menu_book, color: ClinicTheme.malachite, size: 16),
-                label: const Text('Clinical Quick-Reference', style: TextStyle(color: ClinicTheme.malachite)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: ClinicTheme.malachite),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                ),
-                onPressed: () => DoctorReferenceDialog.show(context),
-              ),
-            ],
+          const Text(
+            'Scribe Studio',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -0.4),
           ),
           const Text(
             'Ambient drafts from exam conversations. Review, then mark reviewed — '

@@ -646,15 +646,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           colors: [
                             if (isSpeaking) ...[
                               GozAITheme.speakingPulse,
-                              const Color(0xFF003818),
+                              const Color(0xFF024466),
                               GozAITheme.backgroundBlack,
                             ] else if (isActive) ...[
                               GozAITheme.listeningPulse,
-                              const Color(0xFF383000),
+                              const Color(0xFF382E00),
                               GozAITheme.backgroundBlack,
                             ] else ...[
-                              const Color(0xFF16251C),
-                              const Color(0xFF09120C),
+                              const Color(0xFF131722),
+                              const Color(0xFF0E1117),
                               GozAITheme.backgroundBlack,
                             ],
                           ],

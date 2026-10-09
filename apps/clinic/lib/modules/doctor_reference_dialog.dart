@@ -90,7 +90,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
               color: ClinicTheme.surfaceDark,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.menu_book, color: ClinicTheme.malachite),
+            child: const Icon(Icons.menu_book, color: ClinicTheme.brandAccent),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -108,7 +108,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                 ),
                 Text(
                   'Evidence-based optometric guidelines • RAG dynamic knowledge base',
-                  style: TextStyle(fontSize: 11, color: ClinicTheme.malachite),
+                  style: TextStyle(fontSize: 11, color: ClinicTheme.brandAccent),
                 ),
               ],
             ),
@@ -130,7 +130,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
               decoration: InputDecoration(
                 hintText: 'Search condition, drug contraindication, or guideline...',
                 hintStyle: const TextStyle(color: ClinicTheme.textSecondary),
-                prefixIcon: const Icon(Icons.search, color: ClinicTheme.malachite),
+                prefixIcon: const Icon(Icons.search, color: ClinicTheme.brandAccent),
                 suffixIcon: _filter.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, color: ClinicTheme.textSecondary),
@@ -159,7 +159,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: ClinicTheme.malachite, size: 16),
+                  const Icon(Icons.auto_awesome, color: ClinicTheme.brandAccent, size: 16),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -211,7 +211,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: ClinicTheme.malachite.withValues(alpha: 0.15),
+                                      color: ClinicTheme.brandAccent.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -219,7 +219,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: ClinicTheme.malachite,
+                                        color: ClinicTheme.brandAccent,
                                       ),
                                     ),
                                   ),
@@ -244,14 +244,14 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                               const SizedBox(height: 6),
                               Row(
                                 children: [
-                                  const Icon(Icons.verified_outlined, size: 12, color: ClinicTheme.malachite),
+                                  const Icon(Icons.verified_outlined, size: 12, color: ClinicTheme.brandAccent),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       'Source: ${item['source']}',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: ClinicTheme.malachite.withValues(alpha: 0.8),
+                                        color: ClinicTheme.brandAccent.withValues(alpha: 0.8),
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
@@ -270,7 +270,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close', style: TextStyle(color: ClinicTheme.malachite)),
+          child: const Text('Close', style: TextStyle(color: ClinicTheme.brandAccent)),
         ),
       ],
     );

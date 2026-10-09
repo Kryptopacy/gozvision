@@ -53,7 +53,7 @@ class _ClinicChatDialogState extends State<ClinicChatDialog> {
         children: [
           const CircleAvatar(
             backgroundColor: ClinicTheme.surfaceDark,
-            child: Icon(Icons.person, color: ClinicTheme.malachite),
+            child: Icon(Icons.person, color: ClinicTheme.brandAccent),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -67,7 +67,7 @@ class _ClinicChatDialogState extends State<ClinicChatDialog> {
                 ),
                 const Text(
                   'Connected: Practitioner • Patient • Caregiver (Push & Email Active)',
-                  style: TextStyle(fontSize: 11, color: ClinicTheme.malachite),
+                  style: TextStyle(fontSize: 11, color: ClinicTheme.brandAccent),
                 ),
               ],
             ),
@@ -96,10 +96,10 @@ class _ClinicChatDialogState extends State<ClinicChatDialog> {
                       constraints: const BoxConstraints(maxWidth: 380),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isMe ? ClinicTheme.malachite.withOpacity(0.18) : ClinicTheme.surfaceDark,
+                        color: isMe ? ClinicTheme.brandAccent.withOpacity(0.18) : ClinicTheme.surfaceDark,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isMe ? ClinicTheme.malachite.withOpacity(0.4) : Colors.white10,
+                          color: isMe ? ClinicTheme.brandAccent.withOpacity(0.4) : Colors.white10,
                         ),
                       ),
                       child: Column(
@@ -110,7 +110,7 @@ class _ClinicChatDialogState extends State<ClinicChatDialog> {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: isMe ? ClinicTheme.malachite : Colors.amber,
+                              color: isMe ? ClinicTheme.brandAccent : Colors.amber,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -154,7 +154,7 @@ class _ClinicChatDialogState extends State<ClinicChatDialog> {
                 const SizedBox(width: 8),
                 IconButton.filled(
                   icon: const Icon(Icons.send, size: 18),
-                  style: IconButton.styleFrom(backgroundColor: ClinicTheme.malachite),
+                  style: IconButton.styleFrom(backgroundColor: ClinicTheme.brandAccent),
                   onPressed: _sendMessage,
                 ),
               ],
