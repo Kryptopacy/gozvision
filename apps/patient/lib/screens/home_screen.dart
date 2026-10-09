@@ -259,10 +259,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         const SizedBox(height: 10),
-        // ── Existing flow (unchanged) ─────────────────────────────────────
         _buildStatusBar(),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         _buildHardwareStatusIndicators(),
+        const SizedBox(height: 14),
+        _buildSensoryPromptTicker(),
         const Spacer(flex: 1),
         _buildCentralButton(),
         const Spacer(flex: 1),
@@ -273,6 +274,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _buildModeSelector(),
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  /// Live rotating sensory guidance banner showing intelligent context
+  Widget _buildSensoryPromptTicker() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF131722).withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: GozAITheme.accentCyan.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: GozAITheme.accentCyan.withValues(alpha: 0.08),
+            blurRadius: 16,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: GozAITheme.accentCyan,
+              boxShadow: [
+                BoxShadow(
+                  color: GozAITheme.accentCyan,
+                  blurRadius: 6,
+                  spreadRadius: 1.5,
+                ),
+              ],
+            ),
+          )
+              .animate(onPlay: (c) => c.repeat())
+              .scaleXY(begin: 0.8, end: 1.3, duration: 800.ms, curve: Curves.easeInOut)
+              .then()
+              .scaleXY(begin: 1.3, end: 0.8, duration: 800.ms, curve: Curves.easeInOut),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'Sensory Copilot Active • Try saying: "Describe what is in front of me"',
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withValues(alpha: 0.9),
+                letterSpacing: 0.1,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -597,18 +655,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     // Outer diffuse breathing aura ring
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 600),
-                      width: isActive ? 240 : 200,
-                      height: isActive ? 240 : 200,
+                      width: isActive ? 240 : 210,
+                      height: isActive ? 240 : 210,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: primaryAccent.withValues(alpha: isActive ? 0.08 : 0.03),
+                        color: (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan)
+                            .withValues(alpha: isActive ? 0.12 : 0.08),
                         boxShadow: [
-                          if (isActive || isSpeaking)
-                            BoxShadow(
-                              color: primaryAccent.withValues(alpha: isSpeaking ? 0.45 : 0.28),
-                              blurRadius: isSpeaking ? 60 : 40,
-                              spreadRadius: isSpeaking ? 16 : 8,
-                            ),
+                          BoxShadow(
+                            color: (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan)
+                                .withValues(alpha: isSpeaking ? 0.45 : (isActive ? 0.35 : 0.22)),
+                            blurRadius: isSpeaking ? 60 : (isActive ? 45 : 36),
+                            spreadRadius: isSpeaking ? 16 : (isActive ? 10 : 4),
+                          ),
                         ],
                       ),
                     ),
@@ -620,10 +679,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         shape: BoxShape.circle,
                         gradient: SweepGradient(
                           colors: [
-                            primaryAccent.withValues(alpha: 0.8),
-                            primaryAccent.withValues(alpha: 0.1),
-                            primaryAccent.withValues(alpha: 0.6),
-                            primaryAccent.withValues(alpha: 0.8),
+                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.85),
+                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.2),
+                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.7),
+                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.85),
                           ],
                         ),
                       ),
@@ -650,11 +709,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               GozAITheme.backgroundBlack,
                             ] else if (isActive) ...[
                               GozAITheme.listeningPulse,
-                              const Color(0xFF382E00),
+                              const Color(0xFF02334D),
                               GozAITheme.backgroundBlack,
                             ] else ...[
-                              const Color(0xFF131722),
-                              const Color(0xFF0E1117),
+                              const Color(0xFF0284C7).withValues(alpha: 0.4),
+                              const Color(0xFF071926),
                               GozAITheme.backgroundBlack,
                             ],
                           ],
@@ -664,50 +723,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (isActive || isSpeaking) ...[
-                              // Dynamic audio waveform simulation
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  _buildWaveBar(12, 26, 400),
-                                  const SizedBox(width: 4),
-                                  _buildWaveBar(20, 44, 600),
-                                  const SizedBox(width: 4),
-                                  _buildWaveBar(30, 56, 500),
-                                  const SizedBox(width: 4),
-                                  _buildWaveBar(18, 38, 700),
-                                  const SizedBox(width: 4),
-                                  _buildWaveBar(10, 22, 450),
-                                ],
+                            // Dynamic audio waveform simulation (active or gentle standby pulse)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildWaveBar(isActive ? 12 : 6, isActive ? 26 : 14, 400),
+                                const SizedBox(width: 4),
+                                _buildWaveBar(isActive ? 20 : 10, isActive ? 44 : 22, 600),
+                                const SizedBox(width: 4),
+                                _buildWaveBar(isActive ? 30 : 16, isActive ? 56 : 32, 500),
+                                const SizedBox(width: 4),
+                                _buildWaveBar(isActive ? 18 : 8, isActive ? 38 : 20, 700),
+                                const SizedBox(width: 4),
+                                _buildWaveBar(isActive ? 10 : 5, isActive ? 22 : 12, 450),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              isSpeaking
+                                  ? 'SPEAKING'
+                                  : (isActive ? 'LISTENING' : 'TAP TO START'),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                                color: Colors.white,
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                isSpeaking ? 'SPEAKING' : 'LISTENING',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ] else ...[
-                              Icon(
-                                Icons.remove_red_eye_rounded,
-                                size: 52,
-                                color: GozAITheme.textPrimary,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'START GOZ',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                            ),
                           ],
                         ),
                       ),
@@ -807,9 +850,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 6),
             decoration: BoxDecoration(
-              color: GozAITheme.backgroundBlack,
+              color: const Color(0xFF131722).withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: effectiveColor.withValues(alpha: 0.35), width: 1.5),
+              border: Border.all(color: effectiveColor.withValues(alpha: 0.45), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: effectiveColor.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -995,11 +1045,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             mainGlow = GozAITheme.primaryBlue;
           }
 
-          final topAlpha = isSpeaking ? 0.20 : (isActive ? 0.14 : 0.03);
-          final bottomAlpha = isSpeaking ? 0.18 : (isActive ? 0.10 : 0.02);
+          final topAlpha = isSpeaking ? 0.25 : (isActive ? 0.18 : 0.12);
+          final bottomAlpha = isSpeaking ? 0.22 : (isActive ? 0.15 : 0.10);
 
           return Stack(
             children: [
+              // Central Atmospheric Ambient Core
+              Center(
+                child: Container(
+                  width: 550,
+                  height: 550,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      center: Alignment.center,
+                      radius: 0.5,
+                      colors: [
+                        mainGlow.withValues(alpha: isSpeaking ? 0.22 : (isActive ? 0.16 : 0.10)),
+                        mainGlow.withValues(alpha: 0.03),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                    ),
+                  ),
+                ),
+              ),
               // Top Right Atmospheric Aura
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 1500),

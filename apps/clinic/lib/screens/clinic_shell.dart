@@ -118,20 +118,33 @@ class _ClinicShellState extends State<ClinicShell> {
           const VerticalDivider(width: 1, thickness: 1, color: ClinicTheme.border),
           // Main Clinical Module Content Area
           Expanded(
-            child: Column(
-              children: [
-                _buildContentHeader(context, scope),
-                const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: KeyedSubtree(
-                      key: ValueKey<int>(_index),
-                      child: pages[_index],
+            child: Container(
+              decoration: const BoxDecoration(
+                color: ClinicTheme.obsidian,
+                gradient: RadialGradient(
+                  center: Alignment(0.4, -0.8),
+                  radius: 1.4,
+                  colors: [
+                    Color(0x1838BDF8),
+                    Color(0xFF08090C),
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  _buildContentHeader(context, scope),
+                  const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: KeyedSubtree(
+                        key: ValueKey<int>(_index),
+                        child: pages[_index],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
