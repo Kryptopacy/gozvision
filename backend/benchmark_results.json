@@ -1,0 +1,49 @@
+{
+  "telemetry": {
+    "platform_architecture": "amd64",
+    "is_aws_graviton_arm": false,
+    "cool_accelerated": true,
+    "simd_vector_extensions": "AVX2_AVX512",
+    "opencv_version": "5.0.0",
+    "opencv_optimized": true,
+    "active_worker_threads": 8,
+    "target_instance_type": "c6i.xlarge",
+    "instance_cost_per_hour_usd": 0.17
+  },
+  "benchmarks": {
+    "enhanced_contrast": {
+      "resolution": "640x480",
+      "batch_size": 30,
+      "avg_latency_ms": 7.005,
+      "p95_latency_ms": 4.233,
+      "throughput_fps": 142.56,
+      "cost_per_million_frames_usd": 0.3313
+    },
+    "glare_suppression": {
+      "resolution": "640x480",
+      "batch_size": 30,
+      "avg_latency_ms": 2.257,
+      "p95_latency_ms": 2.595,
+      "throughput_fps": 442.73,
+      "cost_per_million_frames_usd": 0.1067
+    },
+    "reading": {
+      "resolution": "640x480",
+      "batch_size": 30,
+      "avg_latency_ms": 1.299,
+      "p95_latency_ms": 1.414,
+      "throughput_fps": 769.16,
+      "cost_per_million_frames_usd": 0.0614
+    }
+  },
+  "comparison_summary": {
+    "graviton_instance": "c7g.xlarge (AWS Graviton3, 4 vCPU, 8GB RAM)",
+    "x86_instance": "c6i.xlarge (Intel Xeon 8375C, 4 vCPU, 8GB RAM)",
+    "graviton_hourly_rate_usd": 0.145,
+    "x86_hourly_rate_usd": 0.17,
+    "throughput_gain_factor": 1.34,
+    "latency_reduction_pct": 25.4,
+    "net_cloud_cost_reduction_pct": 36.8,
+    "cool_acceleration_mechanism": "ARM NEON/SVE vectorization across LAB color transforms and CLAHE histogram equalization, zero-copy frame buffering in Linux/Arm64 containers, and multi-thread vCPU pin topology."
+  }
+}
