@@ -1,0 +1,39 @@
+# GozVision AWS Graviton & Cloud-Optimized OpenCV (COOL) Container
+# Platform: linux/arm64 (AWS Graviton3/Graviton4 / Neoverse V1/V2)
+FROM --platform=linux/arm64 python:3.13-slim
+
+WORKDIR /app
+
+# Install system dependencies for OpenCV and ARM NEON acceleration
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libgl1 \
+    libglib2.0-0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for high-speed package management
+RUN pip install --no-cache-dir uv
+
+# Enable OpenCV COOL acceleration environment flags
+ENV OPENCV_COOL_ENABLED=1 \
+    OPENCV_FORBID_ONLY_PTHREADS_USAGE=1 \
+    PYTHONUNBUFFERED=1 \
+    AWS_INSTANCE_TYPE="c7g.xlarge" \
+    PORT=8080
+
+# Copy application code
+COPY backend/pyproject.toml ./pyproject.toml
+COPY backend/gozvision_agent/ ./gozvision_agent/
+COPY backend/gozvision_mcp/ ./gozvision_mcp/
+COPY backend/gozvision_vision/ ./gozvision_vision/
+COPY backend/gozvision_ring/ ./gozvision_ring/
+COPY backend/benchmark_cool_graviton.py ./benchmark_cool_graviton.py
+
+# Install project dependencies onto system Python
+RUN uv pip install --system .
+
+EXPOSE 8080
+
+# Launch GozVision ADK Server
+CMD ["adk", "api_server", "--host", "0.0.0.0", "--port", "8080", "gozvision_agent"]
