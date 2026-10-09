@@ -101,12 +101,6 @@
     font-weight: 700;
     letter-spacing: -0.02em;
   }
-  .brand-tag {
-    font-size: 11px; font-weight: 600; font-family: var(--font-mono);
-    color: var(--accent); background: var(--accent-faint);
-    padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);
-    margin-left: 2px;
-  }
   .nav-center {
     display: flex; align-items: center; gap: 32px;
   }
@@ -160,49 +154,89 @@
 
   /* Hero Section */
   header.hero {
-    padding: 96px 0 64px;
-    text-align: center;
     position: relative;
+    padding: 130px 0 90px;
+    text-align: center;
+    overflow: hidden;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .hero-tagline {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 5px 14px; border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--panel-border);
-    font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em;
-    color: var(--ink-secondary);
-    margin-bottom: 28px;
+  .hero-bg-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
-  .hero-tagline .dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--accent);
+  .hero-bg-image {
+    position: absolute;
+    inset: -30px;
+    background: url('assets/hero_optics_bg.jpg') center 42% / cover no-repeat;
+    opacity: 0.42;
+    filter: brightness(0.85) contrast(1.15) saturate(1.1);
+    animation: heroKenBurns 32s ease-in-out infinite alternate;
+    transform-origin: 50% 45%;
+  }
+  @keyframes heroKenBurns {
+    0% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.05) translateY(-8px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .hero-bg-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: 
+      radial-gradient(ellipse 65% 55% at 50% 45%, rgba(8, 9, 12, 0.35) 0%, rgba(8, 9, 12, 0.85) 75%, #08090c 100%),
+      linear-gradient(to bottom, rgba(8, 9, 12, 0.95) 0%, transparent 22%, transparent 70%, #08090c 100%);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 980px;
+    margin: 0 auto;
   }
   h1.hero-title {
-    font-size: clamp(38px, 5.8vw, 68px);
-    letter-spacing: -0.035em;
-    max-width: 20ch;
+    font-size: clamp(40px, 6vw, 72px);
+    letter-spacing: -0.04em;
+    max-width: 18ch;
     margin: 0 auto 24px;
-    line-height: 1.1;
+    line-height: 1.08;
     font-weight: 750;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
   }
   .hero-desc {
     color: var(--ink-secondary);
     font-size: clamp(16px, 1.8vw, 19px);
-    max-width: 60ch;
-    margin: 0 auto 36px;
+    max-width: 58ch;
+    margin: 0 auto 38px;
     font-weight: 400;
     line-height: 1.6;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
   }
   .hero-actions {
     display: flex; align-items: center; justify-content: center;
-    gap: 14px; flex-wrap: wrap; margin-bottom: 44px;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 48px;
   }
   .hero-metrics-pill {
     display: inline-flex; align-items: center; gap: 20px;
     padding: 10px 22px; border-radius: var(--radius-full);
-    background: var(--panel-glass); border: 1px solid var(--panel-border);
+    background: rgba(14, 17, 23, 0.7);
+    border: 1px solid var(--panel-border);
     font-size: 13px; color: var(--ink-secondary);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   }
   .hero-metrics-pill strong { color: var(--ink); font-weight: 600; }
   .hero-metrics-pill .sep { opacity: 0.25; }
@@ -579,7 +613,6 @@
     <a class="brand" href="#">
       <img src="assets/gozvision_lens.png" alt="GozVision" class="brand-logo-img" />
       <span class="brand-text">GozVision</span>
-      <span class="brand-tag">CLINICAL</span>
     </a>
     <div class="nav-center">
       <a href="#simulator">Live Copilot</a>
@@ -597,11 +630,12 @@
 <main>
   <!-- Hero Section -->
   <header class="hero">
-    <div class="wrap">
-      <div class="hero-tagline">
-        <span class="dot"></span>
-        October 2026 Clinical Intelligence · Ambient Scribe & Multimodal Copilot
-      </div>
+    <div class="hero-bg-backdrop">
+      <div class="hero-bg-image"></div>
+      <canvas id="heroCanvas" class="hero-canvas"></canvas>
+      <div class="hero-bg-gradient"></div>
+    </div>
+    <div class="wrap hero-content">
       <h1 class="hero-title">
         Clinical intelligence in the exam room.<br>Visual autonomy in everyday life.
       </h1>
@@ -1151,6 +1185,130 @@
     navigator.clipboard.writeText(getBriefText());
     alert('Project Brief copied to clipboard!');
   }
+
+  // ── High-Performance Optical Canvas Animation ──
+  (function initHeroCanvas() {
+    const canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = 0, height = 0;
+    let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let particles = [];
+    const PARTICLE_COUNT = 36;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (e.clientY <= rect.bottom + 100) {
+        mouse.targetX = (e.clientX - width / 2) * 0.08;
+        mouse.targetY = (e.clientY - height / 2) * 0.08;
+      }
+    });
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * (width || window.innerWidth),
+        y: Math.random() * (height || 600),
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: Math.random() * 2 + 1,
+        alpha: Math.random() * 0.45 + 0.2,
+        pulseSpeed: Math.random() * 0.02 + 0.01,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    let time = 0;
+    function render() {
+      time += 0.015;
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw subtle refractive caustic rays
+      ctx.save();
+      ctx.translate(width / 2 + mouse.x * 1.4, height * 0.45 + mouse.y * 1.4);
+      
+      const rayCount = 6;
+      for (let r = 0; r < rayCount; r++) {
+        const angle = (r / rayCount) * Math.PI * 2 + time * 0.05;
+        const rayLen = 220 + Math.sin(time + r) * 40;
+        const grad = ctx.createLinearGradient(0, 0, Math.cos(angle) * rayLen, Math.sin(angle) * rayLen);
+        grad.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
+        grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.03)');
+        grad.addColorStop(1, 'transparent');
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.8 + Math.sin(time * 2 + r) * 1.0;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(angle) * rayLen, Math.sin(angle) * rayLen);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Update & draw optical particles
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx + mouse.x * 0.01;
+        p.y += p.vy + mouse.y * 0.01;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        const currentAlpha = p.alpha * (0.6 + 0.4 * Math.sin(time * p.pulseSpeed * 60 + p.phase));
+
+        // Connect nearby particles with subtle caustic lines
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            const lineAlpha = (1 - dist / 100) * 0.16;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${lineAlpha})`;
+            ctx.lineWidth = 0.75;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        // Particle node glow
+        const radGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
+        radGrad.addColorStop(0, `rgba(56, 189, 248, ${currentAlpha})`);
+        radGrad.addColorStop(1, 'transparent');
+
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(240, 249, 255, ${currentAlpha * 1.2})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  })();
 </script>
 </body>
 </html>
