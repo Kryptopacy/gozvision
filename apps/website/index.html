@@ -284,25 +284,6 @@
   }
   .hero-metrics-pill strong { color: #ffffff; font-weight: 700; }
   .hero-metrics-pill .sep { opacity: 0.3; }
-  .hero-beacon {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #38bdf8;
-    position: relative;
-    box-shadow: 0 0 12px #38bdf8;
-    display: inline-block;
-  }
-  .hero-beacon::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 1.5px solid #38bdf8;
-    animation: beaconPulse 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-  }
-  @keyframes beaconPulse {
-    0% { transform: scale(0.6); opacity: 1; }
-    100% { transform: scale(2.4); opacity: 0; }
-  }
 
   /* Interactive Viewfinder Simulator */
   .interactive-sim-wrap {
@@ -700,10 +681,6 @@
       <div class="hero-bg-gradient"></div>
     </div>
     <div class="wrap hero-content">
-      <div class="hero-badge" style="display:inline-flex;align-items:center;gap:10px;padding:6px 18px;border-radius:var(--radius-full);background:rgba(14,17,23,0.78);border:1px solid rgba(56,189,248,0.35);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:24px;box-shadow:0 0 24px rgba(56,189,248,0.18);">
-        <span class="hero-beacon"></span>
-        <span style="font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:0.06em;color:var(--accent);text-transform:uppercase;">Next-Gen Vision AI & Autonomous Copilot</span>
-      </div>
       <h1 class="hero-title">
         Clinical intelligence in the exam room.<br>Visual autonomy in everyday life.
       </h1>
@@ -724,7 +701,6 @@
         </button>
       </div>
       <div class="hero-metrics-pill">
-        <span class="hero-beacon"></span>
         <span><strong>64% → 55%</strong> Referral Loss Repaired</span>
         <span class="sep">•</span>
         <span><strong>29%</strong> Device Abandonment Averted</span>
