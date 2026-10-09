@@ -843,6 +843,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         userId: uid,
         message: 'Patient requested immediate assistance via Copilot Emergency trigger',
         severity: 'critical',
+        target: 'caregiver_and_clinic',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

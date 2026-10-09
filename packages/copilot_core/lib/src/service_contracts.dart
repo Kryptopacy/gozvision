@@ -113,7 +113,7 @@ abstract class CopilotAlertSink {
     required String userId,
     required String message,
     required String severity,
-    required String target,
+    String target = 'caregiver',
   });
 }
 

@@ -49,6 +49,7 @@ class GozAITheme {
   static const Color electricPink   = patientAccent;
   static const Color success        = malachite;
   static const Color surfacePure    = proSurface;
+  static const Color surfaceGlass   = proSurface;
   static const Color surfaceElevated = Color(0x0DFFFFFF);
   static const Color borderSubtle   = proBorder;
   static const Color borderHover    = proBorderGlow;

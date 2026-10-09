@@ -28,7 +28,7 @@ class SosService implements CopilotAlertSink {
     required String userId,
     required String message,
     required String severity,
-    required String target,
+    String target = 'caregiver',
   }) async {
     try {
       // One current alert per patient (unique patient_id — upsert keeps the
