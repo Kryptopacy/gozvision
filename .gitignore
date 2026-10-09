@@ -27,6 +27,7 @@ coverage/
 app.env
 assets/app.env
 apps/*/assets/app.env
+!apps/*/assets/app.env
 backend/.env
 !.env.example
 !*.env.example

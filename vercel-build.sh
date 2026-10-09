@@ -27,6 +27,30 @@ mkdir -p dist/clinic dist/patient
 echo "[3/5] Deploying public website to / ..."
 cp -r apps/website/* dist/
 
+# 3.5 Ensure client asset configuration exists for Flutter copyAssets
+echo "[3.5/5] Ensuring client configuration assets exist..."
+mkdir -p apps/clinic/assets apps/patient/assets
+
+if [ ! -f "apps/clinic/assets/app.env" ]; then
+    echo "  -> Writing apps/clinic/assets/app.env..."
+    cat << 'EOF' > apps/clinic/assets/app.env
+SUPABASE_URL=https://zxvdcazzayuwgzpeabfc.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_sMWTt1A74hs3AEgQhyMQHg_aWAwL2lk
+ADK_BACKEND_URL=https://d7icpdzxenshi.cloudfront.net
+EOF
+fi
+
+if [ ! -f "apps/patient/assets/app.env" ]; then
+    echo "  -> Writing apps/patient/assets/app.env..."
+    cat << 'EOF' > apps/patient/assets/app.env
+ADK_BACKEND_URL=https://d7icpdzxenshi.cloudfront.net
+SUPABASE_URL=https://zxvdcazzayuwgzpeabfc.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_sMWTt1A74hs3AEgQhyMQHg_aWAwL2lk
+DEMO_PATIENT_EMAIL=demo-patient@gozvision.demo
+DEMO_PATIENT_PASSWORD=gozvision-demo
+EOF
+fi
+
 # 4. Resolve Dart/Flutter Workspace dependencies
 echo "[4/5] Resolving Flutter workspace dependencies..."
 flutter pub get
