@@ -73,19 +73,30 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Center(
+                  child: Image.asset(
+                    'assets/gozvision_logo.png',
+                    height: 64,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 const Text(
                   'GozVision',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: ClinicTheme.malachite,
-                    fontSize: 32,
+                    color: Colors.white,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const Text(
                   'Clinic Suite',
-                  style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 16),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 15),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 36),
                 TextField(
                   controller: _email,
                   decoration: const InputDecoration(labelText: 'Email'),

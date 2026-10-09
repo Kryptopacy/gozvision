@@ -279,21 +279,13 @@ class _ClinicShellState extends State<ClinicShell> {
             padding: const EdgeInsets.only(left: 8, bottom: 18),
             child: Row(
               children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: ClinicTheme.malachite,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ClinicTheme.malachite.withOpacity(0.3),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.remove_red_eye_rounded, size: 16, color: Colors.black),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/gozvision_lens.png',
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 const SizedBox(width: 10),

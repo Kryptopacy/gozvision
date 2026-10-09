@@ -25,3 +25,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/app.env
+    - assets/gozvision_logo.png
+    - assets/gozvision_lens.png
