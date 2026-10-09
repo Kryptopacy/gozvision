@@ -182,7 +182,7 @@ class _DeviceFitPanel extends StatelessWidget {
                 )
               : ListView.separated(
                   itemCount: rows.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
                     final fit = DeviceFitView.fromMap(rows[i]);
                     return _FitCard(fit: fit);

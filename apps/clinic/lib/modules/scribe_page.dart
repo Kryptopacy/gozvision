@@ -68,7 +68,7 @@ class ScribePage extends StatelessWidget {
                 }
                 return ListView.separated(
                   itemCount: rows.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) => _EncounterCard(row: rows[i]),
                 );
               },

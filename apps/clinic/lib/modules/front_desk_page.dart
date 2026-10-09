@@ -80,7 +80,7 @@ class FrontDeskPage extends StatelessWidget {
                       }
                       return ListView.separated(
                         itemCount: rows.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
                         itemBuilder: (context, i) {
                           final data = rows[i];
                           final status = (data['status'] as String?) ?? 'scheduled';
@@ -161,7 +161,7 @@ class FrontDeskPage extends StatelessWidget {
                                 Expanded(
                                   child: ListView.separated(
                                     itemCount: rows.length,
-                                    separatorBuilder: (_, _) => const Divider(
+                                    separatorBuilder: (_, __) => const Divider(
                                         color: ClinicTheme.border, height: 16),
                                     itemBuilder: (context, i) {
                                       final n = rows[i];
