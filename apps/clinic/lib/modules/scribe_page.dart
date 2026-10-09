@@ -233,7 +233,7 @@ Electronically signed via GozVision Ambient Scribe.''';
                   ),
                   child: SelectableText(
                     transcript,
-                    style: GoogleFonts.jetbrainsMono(
+                    style: GoogleFonts.jetBrainsMono(
                       fontSize: 13,
                       height: 1.5,
                       color: ClinicTheme.textPrimary,
@@ -336,7 +336,7 @@ class _SoapSectionItem extends StatelessWidget {
                                       style: TextStyle(color: ClinicTheme.textSecondary)),
                                   const SizedBox(height: 8),
                                   SelectableText(transcript,
-                                      style: GoogleFonts.jetbrainsMono(
+                                      style: GoogleFonts.jetBrainsMono(
                                           fontSize: 13,
                                           color: ClinicTheme.textPrimary)),
                                 ],
