@@ -8,12 +8,14 @@ class ClinicTheme {
   ClinicTheme._();
 
   static const Color obsidian = Color(0xFF050806);
-  static const Color cardBackground = Color(0xFF101713);
+  static const Color cardBackground = Color(0xFF0A121A);
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF8A8A99);
-  static const Color malachite = Color(0xFF00FF87);
-  static const Color malachiteDim = Color(0xFF00C86A);
-  static const Color malachiteFaint = Color(0x1A00FF87);
+  static const Color malachite = Color(0xFF00D2FF);      // Precision Optical Cyan
+  static const Color opticalCyan = malachite;
+  static const Color malachiteDim = Color(0xFF0284C7);   // Laser Azure
+  static const Color opticalAzure = malachiteDim;
+  static const Color malachiteFaint = Color(0x1A00D2FF); // Cyan surface glow
   static const Color surface = Color(0x12FFFFFF);
   static const Color surfaceDark = Color(0xFF0A0F0C);
   static const Color surfaceLight = Color(0x20FFFFFF);

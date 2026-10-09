@@ -32,14 +32,16 @@ class GozAITheme {
   static const Color patientSurface = Color(0xFF111100);   // Warm near-black
 
   // ─────────────────────────────────────────────
-  // PRO DASHBOARDS — Bioluminescent Malachite
+  // PRO DASHBOARDS & OPTICAL LENS PALETTE
   // ─────────────────────────────────────────────
-  static const Color malachite      = Color(0xFF00FF87);   // Primary glow
-  static const Color malachiteDim   = Color(0xFF00C86A);   // Secondary/subdued
-  static const Color malachiteFaint = Color(0x1A00FF87);   // Surface tint
+  static const Color malachite      = Color(0xFF00D2FF);   // Precision Optical Cyan
+  static const Color opticalCyan    = malachite;
+  static const Color malachiteDim   = Color(0xFF0284C7);   // Laser Azure
+  static const Color opticalAzure   = malachiteDim;
+  static const Color malachiteFaint = Color(0x1A00D2FF);   // Surface tint
   static const Color proSurface     = Color(0x12FFFFFF);   // Glassmorphic panel
   static const Color proBorder      = Color(0x25FFFFFF);
-  static const Color proBorderGlow  = Color(0x4000FF87);   // Active border
+  static const Color proBorderGlow  = Color(0x4000D2FF);   // Active border
 
   // Legacy aliases kept for backward-compat across existing widgets
   static const Color primaryBlue    = malachite;
