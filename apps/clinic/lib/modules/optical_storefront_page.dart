@@ -138,6 +138,202 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     super.dispose();
   }
 
+  void _showStorefrontDiscoveryModal(BuildContext context, ClinicScope scope) {
+    final clinicId = scope.clinicId ?? 'demo_clinic';
+    final storeUrl = 'https://gozvision.com/store/$clinicId';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ClinicTheme.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: ClinicTheme.border),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: ClinicTheme.malachiteFaint,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.storefront_rounded, color: ClinicTheme.malachite, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Practice Storefront & Patient Discovery',
+                    style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'How patients discover, browse, and purchase from your clinic',
+                    style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Highlight Banner: Strategic Practice Edge
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.malachiteFaint,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ClinicTheme.malachite.withOpacity(0.35)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.insights_rounded, color: ClinicTheme.malachite, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Strategic Practice Edge (40% - 60% of Clinic Margin)',
+                              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Optical dispensaries and specialty therapeutics represent up to 60% of independent optometry profits. GozVision bridges clinical care directly into immediate purchases, preventing patients from leaking to external online retailers.',
+                              style: TextStyle(color: ClinicTheme.textPrimary, fontSize: 11.5, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Channel 1
+                _buildDiscoveryChannelCard(
+                  icon: Icons.smartphone_rounded,
+                  title: '1. Patient Copilot App Bar Integration',
+                  description:
+                      'Patients using the GozVision Copilot have a dedicated "Optical Dispensary" icon directly in their top bar. They can view doctor-curated frames, FL-41 filters, and artificial tears with 1-tap ordering.',
+                ),
+                const SizedBox(height: 12),
+
+                // Channel 2
+                _buildDiscoveryChannelCard(
+                  icon: Icons.domain_rounded,
+                  title: '2. Clinic Discovery & Appointment Search',
+                  description:
+                      'When prospective or returning patients search for clinics in the GozVision Directory, every verified clinic profile displays a prominent "Browse Dispensary Catalog & Prescriptions" action.',
+                ),
+                const SizedBox(height: 12),
+
+                // Channel 3
+                _buildDiscoveryChannelCard(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  title: '3. Post-Exam Scribe Rx & Care Threads',
+                  description:
+                      'Whenever an optometrist prescribes frames, therapeutic drops, or smart glasses in Scribe Studio, an automated assisted-checkout link is dispatched to the patient and family caregiver.',
+                ),
+                const SizedBox(height: 16),
+
+                // Clinic Web Storefront URL
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.surfaceDark,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white.withOpacity(0.06)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.link_rounded, size: 16, color: ClinicTheme.malachite),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          storeUrl,
+                          style: const TextStyle(fontSize: 12, color: ClinicTheme.textSecondary, fontFamily: 'monospace'),
+                        ),
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.copy_rounded, size: 14),
+                        label: const Text('Copy Link', style: TextStyle(fontSize: 11)),
+                        style: TextButton.styleFrom(foregroundColor: ClinicTheme.malachite),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Copied "$storeUrl" to clipboard!')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Close', style: TextStyle(color: ClinicTheme.textSecondary)),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
+            icon: const Icon(Icons.print_rounded, size: 16),
+            label: const Text('Print Reception Desk QR Code'),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('✓ Generated printable Reception Desk Frame Catalog QR Code!')),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiscoveryChannelCard({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surfaceDark.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withOpacity(0.04)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: ClinicTheme.malachite),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 3),
+                Text(description, style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 11, height: 1.35)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddProductDialog(BuildContext context) {
     final nameCtrl = TextEditingController();
     final skuCtrl = TextEditingController();
@@ -825,6 +1021,17 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                 ),
               ),
               const SizedBox(width: 14),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: ClinicTheme.malachite,
+                  side: BorderSide(color: ClinicTheme.malachite.withOpacity(0.4)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+                icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+                label: const Text('Patient Discovery & QR', style: TextStyle(fontWeight: FontWeight.w700)),
+                onPressed: () => _showStorefrontDiscoveryModal(context, scope),
+              ),
+              const SizedBox(width: 10),
               FilledButton.icon(
                 style: FilledButton.styleFrom(
                   backgroundColor: ClinicTheme.malachite,
