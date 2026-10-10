@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/theme.dart';
 import '../services/haptic_service.dart';
+import 'patient_dispensary_sheet.dart';
 
 /// Clinic Discovery & Appointment Booking Sheet for Low-Vision Patients.
 ///
@@ -360,6 +361,24 @@ class _ClinicDiscoverySheetState extends State<ClinicDiscoverySheet> {
                       : const Icon(Icons.calendar_month, size: 18),
                   label: Text(_booking ? 'Scheduling...' : 'Book Appointment with Attending Doctor'),
                   onPressed: _booking ? null : () => _bookAppointment(clinic['name'] as String),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: GozAITheme.accentCyan,
+                    side: BorderSide(color: GozAITheme.accentCyan.withOpacity(0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.storefront_outlined, size: 16),
+                  label: const Text('Browse Dispensary Catalog & Prescriptions', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    PatientDispensarySheet.show(context);
+                  },
                 ),
               ),
             ],
