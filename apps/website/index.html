@@ -1200,14 +1200,14 @@
       </div>
 
       <div class="bento-grid">
-        <!-- Card 1: Ambient Scribe (Large) -->
+        <!-- Card 1: Ambient Scribe (Large, Col 2) -->
         <div class="bento-card bento-col-2">
-          <span class="card-tag">Epic & Eyefinity Ready</span>
+          <span class="card-tag">All Clinic Encounters · Practice Wide</span>
           <div class="card-icon">✎</div>
           <div>
             <h3>Ambient Clinical Scribe Workspace</h3>
             <p>
-              Turns raw practitioner-patient exam dialogues into structured SOAP clinical notes in real time. Validates optometric measurements (IOP mmHg, visual acuity 20/XX, anterior segment findings) against citation transcript extracts. Never finalized until the optometrist signs off.
+              Transcribes real-time practitioner-patient exam dialogues into structured SOAP clinical notes across comprehensive exams, contact lens evaluations, and medical visits. Validates optometric metrics (IOP mmHg, visual acuity 20/XX, anterior/posterior segment findings) with 1-click clipboard export ready for Epic, Eyefinity, and RevolutionEHR.
             </p>
           </div>
           <div class="bento-card-footer">
@@ -1216,49 +1216,112 @@
           </div>
         </div>
 
-        <!-- Card 2: Low Vision Hub -->
+        <!-- Card 2: Front Desk & Automated Recall -->
         <div class="bento-card">
-          <span class="card-tag">Abandonment Radar</span>
+          <span class="card-tag">Practice Growth · Retention</span>
+          <div class="card-icon">🗓</div>
+          <div>
+            <h3>Front Desk & Automated Recall</h3>
+            <p>
+              Recovers lost clinic revenue and no-shows with autonomous recall sweeps. Intelligently tracks overdue annual exams, diabetic retinopathy screenings, and glaucoma IOP follow-ups via two-way conversational booking.
+            </p>
+          </div>
+          <div class="bento-card-footer">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Autonomous Recall Sweeps</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Clinical Decision Support & RAG -->
+        <div class="bento-card">
+          <span class="card-tag">Clinical Intelligence · RAG</span>
+          <div class="card-icon">⚕</div>
+          <div>
+            <h3>Clinical Copilot & Grounded RAG</h3>
+            <p>
+              Sub-second guideline lookup powered by Gemini and vector embeddings over AAO Preferred Practice Patterns, AOA Clinical Guidelines, TFOS DEWS II dry eye protocols, and drug contraindication databases.
+            </p>
+          </div>
+          <div class="bento-card-footer">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Verified Optometric Corpus</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Low Vision Hub (Large, Col 2) -->
+        <div class="bento-card bento-col-2">
+          <span class="card-tag">Specialty Care · Abandonment Radar</span>
           <div class="card-icon">◎</div>
           <div>
-            <h3>The Low Vision Hub</h3>
+            <h3>The Low Vision Hub & Device Fitting</h3>
             <p>
-              Shrinks the 29% device abandonment leak. Aggregates live adherence signals from Goz copilot trials — flagging quiet devices before patients discard them.
+              Closes the 64% → 55% referral leak and curbs the 29% assistive device abandonment rate. Manages specialty optical fittings, sets functional vision goals, and aggregates live adherence telemetry streamed from patient copilot trials before disengagement occurs.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Automated Outreach Triage</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Automated Outreach Triage</span>
+            <a href="/clinic" class="btn btn-ghost btn-sm">Access Clinic Hub →</a>
           </div>
         </div>
 
-        <!-- Card 3: Care Thread Chat & Telemetry -->
-        <div class="bento-card">
-          <span class="card-tag">Direct Patient Seam</span>
-          <div class="card-icon">💬</div>
-          <div>
-            <h3>In-App Care Thread & Chat</h3>
-            <p>
-              Connects doctors, front desk staff, patients, and family caregivers in an auditable medical chat thread. Two-way AWS rescheduling, push alerts, and FL-41 contrast profile recommendations.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Encrypted Multi-Tenant RLS</span>
-          </div>
-        </div>
-
-        <!-- Card 4: Hardware & Smart Glasses Bridge (Large) -->
+        <!-- Card 5: Edge Computer Vision Pipeline (Large, Col 2) -->
         <div class="bento-card bento-col-2">
-          <span class="card-tag">Peripheral Integration</span>
+          <span class="card-tag">Real-Time Accessibility · On-Device</span>
+          <div class="card-icon">⚡</div>
+          <div>
+            <h3>Edge Computer Vision Engine (OpenCV 5)</h3>
+            <p>
+              Zero-latency video processing running directly in the browser and mobile devices: Adaptive LAB CLAHE contrast + edge salience for AMD curb/step detection, specular highlight attenuation for cataracts and photophobia, and morphological reading zone bounding boxes for instant prescription label audio readouts.
+            </p>
+          </div>
+          <div class="bento-card-footer">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Sub-50ms Processing Latency</span>
+            <a href="#simulator" class="btn btn-ghost btn-sm">Test Simulator Above ↑</a>
+          </div>
+        </div>
+
+        <!-- Card 6: Smart Glasses Bridge -->
+        <div class="bento-card">
+          <span class="card-tag">Wearables & Peripherals</span>
           <div class="card-icon">👓</div>
           <div>
-            <h3>Wearable & Smart Glasses Telemetry</h3>
+            <h3>Smart Glasses & Audio Frames Bridge</h3>
             <p>
-              Pre-integrated with leading assistive wearables including Solos AirGo 3 audio glasses, Even Realities G1 optical heads-up displays, and smartphone cameras. Telemetry captures dropped frame counts, battery degradation, and thermal status.
+              Pre-integrated BLE and audio/video streaming for Solos AirGo 3 audio glasses, Even Realities G1 optical heads-up displays, Ray-Ban Meta, and Rokid eyewear—streaming battery, dropped frame, and thermal telemetry.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">BLE & Audio WebSocket Transport</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">BLE & Audio WebSocket Transport</span>
+          </div>
+        </div>
+
+        <!-- Card 7: Dual-Mode Patient Copilot -->
+        <div class="bento-card">
+          <span class="card-tag">Patient Portal · Adaptive UI</span>
+          <div class="card-icon">📱</div>
+          <div>
+            <h3>Dual-Mode Patient Copilot (PWA)</h3>
+            <p>
+              Adapts dynamically between Clinic Companion Mode for general patients (appointment booking, drop reminders, clinical summaries) and Low-Vision Assist Mode (high-contrast tactile UI, voice-first continuous guidance, and hands-free control).
+            </p>
+          </div>
+          <div class="bento-card-footer">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Offline PWA Architecture</span>
             <a href="/patient" class="btn btn-ghost btn-sm">Explore PWA →</a>
+          </div>
+        </div>
+
+        <!-- Card 8: In-App Care Thread & Caregiver SOS (Large, Col 2) -->
+        <div class="bento-card bento-col-2">
+          <span class="card-tag">Caregiver Network · Emergency Triage</span>
+          <div class="card-icon">💬</div>
+          <div>
+            <h3>Encrypted Care Thread & Caregiver SOS Telemetry</h3>
+            <p>
+              Connects doctors, staff, patients, and family caregivers in an auditable medical care thread. Delivers real-time adherence updates, FL-41 contrast filter recommendations, and an instant emergency SOS trigger with geolocation dispatch to loved ones and clinic dispatchers.
+            </p>
+          </div>
+          <div class="bento-card-footer">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Encrypted Multi-Tenant RLS & Amazon SES</span>
+            <button class="btn btn-ghost btn-sm" onclick="openLeadModal()">Request Demo →</button>
           </div>
         </div>
       </div>
