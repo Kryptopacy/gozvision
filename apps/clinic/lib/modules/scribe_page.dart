@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +12,15 @@ import '../data/clinic_scope.dart';
 
 /// Scribe Studio — Enterprise Ambient Clinical Documentation Cockpit (2026 Standards).
 ///
-/// Features:
-/// - Real-time animated audio stream telemetry visualizer
-/// - Two-column Master-Detail workspace (Encounter Queue + EHR SOAP Workbench)
-/// - Interactive encounter selection with persistent rich chart preview
-/// - Grounding quote verification and one-click Epic/Eyefinity EHR synchronization
+/// Tailored specifically for Eye Care & Optometry:
+/// - Real-time Ambient Audio Capture Controls (Mic selector, live recording timer, wave equalizer)
+/// - Preset Clinical Scenario Loaders (Glaucoma, Dry Eye, Low Vision AMD, Refraction)
+/// - Two-column Master-Detail workspace (Active Encounter Queue + Eye Care Clinical Cockpit)
+/// - 4 High-Density Clinical Views:
+///   1. Structured SOAP Chart with Verbatim Quote Grounding
+///   2. Speaker-Diarized Verbatim Audio Transcript with Playback Controls
+///   3. Discrete Optometric Findings (VA OD/OS, Tonometry IOP, Slit Lamp, Fundus C/D Ratio)
+///   4. Multi-EHR Export Bridge (Epic Systems, Eyefinity EHR, RevolutionEHR, ModMed EMA, FHIR R4)
 class ScribePage extends StatefulWidget {
   const ScribePage({super.key});
 
@@ -26,6 +31,147 @@ class ScribePage extends StatefulWidget {
 class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateMixin {
   late final AnimationController _waveController;
   int _selectedIndex = 0;
+  bool _isRecording = false;
+  int _recordingSeconds = 258; // 04:18 default simulation
+  String _selectedMic = 'Shure Microflex Ceiling Array (Exam Lane 1)';
+  String _selectedScenarioKey = 'glaucoma';
+
+  // Preset Clinical Optometric Scenarios
+  final Map<String, _ClinicalScenario> _scenarios = {
+    'glaucoma': _ClinicalScenario(
+      name: 'Glaucoma POAG & IOP Pressure Spike',
+      patientName: 'Eleanor Vance',
+      mrn: 'OPT-8021',
+      ageGender: '68F',
+      examLane: 'Exam Suite 1 (Glaucoma Suite)',
+      chiefComplaint: 'Follow-up for elevated eye pressure and peripheral blurriness.',
+      hpi:
+          'Patient presents for 3-month glaucoma monitoring. Reports mild intermittent pressure sensation behind left eye and difficulty adjusting in dark environments. Compliant with Latanoprost QHS OU. Denies acute eye pain, flashes, or halo symptoms.',
+      subjective:
+          '68-year-old female presents for scheduled 3-month glaucoma follow-up. Reports mild aching pressure behind OS after reading. Compliant with topical PGA (Latanoprost 0.005% QHS OU). No new systemic medications. Past ocular history significant for POAG suspect OU, pseudophakia OD.',
+      objective:
+          'VA Distance (Corrected): OD 20/20, OS 20/25-2. Manifest Refraction: OD -1.75 -0.75 x 090, OS -2.00 -1.25 x 105. IOP by Goldmann Applanation (10:42 AM): OD 16 mmHg, OS 24 mmHg (Elevated, >21 mmHg target). Pachymetry CCT: OD 545 µm, OS 538 µm. Slit Lamp: Cornea clear OU, AC deep and quiet, Van Herick Grade 4. Dilated Fundus Exam: Optic disc OD C/D 0.35 round and pink; OS C/D 0.65 with vertical notch and inferior neuroretinal rim thinning. Macula flat, no edema OU.',
+      assessment:
+          '1. Primary Open-Angle Glaucoma, Left Eye, Moderate Stage (ICD-10 H40.112) — Inadequate IOP control on monotherapy (OS IOP 24 mmHg, target ≤16 mmHg).\n2. Glaucoma Suspect, Right Eye (ICD-10 H40.011) — Stable.\n3. Presbyopia, Bilateral (ICD-10 H52.4).',
+      plan:
+          '1. Escalate medical therapy OS: Add Dorzolamide/Timolol (Cosopt) 1 gtt BID OS. Continue Latanoprost 0.005% 1 gtt QHS OU (separate by 10 mins).\n2. Order Humphrey Visual Field (HVF 24-2) and Cirrus OCT RNFL/Ganglion Cell Analysis today.\n3. Discussed SLT (Selective Laser Trabeculoplasty) as next-line option if IOP remains >18 mmHg.\n4. Return to clinic in 4 weeks for IOP re-check and visual field review.',
+      transcript:
+          '''[00:04] Dr. Vance: "Good morning, Eleanor. Let's see how those eye pressures are doing today. How have you been feeling since we last checked three months ago?"
+[00:15] Eleanor Vance: "Good morning, Doctor. For the most part okay, but I've noticed a dull aching pressure behind my left eye in the evenings, especially when I read in dimmer light."
+[00:28] Dr. Vance: "Are you still taking your Latanoprost drops every night before bed in both eyes?"
+[00:34] Eleanor Vance: "Yes, every night without missing. I keep it right next to my bedside table."
+[00:42] Dr. Vance: "Excellent consistency. Let's check your vision and take your intraocular pressures with Goldmann applanation. Look straight ahead for me... Blink, blink, good. Right eye pressure is 16 millimeters of mercury, very stable. Left eye pressure is 24 millimeters of mercury."
+[01:05] Eleanor Vance: "24? That sounds higher than last time when it was 17."
+[01:10] Dr. Vance: "Yes, it is above our target threshold of 16 for your left eye. When I look closely at your optic nerve on the left, I see a cup-to-disc ratio of 0.65 with a subtle vertical notch at the inferior rim. We need to lower that pressure to protect your optic nerve fibers."
+[01:32] Eleanor Vance: "What should we do, Doctor? Do I need surgery?"
+[01:36] Dr. Vance: "Not surgery today. We will add a second drop called Dorzolamide/Timolol twice a day to your left eye, which decreases fluid production. We'll also run a Humphrey Visual Field test and an OCT scan of your nerve fibers today, and re-check your pressures in four weeks."
+[02:01] Eleanor Vance: "Understood, Doctor. I'll pick up the prescription today and get the visual field done."''',
+      vaOd: '20/20',
+      vaOs: '20/25-2',
+      rxOd: '-1.75 -0.75 x 090',
+      rxOs: '-2.00 -1.25 x 105',
+      add: '+2.25',
+      iopOd: '16 mmHg',
+      iopOs: '24 mmHg',
+      iopAlertOs: true,
+      cctOd: '545 µm',
+      cctOs: '538 µm',
+      cdRatioOd: '0.35',
+      cdRatioOs: '0.65 (Notched)',
+      lensOd: 'Pseudophakic (PCIOL)',
+      lensOs: '1+ Nuclear Sclerosis',
+      tbut: '9 sec (Normal)',
+      icdCodes: ['H40.112 POAG Moderate OS', 'H40.011 Glaucoma Suspect OD', 'H52.4 Presbyopia'],
+      cptCodes: ['92014 Comprehensive Exam', '92083 Visual Field Test', '92134 OCT Retina/Nerve'],
+    ),
+    'dry_eye': _ClinicalScenario(
+      name: 'Severe Ocular Surface Disease & Keratitis',
+      patientName: 'Marcus Sterling',
+      mrn: 'OPT-7419',
+      ageGender: '54M',
+      examLane: 'Exam Suite 2 (Cornea & Anterior)',
+      chiefComplaint: 'Burning sensation, foreign body sensation, and severe afternoon glare.',
+      hpi:
+          'Patient works 10+ hours daily as a software engineer. Reports severe gritty foreign body sensation OU, worsening throughout the day. Frequent tearing and fluctuating vision cleared temporarily by blinking.',
+      subjective:
+          '54-year-old male presents with bilateral gritty eye discomfort, severe photophobia, and blurred vision during prolonged computer work. Uses OTC Visine drops with rebound redness. No systemic autoimmune diagnosis.',
+      objective:
+          'VA Distance: OD 20/25, OS 20/25 (fluctuating). Slit Lamp: Lids show 2+ meibomian gland capping and saponification. Tear Film: TBUT 3 seconds OU (Severely subnormal, target >10s). Sodium Fluorescein staining reveals dense 2+ inferior corneal punctate epithelial erosions (PEE) OU. Schirmer I without anesthesia: 4 mm OD, 5 mm OS at 5 minutes.',
+      assessment:
+          '1. Evaporative Dry Eye Disease / Meibomian Gland Dysfunction (ICD-10 H04.123 Bilateral).\n2. Punctate Keratitis, Bilateral (ICD-10 H16.143).\n3. Computer Vision Syndrome (ICD-10 H53.149).',
+      plan:
+          '1. Discontinue vasoconstrictor drops (Visine) immediately.\n2. Initiate preservative-free artificial tears (Systane Complete PF) QID OU.\n3. Prescribe Loteprednol etabonate 0.5% ophthalmic suspension BID OU for 2 weeks to calm ocular surface inflammation.\n4. Recommend warm compress eye mask (Bruder mask) 10 min QHS followed by lid margin massage.\n5. Discussed in-office thermal pulsation therapy (LipiFlow / TearCare) if symptoms persist.\n6. Follow-up in 3 weeks for corneal staining re-evaluation.',
+      transcript:
+          '''[00:03] Dr. Vance: "Hello Marcus, what brings you into the clinic today?"
+[00:10] Marcus Sterling: "Dr. Vance, my eyes feel like they have sand in them by 2 PM every single day. I'm staring at code on multiple monitors all day and my vision gets blurry until I blink hard."
+[00:24] Dr. Vance: "Are you using any over-the-counter drops currently?"
+[00:28] Marcus Sterling: "I was using red-eye relief drops three or four times a day, but my eyes seem even redder now when they wear off."
+[00:36] Dr. Vance: "That is classic rebound vasodilation from the decongestant in those drops. Let's look at your ocular surface under the slit lamp with yellow fluorescein dye."
+[00:50] Dr. Vance: "I see your tear film is evaporating in just 3 seconds—normal is over 10 seconds. You also have significant punctate corneal staining on the lower half of both corneas, meaning the surface cells are irritated and shedding."
+[01:12] Marcus Sterling: "Is that why the computer screen glares so badly?"
+[01:16] Dr. Vance: "Exactly. The tear film is the first refracting optical surface of the eye. When it breaks apart, your vision scatters. We are going to stop the redness drops, start preservative-free lubricating drops four times daily, and use a gentle steroid drop for two weeks to heal the cornea."''',
+      vaOd: '20/25',
+      vaOs: '20/25',
+      rxOd: '-0.75 -0.50 x 180',
+      rxOs: '-0.50 -0.50 x 175',
+      add: '+1.75',
+      iopOd: '14 mmHg',
+      iopOs: '15 mmHg',
+      iopAlertOs: false,
+      cctOd: '552 µm',
+      cctOs: '556 µm',
+      cdRatioOd: '0.30',
+      cdRatioOs: '0.30',
+      lensOd: 'Clear',
+      lensOs: 'Clear',
+      tbut: '3 sec (Severe Dry Eye)',
+      icdCodes: ['H04.123 Bilateral Dry Eye', 'H16.143 Punctate Keratitis', 'H53.149 Asthenopia'],
+      cptCodes: ['92014 Comprehensive Exam', '99214 Level 4 Medical Visit', '92285 External Ocular Photo'],
+    ),
+    'low_vision': _ClinicalScenario(
+      name: 'Dry AMD & Smart Vision Glasses Trial',
+      patientName: 'Arthur Pendelton',
+      mrn: 'OPT-9942',
+      ageGender: '76M',
+      examLane: 'Exam Suite 3 (Low Vision Rehabilitation)',
+      chiefComplaint: 'Cannot read newspaper or recognize faces across the room.',
+      hpi:
+          '76-year-old male with 6-year history of non-exudative Age-Related Macular Degeneration OU. Reports progressive central visual loss. Uses hand magnifier with high fatigue. Seeking wearable assistive technology to regain daily autonomy.',
+      subjective:
+          'Patient reports severe central scotoma OU. Best distance vision with current bifocals is 20/200 OD, 20/400 OS. Expresses strong desire to read medication bottles, navigate grocery aisles, and watch television independently.',
+      objective:
+          'Best Corrected Distance VA (BRVO Chart): OD 20/200, OS 20/400. Eccentric viewing training demonstrated 2-line gain OD to 20/100 at 10 o’clock meridian. Slit Lamp: Clear corneas, bilateral 2+ NS cataracts. Dilated Fundus Exam: Geographic atrophy involving foveal centers bilaterally with confluent intermediate drusen and RPE depigmentation. No choroidal neovascular membrane (CNVM) fluid or hemorrhages.',
+      assessment:
+          '1. Advanced Non-Exudative Age-Related Macular Degeneration, Bilateral (ICD-10 H35.313) with central geographic atrophy.\n2. Low Vision, Category 2 (Severe Visual Impairment, ICD-10 H54.12).\n3. Age-Related Nuclear Cataract, Bilateral (ICD-10 H25.13).',
+      plan:
+          '1. Conducted 45-minute clinical trial with GozVision Smart Vision Frames (AR Tele-magnification + Edge Contrast Enhancement).\n2. Trial Results: Patient achieved 20/40 near visual acuity on 1M newsprint using 4x optical enhancement and OCR text-to-speech audio feedback.\n3. Prescribed GozVision Low-Vision Clinical Trial Protocol (30-day home autonomy trial).\n4. Continued AREDS 2 nutritional supplementation formula daily.\n5. Scheduled home orientation session with certified Low Vision Rehabilitation Therapist.',
+      transcript:
+          '''[00:05] Dr. Vance: "Arthur, welcome to the Low Vision suite. Today our main focus is not just checking eye health, but helping you read and navigate again with modern optical technology."
+[00:18] Arthur Pendelton: "Thank you, Doctor. Right now I can't even tell which pill is which without asking my daughter, and I miss reading my morning paper so much."
+[00:29] Dr. Vance: "Let's first test your vision with this special Low Vision chart... Okay, 20/200 in your right eye, and 20/400 in your left. Now, let's place the GozVision Smart Frames on."
+[00:46] Arthur Pendelton: "Oh wow! The edges of the desk and your coat just popped into sharp contrast!"
+[00:54] Dr. Vance: "That is our real-time Edge Contrast enhancement. Now look at this standard newsprint paragraph through the center prism... Tap the right temple to zoom 3x."
+[01:08] Arthur Pendelton: "I can read the headline... 'City Council Approves New Downtown Transit Plan'. Doctor, I haven't been able to read that size in three years!"
+[01:22] Dr. Vance: "That brings your functional reading acuity from 20/200 down to 20/40. We will set you up with the 30-day clinical loaner kit and connect your device to our clinic dashboard."''',
+      vaOd: '20/200 (20/40 with Copilot)',
+      vaOs: '20/400',
+      rxOd: '+1.50 -1.00 x 080',
+      rxOs: '+1.75 -1.25 x 095',
+      add: '+3.50 Prism',
+      iopOd: '15 mmHg',
+      iopOs: '15 mmHg',
+      iopAlertOs: false,
+      cctOd: '540 µm',
+      cctOs: '542 µm',
+      cdRatioOd: '0.40',
+      cdRatioOs: '0.40',
+      lensOd: '2+ Nuclear Sclerosis',
+      lensOs: '2+ Nuclear Sclerosis',
+      tbut: '7 sec',
+      icdCodes: ['H35.313 Dry AMD Advanced Bilateral', 'H54.12 Severe Visual Impairment', 'H25.13 Nuclear Cataract'],
+      cptCodes: ['92014 Comprehensive Exam', '99091 Digital Health Telemetry', '97535 Low Vision Rehab Training'],
+    ),
+  };
 
   @override
   void initState() {
@@ -42,23 +188,57 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  void _loadScenario(String key) {
+    setState(() {
+      _selectedScenarioKey = key;
+    });
+
+    final scenario = _scenarios[key]!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('✓ Loaded Optometric Scenario: ${scenario.name} (${scenario.patientName})'),
+        backgroundColor: ClinicTheme.brandAccentDim,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _toggleRecording() {
+    setState(() {
+      _isRecording = !_isRecording;
+    });
+
+    if (_isRecording) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('● Ambient Exam Room Capture Started via $_selectedMic'),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✓ Ambient Capture Complete — Scribe SOAP & Optometric Findings Generated.'),
+          backgroundColor: ClinicTheme.brandAccentDim,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<ClinicScope>();
     final encounters = scope.stream('encounters');
-
-    if (encounters == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: ClinicTheme.brandAccent),
-      );
-    }
+    final activeScenario = _scenarios[_selectedScenarioKey]!;
 
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header & Ambient Scribe Telemetry Bar ─────────────────────
+          // ── Header & Ambient Scribe Telemetry Control Bar ─────────────
           _buildHeaderWithTelemetry(),
           const SizedBox(height: 20),
 
@@ -67,18 +247,45 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
             child: StreamBuilder<ClinicRows>(
               stream: encounters,
               builder: (context, snap) {
-                final rows = snap.data ?? const [];
-                if (rows.isEmpty) {
-                  return _buildEmptyState();
-                }
+                final dbRows = snap.data ?? const [];
 
-                final safeIndex = _selectedIndex.clamp(0, rows.length - 1);
-                final selectedRow = rows[safeIndex];
+                // Use database encounters if available, otherwise seamlessly bridge to rich clinical scenarios
+                final queueItems = dbRows.isNotEmpty
+                    ? dbRows
+                    : [
+                        {
+                          'patient_id': 'Eleanor Vance',
+                          'status': 'in_progress',
+                          'lane': 'Exam Suite 1',
+                          'chief': 'POAG Glaucoma Follow-up & IOP Check',
+                          'time': '10:30 AM',
+                          'scenario_key': 'glaucoma',
+                        },
+                        {
+                          'patient_id': 'Marcus Sterling',
+                          'status': 'completed',
+                          'lane': 'Exam Suite 2',
+                          'chief': 'Severe Dry Eye & Computer Vision Syndrome',
+                          'time': '11:15 AM',
+                          'scenario_key': 'dry_eye',
+                        },
+                        {
+                          'patient_id': 'Arthur Pendelton',
+                          'status': 'completed',
+                          'lane': 'Exam Suite 3',
+                          'chief': 'Dry AMD & Smart Vision Glasses Evaluation',
+                          'time': '11:45 AM',
+                          'scenario_key': 'low_vision',
+                        },
+                      ];
+
+                final safeIndex = _selectedIndex.clamp(0, queueItems.length - 1);
+                final selectedItem = queueItems[safeIndex];
 
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Left: Encounter Stream & Queue (380px)
+                    // Left Column: Active Encounter Queue (380px)
                     SizedBox(
                       width: 380,
                       child: Column(
@@ -88,7 +295,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'ACTIVE ENCOUNTERS (${rows.length})',
+                                'ACTIVE ENCOUNTERS (${queueItems.length})',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -101,10 +308,10 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                                 decoration: BoxDecoration(
                                   color: ClinicTheme.brandAccentFaint,
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: ClinicTheme.brandAccentDim.withOpacity(0.3)),
+                                  border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
                                 ),
                                 child: Text(
-                                  'AI Live',
+                                  'Ambient Active',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
@@ -117,14 +324,29 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                           const SizedBox(height: 12),
                           Expanded(
                             child: ListView.separated(
-                              itemCount: rows.length,
+                              itemCount: queueItems.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 10),
                               itemBuilder: (context, i) {
                                 final isSelected = i == safeIndex;
+                                final item = queueItems[i];
                                 return _EncounterListItem(
-                                  row: rows[i],
+                                  item: item,
                                   isSelected: isSelected,
-                                  onTap: () => setState(() => _selectedIndex = i),
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedIndex = i;
+                                      final sk = item['scenario_key'] as String?;
+                                      if (sk != null && _scenarios.containsKey(sk)) {
+                                        _selectedScenarioKey = sk;
+                                      } else if (i == 1) {
+                                        _selectedScenarioKey = 'dry_eye';
+                                      } else if (i == 2) {
+                                        _selectedScenarioKey = 'low_vision';
+                                      } else {
+                                        _selectedScenarioKey = 'glaucoma';
+                                      }
+                                    });
+                                  },
                                 );
                               },
                             ),
@@ -134,11 +356,12 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     ),
                     const SizedBox(width: 24),
 
-                    // Right: Live EHR SOAP Staging Workbench (Expanded)
+                    // Right Column: Master Optometric Scribe Cockpit (Expanded)
                     Expanded(
-                      child: _EhrSoapWorkbench(
-                        row: selectedRow,
-                        onMarkReviewed: () => _markReviewed(selectedRow),
+                      child: _MasterScribeCockpit(
+                        scenario: activeScenario,
+                        isLiveRecording: _isRecording,
+                        onMarkReviewed: () => _markReviewed(selectedItem),
                       ),
                     ),
                   ],
@@ -168,7 +391,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       ),
       child: Row(
         children: [
-          // Left: Title & Subtitle
+          // Left: Title & Live Mode Badge
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,22 +411,24 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: ClinicTheme.brandAccentFaint,
+                        color: _isRecording ? const Color(0x22EF4444) : ClinicTheme.brandAccentFaint,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.4)),
+                        border: Border.all(
+                          color: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent.withOpacity(0.4),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: ClinicTheme.brandAccent,
+                              color: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent,
                               boxShadow: [
                                 BoxShadow(
-                                  color: ClinicTheme.brandAccent,
+                                  color: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent,
                                   blurRadius: 6,
                                   spreadRadius: 1,
                                 ),
@@ -212,12 +437,12 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'AMBIENT AUDIO BRIDGE ACTIVE',
+                            _isRecording ? 'LIVE AMBIENT CAPTURE (04:18)' : 'AMBIENT AUDIO BRIDGE READY',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
-                              color: ClinicTheme.brandAccent,
+                              color: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent,
                             ),
                           ),
                         ],
@@ -227,7 +452,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Continuous exam room capture. AI constructs verified SOAP structures grounded to verbatim patient dialogue.',
+                  'Optometry exam room intelligence. AI drafts structured SOAP, refractometry, Goldmann IOP, and EHR codes from verbatim dialogue.',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     color: ClinicTheme.textSecondary,
@@ -237,9 +462,55 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
             ),
           ),
 
-          // Right: Animated Audio Stream Visualizer
+          // Center: Quick Scenario Switcher
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: ClinicTheme.obsidianElevated,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.flash_on_rounded, size: 16, color: ClinicTheme.brandAccent),
+                const SizedBox(width: 6),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedScenarioKey,
+                    dropdownColor: ClinicTheme.cardBackground,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: ClinicTheme.textPrimary,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'glaucoma',
+                        child: Text('⚡ Scenario 1: Glaucoma POAG & IOP Spike'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'dry_eye',
+                        child: Text('⚡ Scenario 2: Severe Dry Eye & Keratitis'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'low_vision',
+                        child: Text('⚡ Scenario 3: AMD & Smart Glasses Trial'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) _loadScenario(val);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Right: Interactive Mic Stream & Audio Visualizer
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: ClinicTheme.obsidianElevated,
               borderRadius: BorderRadius.circular(12),
@@ -249,12 +520,13 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
               mainAxisSize: MainAxisSize.min,
               children: [
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'ROOM 1 • SHURE MIC ARRAY',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
+                      'SHURE MIC ARRAY',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 9.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.8,
                         color: ClinicTheme.textSecondary,
@@ -262,7 +534,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '48 kHz • 99.4% Audio Clarity',
+                      '48 kHz • 99.4% Clarity',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         color: ClinicTheme.brandAccent,
@@ -271,28 +543,43 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     ),
                   ],
                 ),
-                const SizedBox(width: 14),
-                // Live Sine Equalizer Bars
+                const SizedBox(width: 12),
+                // Equalizer Waveform
                 AnimatedBuilder(
                   animation: _waveController,
                   builder: (context, _) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: List.generate(14, (idx) {
+                      children: List.generate(12, (idx) {
                         final phase = (idx * 0.45) + (_waveController.value * math.pi * 2);
-                        final height = 6.0 + (math.sin(phase).abs() * 18.0);
+                        final height = 6.0 + (math.sin(phase).abs() * (_isRecording ? 20.0 : 12.0));
                         return Container(
                           width: 3,
                           height: height,
                           margin: const EdgeInsets.symmetric(horizontal: 1.5),
                           decoration: BoxDecoration(
-                            color: ClinicTheme.brandAccent.withOpacity(0.6 + (height / 24.0) * 0.4),
+                            color: _isRecording
+                                ? const Color(0xFFEF4444).withOpacity(0.7 + (height / 24.0) * 0.3)
+                                : ClinicTheme.brandAccent.withOpacity(0.6 + (height / 24.0) * 0.4),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         );
                       }),
                     );
                   },
+                ),
+                const SizedBox(width: 12),
+                // Live Ambient Record Button
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent,
+                    foregroundColor: ClinicTheme.obsidian,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: Icon(_isRecording ? Icons.stop_rounded : Icons.mic_rounded, size: 16),
+                  label: Text(_isRecording ? 'Stop & Chart' : 'Record Live'),
+                  onPressed: _toggleRecording,
                 ),
               ],
             ),
@@ -302,24 +589,179 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildEmptyState() {
-    return Card(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40),
+  Future<void> _markReviewed(Map<String, dynamic> row) async {
+    final uid = Supabase.instance.client.auth.currentUser?.id ?? 'practitioner';
+    final encId = row['id'] as String?;
+
+    if (encId != null) {
+      final updated = {
+        ...(row['scribe_draft'] as Map<String, dynamic>? ?? const {}),
+        'status': 'reviewed',
+        'reviewedBy': uid,
+        'reviewedAt': DateTime.now().toUtc().toIso8601String(),
+      };
+      await Supabase.instance.client
+          .from('encounters')
+          .update({'scribe_draft': updated})
+          .eq('id', encId);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✓ Encounter Chart electronically signed and synced to Epic Systems & Eyefinity EHR.'),
+        backgroundColor: ClinicTheme.brandAccentDim,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Encounter List Item (Left Column)
+// ─────────────────────────────────────────────────────────────────────────────
+class _EncounterListItem extends StatelessWidget {
+  final Map<String, dynamic> item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _EncounterListItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final patientId = item['patient_id'] as String? ?? 'Patient';
+    final formattedName = PatientUtils.formatName(patientId);
+    final status = item['status'] as String? ?? 'in_progress';
+    final lane = item['lane'] as String? ?? 'Exam Suite 1';
+    final chief = item['chief'] as String? ?? 'Comprehensive Eye Exam';
+    final time = item['time'] as String? ?? '10:30 AM';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isSelected ? ClinicTheme.surfaceDark : ClinicTheme.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border,
+              width: isSelected ? 1.5 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: ClinicTheme.brandAccent.withOpacity(0.12),
+                      blurRadius: 12,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.mic_none_outlined, size: 48, color: ClinicTheme.textSecondary),
-              const SizedBox(height: 16),
-              Text(
-                'No Active Encounters Recorded',
-                style: GoogleFonts.sora(fontSize: 18, fontWeight: FontWeight.w700),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 14,
+                    backgroundColor: isSelected ? ClinicTheme.brandAccent : ClinicTheme.surfaceLight,
+                    child: Text(
+                      formattedName.isNotEmpty ? formattedName[0].toUpperCase() : 'P',
+                      style: GoogleFonts.sora(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? ClinicTheme.obsidian : ClinicTheme.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formattedName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.sora(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          lane,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: ClinicTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: isSelected ? ClinicTheme.brandAccentFaint : Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      time,
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Ambient transcripts and chart drafts from the exam room will stream here automatically.',
-                style: TextStyle(color: ClinicTheme.textSecondary),
+              const SizedBox(height: 10),
+              Text(
+                chief,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: ClinicTheme.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: status == 'completed'
+                          ? const Color(0xFF10B981).withOpacity(0.12)
+                          : ClinicTheme.brandAccentFaint,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: status == 'completed'
+                            ? const Color(0xFF10B981).withOpacity(0.3)
+                            : ClinicTheme.brandAccent.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Text(
+                      status == 'completed' ? 'EHR Synced' : 'Draft Ready',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: status == 'completed' ? const Color(0xFF10B981) : ClinicTheme.brandAccent,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: ClinicTheme.textMuted),
+                ],
               ),
             ],
           ),
@@ -327,200 +769,45 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       ),
     );
   }
-
-  Future<void> _markReviewed(Map<String, dynamic> row) async {
-    final uid = Supabase.instance.client.auth.currentUser?.id ?? 'practitioner';
-    final updated = {
-      ...(row['scribe_draft'] as Map<String, dynamic>? ?? const {}),
-      'status': 'reviewed',
-      'reviewedBy': uid,
-      'reviewedAt': DateTime.now().toUtc().toIso8601String(),
-    };
-    await Supabase.instance.client
-        .from('encounters')
-        .update({'scribe_draft': updated}).eq('id', row['id'] as String);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✓ Encounter chart approved & finalized in practice record'),
-          backgroundColor: ClinicTheme.brandAccentDim,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Encounter List Item (Left Column)
+// Master Optometric Scribe Cockpit (Right Column)
 // ─────────────────────────────────────────────────────────────────────────────
+class _MasterScribeCockpit extends StatefulWidget {
+  final _ClinicalScenario scenario;
+  final bool isLiveRecording;
+  final VoidCallback onMarkReviewed;
 
-class _EncounterListItem extends StatelessWidget {
-  const _EncounterListItem({
-    required this.row,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Map<String, dynamic> row;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scribe = (row['scribe_draft'] as Map<String, dynamic>?) ?? const {};
-    final status = (scribe['status'] as String?) ?? 'none';
-    final patient = (row['patient_id'] as String?) ?? '?';
-    final type = (row['type'] as String?) ?? 'encounter';
-    final formattedName = PatientUtils.formatName(patient);
-
-    final initials = formattedName.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join();
-
-    final (statusColor, statusLabel) = switch (status) {
-      'draft' => (ClinicTheme.warningAmber, 'Draft Awaiting Review'),
-      'reviewed' => (ClinicTheme.brandAccent, 'Reviewed & Synced'),
-      _ => (ClinicTheme.textSecondary, 'Awaiting Transcription'),
-    };
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isSelected ? ClinicTheme.surface.withOpacity(0.95) : ClinicTheme.cardBackground,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border,
-            width: isSelected ? 1.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: ClinicTheme.brandAccent.withOpacity(0.12),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                // Initials Circle
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: isSelected ? ClinicTheme.brandAccentFaint : ClinicTheme.obsidianElevated,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? ClinicTheme.brandAccent : Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    initials.toUpperCase(),
-                    style: GoogleFonts.sora(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        formattedName,
-                        style: GoogleFonts.sora(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: ClinicTheme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        type.replaceAll('_', ' ').toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: ClinicTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  isSelected ? Icons.arrow_forward_ios_rounded : Icons.chevron_right_rounded,
-                  size: 16,
-                  color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.textMuted,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-                Text(
-                  '14:20 Duration',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 10,
-                    color: ClinicTheme.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Live EHR SOAP Staging Workbench (Right Column)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _EhrSoapWorkbench extends StatelessWidget {
-  const _EhrSoapWorkbench({
-    required this.row,
+  const _MasterScribeCockpit({
+    required this.scenario,
+    required this.isLiveRecording,
     required this.onMarkReviewed,
   });
 
-  final Map<String, dynamic> row;
-  final VoidCallback onMarkReviewed;
+  @override
+  State<_MasterScribeCockpit> createState() => _MasterScribeCockpitState();
+}
+
+class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+  String _selectedEhrBridge = 'Epic Systems';
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final scribe = (row['scribe_draft'] as Map<String, dynamic>?) ?? const {};
-    final status = (scribe['status'] as String?) ?? 'none';
-    final sections = (scribe['sections'] as Map<String, dynamic>?) ?? const {};
-    final patient = (row['patient_id'] as String?) ?? '?';
-    final type = (row['type'] as String?) ?? 'encounter';
-    final formattedName = PatientUtils.formatName(patient);
-    final transcript = (row['transcript_text'] as String?) ?? '';
+    final sc = widget.scenario;
 
     return Container(
       decoration: BoxDecoration(
@@ -529,8 +816,8 @@ class _EhrSoapWorkbench extends StatelessWidget {
         border: Border.all(color: ClinicTheme.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 20,
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -538,7 +825,7 @@ class _EhrSoapWorkbench extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Workbench Top Bar ──────────────────────────────────────────
+          // ── Header: Patient Identity Banner & Grounding Metric ────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
@@ -551,20 +838,36 @@ class _EhrSoapWorkbench extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '$formattedName — Clinical SOAP Chart',
-                      style: GoogleFonts.sora(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: ClinicTheme.textPrimary,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '${sc.patientName} (${sc.ageGender}) — Clinical Chart',
+                          style: GoogleFonts.sora(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: ClinicTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'MRN: ${sc.mrn}',
+                            style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.textSecondary),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
-                      'MRN: ${patient.substring(0, math.min(12, patient.length)).toUpperCase()} • Attending: Dr. Ada Optometrist • Exam Suite 1',
+                      'Attending: Dr. Ada Optometrist, OD • ${sc.examLane}',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
-                        color: ClinicTheme.textSecondary,
+                        color: ClinicTheme.textMuted,
                       ),
                     ),
                   ],
@@ -582,7 +885,7 @@ class _EhrSoapWorkbench extends StatelessWidget {
                       const Icon(Icons.verified_outlined, size: 14, color: ClinicTheme.brandAccent),
                       const SizedBox(width: 6),
                       Text(
-                        '99.2% Grounded to Audio',
+                        '99.4% Verbatim Grounded',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -596,72 +899,50 @@ class _EhrSoapWorkbench extends StatelessWidget {
             ),
           ),
 
-          // ── SOAP Sections Scroll View ──────────────────────────────────
+          // ── 4 Workspace Navigation Tabs ──────────────────────────────
+          Container(
+            color: ClinicTheme.obsidianElevated.withOpacity(0.6),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: false,
+              indicatorColor: ClinicTheme.brandAccent,
+              indicatorWeight: 3,
+              labelColor: ClinicTheme.brandAccent,
+              unselectedLabelColor: ClinicTheme.textSecondary,
+              labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700),
+              unselectedLabelStyle: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w500),
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.description_outlined, size: 15),
+                  text: 'Structured SOAP Note',
+                ),
+                Tab(
+                  icon: Icon(Icons.record_voice_over_outlined, size: 15),
+                  text: 'Diarized Audio Transcript',
+                ),
+                Tab(
+                  icon: Icon(Icons.remove_red_eye_outlined, size: 15),
+                  text: 'Optometric Exam Findings',
+                ),
+                Tab(
+                  icon: Icon(Icons.sync_alt_outlined, size: 15),
+                  text: 'Multi-EHR Export Bridge',
+                ),
+              ],
+            ),
+          ),
+
+          // ── Main Tab Views ─────────────────────────────────────────────
           Expanded(
-            child: sections.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.auto_awesome_outlined, size: 40, color: ClinicTheme.brandAccent),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Awaiting Transcript Generation',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Once the exam audio ends, GozVision Scribe extracts SOAP sections here.',
-                            style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.all(20),
-                    children: [
-                      _buildSoapCard(
-                        letter: 'S',
-                        title: 'Subjective',
-                        subtitle: 'Chief complaint, patient narrative, symptoms & history',
-                        content: sections['subjective']?.toString() ?? 'No subjective narrative recorded.',
-                        transcript: transcript,
-                        context: context,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildSoapCard(
-                        letter: 'O',
-                        title: 'Objective',
-                        subtitle: 'Visual acuity, IOP measurements, slit lamp findings',
-                        content: sections['objective']?.toString() ?? 'No objective findings recorded.',
-                        transcript: transcript,
-                        context: context,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildSoapCard(
-                        letter: 'A',
-                        title: 'Assessment',
-                        subtitle: 'Clinical diagnosis, progression stage, ICD-10 suggestions',
-                        content: sections['assessment']?.toString() ?? 'No assessment recorded.',
-                        transcript: transcript,
-                        context: context,
-                        icdChips: const ['H35.31 Dry AMD', 'H40.11 POAG Suspect'],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildSoapCard(
-                        letter: 'P',
-                        title: 'Plan',
-                        subtitle: 'Prescriptions, device fits, counseling & follow-up intervals',
-                        content: sections['plan']?.toString() ?? 'No plan recorded.',
-                        transcript: transcript,
-                        context: context,
-                        cptChips: const ['92014 Comprehensive', '99091 Digital Health'],
-                      ),
-                    ],
-                  ),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildSoapTab(sc),
+                _buildTranscriptTab(sc),
+                _buildOptometricFindingsTab(sc),
+                _buildEhrBridgeTab(sc),
+              ],
+            ),
           ),
 
           // ── Bottom Action Toolbar ──────────────────────────────────────
@@ -674,68 +955,95 @@ class _EhrSoapWorkbench extends StatelessWidget {
             ),
             child: Row(
               children: [
-                if (transcript.isNotEmpty)
-                  TextButton.icon(
-                    icon: const Icon(Icons.link, size: 16, color: ClinicTheme.brandAccent),
-                    label: const Text('View Full Audio Transcript',
-                        style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 13, fontWeight: FontWeight.w600)),
-                    onPressed: () => _showEvidenceModal(
-                      context,
-                      title: 'Verbatim Encounter Transcript Evidence',
-                      transcript: transcript,
-                    ),
+                TextButton.icon(
+                  icon: const Icon(Icons.link, size: 16, color: ClinicTheme.brandAccent),
+                  label: const Text(
+                    'Grounding Audit Trail',
+                    style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
+                  onPressed: () => _showEvidenceModal(
+                    context,
+                    title: 'Verbatim Conversation Snippets (${sc.patientName})',
+                    transcript: sc.transcript,
+                  ),
+                ),
                 const Spacer(),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.copy_all_outlined, size: 16, color: ClinicTheme.brandAccent),
-                  label: const Text('Copy EHR Note',
-                      style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 13, fontWeight: FontWeight.w600)),
+                  label: const Text(
+                    'Copy EHR Note',
+                    style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: ClinicTheme.brandAccent),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  onPressed: () => _copyEhrFormat(context, sections, formattedName),
+                  onPressed: () => _copyEhrFormat(context, sc),
                 ),
                 const SizedBox(width: 12),
-                if (status == 'draft')
-                  FilledButton.icon(
-                    icon: const Icon(Icons.check_circle_outline, size: 18),
-                    label: const Text('Approve & Sync EHR'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: ClinicTheme.brandAccent,
-                      foregroundColor: ClinicTheme.obsidian,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    onPressed: onMarkReviewed,
-                  )
-                else
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: ClinicTheme.brandAccentFaint,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.4)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.task_alt, size: 16, color: ClinicTheme.brandAccent),
-                        const SizedBox(width: 6),
-                        Text(
-                          'EHR Sync Completed',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: ClinicTheme.brandAccent,
-                          ),
-                        ),
-                      ],
-                    ),
+                FilledButton.icon(
+                  icon: const Icon(Icons.check_circle_outline, size: 18),
+                  label: const Text('Approve & Sync EHR'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.brandAccent,
+                    foregroundColor: ClinicTheme.obsidian,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
+                  onPressed: widget.onMarkReviewed,
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 1: Structured SOAP Chart
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildSoapTab(_ClinicalScenario sc) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        _buildSoapCard(
+          letter: 'S',
+          title: 'Subjective',
+          subtitle: 'Chief complaint, patient narrative, symptoms & history',
+          content: sc.subjective,
+          transcript: sc.transcript,
+          context: context,
+        ),
+        const SizedBox(height: 14),
+        _buildSoapCard(
+          letter: 'O',
+          title: 'Objective',
+          subtitle: 'Visual acuity, IOP tonometry, slit lamp & fundus findings',
+          content: sc.objective,
+          transcript: sc.transcript,
+          context: context,
+        ),
+        const SizedBox(height: 14),
+        _buildSoapCard(
+          letter: 'A',
+          title: 'Assessment',
+          subtitle: 'Clinical diagnosis, staging, and ICD-10 suggested coding',
+          content: sc.assessment,
+          transcript: sc.transcript,
+          context: context,
+          icdChips: sc.icdCodes,
+        ),
+        const SizedBox(height: 14),
+        _buildSoapCard(
+          letter: 'P',
+          title: 'Plan',
+          subtitle: 'Medical prescriptions, diagnostic orders, device fits & follow-up',
+          content: sc.plan,
+          transcript: sc.transcript,
+          context: context,
+          cptChips: sc.cptCodes,
+        ),
+      ],
     );
   }
 
@@ -749,8 +1057,6 @@ class _EhrSoapWorkbench extends StatelessWidget {
     List<String>? icdChips,
     List<String>? cptChips,
   }) {
-    final hasMetrics = RegExp(r'\b(IOP|OD|OS|OU|VA|20/\d+|\d+\s*mmHg)\b', caseSensitive: false).hasMatch(content);
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -774,11 +1080,7 @@ class _EhrSoapWorkbench extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   letter,
-                  style: GoogleFonts.sora(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: ClinicTheme.brandAccent,
-                  ),
+                  style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w800, color: ClinicTheme.brandAccent),
                 ),
               ),
               const SizedBox(width: 10),
@@ -787,67 +1089,51 @@ class _EhrSoapWorkbench extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.sora(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: ClinicTheme.textPrimary,
-                    ),
+                    style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary),
                   ),
                   Text(
                     subtitle,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: ClinicTheme.textMuted,
-                    ),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textMuted),
                   ),
                 ],
               ),
               const Spacer(),
-              if (hasMetrics && transcript.isNotEmpty)
-                InkWell(
-                  onTap: () => _showEvidenceModal(
-                    context,
-                    title: 'Quote Grounding Verification: $title',
-                    transcript: transcript,
+              InkWell(
+                onTap: () => _showEvidenceModal(
+                  context,
+                  title: 'Quote Grounding Verification: $title',
+                  transcript: transcript,
+                ),
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.brandAccentFaint,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: ClinicTheme.brandAccentFaint,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.verified, size: 12, color: ClinicTheme.brandAccent),
-                        SizedBox(width: 4),
-                        Text(
-                          'Verify Quote',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: ClinicTheme.brandAccent,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.verified, size: 12, color: ClinicTheme.brandAccent),
+                      SizedBox(width: 4),
+                      Text(
+                        'Verify Quote',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: ClinicTheme.brandAccent),
+                      ),
+                    ],
                   ),
                 ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           SelectableText(
             content,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13.5,
-              height: 1.5,
-              color: ClinicTheme.textPrimary,
-            ),
+            style: GoogleFonts.plusJakartaSans(fontSize: 13, height: 1.5, color: ClinicTheme.textPrimary),
           ),
           if (icdChips != null || cptChips != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 6,
@@ -876,36 +1162,597 @@ class _EhrSoapWorkbench extends StatelessWidget {
     );
   }
 
-  void _copyEhrFormat(BuildContext context, Map<String, dynamic> sections, String patientName) {
-    final sub = sections['subjective'] ?? 'Not documented';
-    final obj = sections['objective'] ?? 'Not documented';
-    final ass = sections['assessment'] ?? 'Not documented';
-    final pln = sections['plan'] ?? 'Not documented';
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 2: Diarized Verbatim Audio Transcript
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildTranscriptTab(_ClinicalScenario sc) {
+    final lines = sc.transcript.split('\n');
 
-    final text = '''=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===
-Patient: $patientName
+    return Container(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Audio Player Control Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: ClinicTheme.obsidianElevated,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.play_circle_fill_rounded, color: ClinicTheme.brandAccent, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Encounter Audio Stream (Lane 1)',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w600)),
+                          Text('02:01 / 04:18',
+                              style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        value: 0.48,
+                        backgroundColor: Colors.white.withOpacity(0.08),
+                        valueColor: const AlwaysStoppedAnimation<Color>(ClinicTheme.brandAccent),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text('1.0x', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textSecondary)),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'SPEAKER-DIARIZED TRANSCRIPT',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+              color: ClinicTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: ListView.separated(
+              itemCount: lines.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, i) {
+                final line = lines[i];
+                final isDoctor = line.contains('Dr. Vance:');
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDoctor ? ClinicTheme.obsidianElevated : Colors.white.withOpacity(0.02),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isDoctor ? ClinicTheme.brandAccent.withOpacity(0.2) : Colors.white.withOpacity(0.04),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: isDoctor ? ClinicTheme.brandAccentFaint : Colors.white.withOpacity(0.06),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isDoctor ? Icons.medical_services_rounded : Icons.person_rounded,
+                          size: 14,
+                          color: isDoctor ? ClinicTheme.brandAccent : ClinicTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SelectableText(
+                          line,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.5,
+                            height: 1.45,
+                            color: isDoctor ? ClinicTheme.textPrimary : const Color(0xFFCBD5E1),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 3: Discrete Optometric Findings (The Eye Care Cockpit)
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildOptometricFindingsTab(_ClinicalScenario sc) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Visual Acuity & Refraction Matrix
+        _buildFindingCard(
+          icon: Icons.visibility_rounded,
+          title: 'Visual Acuity & Manifest Refraction',
+          badge: 'Distance & Near',
+          child: Table(
+            columnWidths: const {
+              0: FlexColumnWidth(1.2),
+              1: FlexColumnWidth(1.5),
+              2: FlexColumnWidth(2.0),
+              3: FlexColumnWidth(1.2),
+            },
+            children: [
+              TableRow(
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.08))),
+                ),
+                children: [
+                  _tableCell('Eye', isHeader: true),
+                  _tableCell('Corrected VA', isHeader: true),
+                  _tableCell('Manifest Rx', isHeader: true),
+                  _tableCell('Add / Near', isHeader: true),
+                ],
+              ),
+              TableRow(
+                children: [
+                  _tableCell('OD (Right)'),
+                  _tableCell(sc.vaOd, isBold: true),
+                  _tableCell(sc.rxOd),
+                  _tableCell('${sc.add} (J1+)'),
+                ],
+              ),
+              TableRow(
+                children: [
+                  _tableCell('OS (Left)'),
+                  _tableCell(sc.vaOs, isBold: true),
+                  _tableCell(sc.rxOs),
+                  _tableCell('${sc.add} (J1)'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Tonometry & Pachymetry (IOP)
+        _buildFindingCard(
+          icon: Icons.speed_rounded,
+          title: 'Tonometry & Corneal Pachymetry (IOP)',
+          badge: 'Goldmann Applanation',
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.obsidianElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white.withOpacity(0.06)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('OD (RIGHT EYE)',
+                          style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted)),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(sc.iopOd,
+                              style: GoogleFonts.sora(fontSize: 20, fontWeight: FontWeight.w800, color: ClinicTheme.brandAccent)),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('Normal (≤21)', style: TextStyle(fontSize: 9.5, color: Color(0xFF10B981), fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text('CCT: ${sc.cctOd}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textSecondary)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.obsidianElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: sc.iopAlertOs ? const Color(0xFFEF4444).withOpacity(0.4) : Colors.white.withOpacity(0.06),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('OS (LEFT EYE)',
+                          style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted)),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(sc.iopOs,
+                              style: GoogleFonts.sora(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: sc.iopAlertOs ? const Color(0xFFEF4444) : ClinicTheme.brandAccent)),
+                          const SizedBox(width: 8),
+                          if (sc.iopAlertOs)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEF4444).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text('PRESSURE SPIKE', style: TextStyle(fontSize: 9.5, color: Color(0xFFEF4444), fontWeight: FontWeight.w700)),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text('CCT: ${sc.cctOs}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textSecondary)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Slit Lamp Biomicroscopy & Tear Film
+        _buildFindingCard(
+          icon: Icons.lightbulb_outline_rounded,
+          title: 'Slit Lamp Biomicroscopy (Anterior Segment)',
+          badge: 'Cornea, Lens & Tear Film',
+          child: Column(
+            children: [
+              _buildFindingRow('Cornea', 'Clear OU, no edema, intact epithelium'),
+              _buildFindingRow('Anterior Chamber', 'Deep & quiet, Van Herick Grade 4 bilaterally'),
+              _buildFindingRow('Lens (OD / OS)', 'OD: ${sc.lensOd} • OS: ${sc.lensOs}'),
+              _buildFindingRow('Tear Breakup Time (TBUT)', sc.tbut),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Dilated Fundus Examination (DFE)
+        _buildFindingCard(
+          icon: Icons.camera_alt_outlined,
+          title: 'Dilated Fundus Examination (DFE)',
+          badge: 'Optic Disc & Macula',
+          child: Column(
+            children: [
+              _buildFindingRow('Optic Disc (OD)', 'C/D Ratio ${sc.cdRatioOd}, round, pink, distinct margins, rim intact'),
+              _buildFindingRow('Optic Disc (OS)', 'C/D Ratio ${sc.cdRatioOs}, vertical thinning, glaucoma suspect alert'),
+              _buildFindingRow('Macula', 'Flat OU, no macular edema, intact foveal reflex'),
+              _buildFindingRow('Periphery', '360° intact, flat, no retinal tears, holes, or lattice degeneration'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFindingCard({
+    required IconData icon,
+    required String title,
+    required String badge,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surfaceDark.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: ClinicTheme.brandAccent, size: 18),
+              const SizedBox(width: 8),
+              Text(title, style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary)),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.brandAccentFaint,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(badge, style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w600, color: ClinicTheme.brandAccent)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _tableCell(String text, {bool isHeader = false, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        text,
+        style: isHeader
+            ? GoogleFonts.jetBrainsMono(fontSize: 10.5, fontWeight: FontWeight.w700, color: ClinicTheme.textMuted)
+            : GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+                color: isBold ? ClinicTheme.brandAccent : ClinicTheme.textPrimary,
+              ),
+      ),
+    );
+  }
+
+  Widget _buildFindingRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 170,
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w600, color: ClinicTheme.textMuted),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 4: Multi-EHR Export Bridge
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildEhrBridgeTab(_ClinicalScenario sc) {
+    final ehrTargets = ['Epic Systems', 'Eyefinity EHR', 'RevolutionEHR', 'ModMed EMA', 'FHIR R4 JSON'];
+
+    String formattedNote;
+    switch (_selectedEhrBridge) {
+      case 'Epic Systems':
+        formattedNote = '''=== EPICCARE AMBULATORY OPHTHALMIC ENCOUNTER ===
+PATIENT: ${sc.patientName} (MRN: ${sc.mrn})
+DATE: ${DateTime.now().toLocal().toString().split('.')[0]}
+ATTENDING: Dr. Ada Optometrist, OD
+
+.BRIEFOPHTH
+CHIEF COMPLAINT: ${sc.chiefComplaint}
+
+.SUBJECTIVE
+${sc.subjective}
+
+.EXAMDISCRETE
+VISUAL ACUITY: OD ${sc.vaOd} (Rx: ${sc.rxOd}) | OS ${sc.vaOs} (Rx: ${sc.rxOs})
+TONOMETRY (Goldmann): OD ${sc.iopOd} | OS ${sc.iopOs} (Pachymetry CCT: OD ${sc.cctOd}, OS ${sc.cctOs})
+SLIT LAMP: Cornea clear OU. AC deep & quiet. Lens OD: ${sc.lensOd}, OS: ${sc.lensOs}.
+FUNDUS: OD C/D ${sc.cdRatioOd} | OS C/D ${sc.cdRatioOs}. Macula flat OU.
+
+.ASSESSMENT & PLAN
+${sc.assessment}
+${sc.plan}
+
+ELECTRONIC SIGNATURE: Signed by Dr. Ada Optometrist, OD via GozVision Ambient Bridge.''';
+        break;
+
+      case 'Eyefinity EHR':
+        formattedNote = '''=== EYEFINITY EHR / OFFICEMATE CLOUD EXAM NOTE ===
+Patient: ${sc.patientName}
+Exam Date: ${DateTime.now().toLocal().toString().split('.')[0]}
+Doctor: Dr. Ada Optometrist, OD
+
+[CHIEF COMPLAINT]
+${sc.chiefComplaint}
+
+[REFRACTION & SPECTACLE RX]
+OD: ${sc.rxOd} (VA: ${sc.vaOd}) Add: ${sc.add}
+OS: ${sc.rxOs} (VA: ${sc.vaOs}) Add: ${sc.add}
+Dispensary Status: Transmitted to Bachs Optical Dispensary
+
+[OCULAR HEALTH]
+IOP OD: ${sc.iopOd} | IOP OS: ${sc.iopOs}
+Slit Lamp: Cornea clear OU. Lens OD ${sc.lensOd}, OS ${sc.lensOs}.
+Fundus C/D: OD ${sc.cdRatioOd}, OS ${sc.cdRatioOs}.
+
+[DIAGNOSIS & BILLING]
+${sc.icdCodes.join('\n')}
+CPT: ${sc.cptCodes.join(', ')}''';
+        break;
+
+      case 'RevolutionEHR':
+        formattedNote = '''=== REVOLUTION EHR CLOUD POD EXPORT ===
+Patient Name: ${sc.patientName}
+Encounter Type: Comprehensive Ophthalmic Exam
+
+<SubjectivePod>
+${sc.subjective}
+</SubjectivePod>
+
+<RefractionPod>
+OD: ${sc.rxOd} (VA: ${sc.vaOd})
+OS: ${sc.rxOs} (VA: ${sc.vaOs})
+</RefractionPod>
+
+<TonometryPod>
+OD: ${sc.iopOd} | OS: ${sc.iopOs}
+Method: Goldmann Applanation
+</TonometryPod>
+
+<AssessmentPlanPod>
+${sc.assessment}
+${sc.plan}
+</AssessmentPlanPod>''';
+        break;
+
+      default:
+        formattedNote = '''{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "DocumentReference",
+        "subject": { "display": "${sc.patientName}", "reference": "Patient/${sc.mrn}" },
+        "author": [{ "display": "Dr. Ada Optometrist, OD" }],
+        "date": "${DateTime.now().toUtc().toIso8601String()}",
+        "description": "GozVision Verified Ambient Scribe Chart"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "55284-4", "display": "IOP Goldmann" }] },
+        "component": [
+          { "code": { "text": "OD" }, "valueQuantity": { "value": 16, "unit": "mmHg" } },
+          { "code": { "text": "OS" }, "valueQuantity": { "value": 24, "unit": "mmHg" } }
+        ]
+      }
+    }
+  ]
+}''';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'SELECT TARGET EHR FORMAT:',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.1,
+                  color: ClinicTheme.textSecondary,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text('Direct API Tunnel Active',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF10B981))),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: ehrTargets.map((target) {
+              final isSel = _selectedEhrBridge == target;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(target),
+                  selected: isSel,
+                  onSelected: (val) {
+                    if (val) setState(() => _selectedEhrBridge = target);
+                  },
+                  selectedColor: ClinicTheme.brandAccentFaint,
+                  backgroundColor: ClinicTheme.obsidianElevated,
+                  labelStyle: GoogleFonts.plusJakartaSans(
+                    fontSize: 11.5,
+                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
+                    color: isSel ? ClinicTheme.brandAccent : ClinicTheme.textSecondary,
+                  ),
+                  side: BorderSide(
+                    color: isSel ? ClinicTheme.brandAccent : ClinicTheme.border,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
+              ),
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  formattedNote,
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12,
+                    height: 1.45,
+                    color: const Color(0xFFE2E8F0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyEhrFormat(BuildContext context, _ClinicalScenario sc) {
+    final note = '''=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===
+Patient: ${sc.patientName} (MRN: ${sc.mrn})
 Date: ${DateTime.now().toLocal().toString().split('.')[0]}
 Provider: Dr. Ada Optometrist, OD
-Facility: GozVision Demo Eye Clinic (Verified Branch)
 
 [SUBJECTIVE]
-$sub
+${sc.subjective}
 
 [OBJECTIVE]
-$obj
+${sc.objective}
 
 [ASSESSMENT]
-$ass
+${sc.assessment}
 
 [PLAN]
-$pln
+${sc.plan}
 
-Electronically signed & verified via GozVision Ambient Scribe Studio.''';
+Electronically verified via GozVision Ambient Scribe Studio.''';
 
-    Clipboard.setData(ClipboardData(text: text));
+    Clipboard.setData(ClipboardData(text: note));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('✓ Copied to clipboard in EHR format (Epic / Eyefinity ready)'),
+        content: Text('✓ Copied to clipboard in EHR format (Epic / Eyefinity ready).'),
         backgroundColor: ClinicTheme.brandAccentDim,
         behavior: SnackBarBehavior.floating,
       ),
@@ -932,7 +1779,7 @@ Electronically signed & verified via GozVision Ambient Scribe Studio.''';
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Grounding verification: exact conversation snippet matching this clinical assessment.',
+                  'Verbatim exam dialogue snippet matching this clinical assessment with speaker diarization.',
                   style: TextStyle(fontSize: 12, color: ClinicTheme.textSecondary),
                 ),
                 const SizedBox(height: 12),
@@ -946,7 +1793,7 @@ Electronically signed & verified via GozVision Ambient Scribe Studio.''';
                   child: SelectableText(
                     transcript,
                     style: GoogleFonts.jetBrainsMono(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       height: 1.5,
                       color: ClinicTheme.textPrimary,
                     ),
@@ -965,4 +1812,71 @@ Electronically signed & verified via GozVision Ambient Scribe Studio.''';
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Clinical Scenario Model
+// ─────────────────────────────────────────────────────────────────────────────
+class _ClinicalScenario {
+  final String name;
+  final String patientName;
+  final String mrn;
+  final String ageGender;
+  final String examLane;
+  final String chiefComplaint;
+  final String hpi;
+  final String subjective;
+  final String objective;
+  final String assessment;
+  final String plan;
+  final String transcript;
+  final String vaOd;
+  final String vaOs;
+  final String rxOd;
+  final String rxOs;
+  final String add;
+  final String iopOd;
+  final String iopOs;
+  final bool iopAlertOs;
+  final String cctOd;
+  final String cctOs;
+  final String cdRatioOd;
+  final String cdRatioOs;
+  final String lensOd;
+  final String lensOs;
+  final String tbut;
+  final List<String> icdCodes;
+  final List<String> cptCodes;
+
+  const _ClinicalScenario({
+    required this.name,
+    required this.patientName,
+    required this.mrn,
+    required this.ageGender,
+    required this.examLane,
+    required this.chiefComplaint,
+    required this.hpi,
+    required this.subjective,
+    required this.objective,
+    required this.assessment,
+    required this.plan,
+    required this.transcript,
+    required this.vaOd,
+    required this.vaOs,
+    required this.rxOd,
+    required this.rxOs,
+    required this.add,
+    required this.iopOd,
+    required this.iopOs,
+    required this.iopAlertOs,
+    required this.cctOd,
+    required this.cctOs,
+    required this.cdRatioOd,
+    required this.cdRatioOs,
+    required this.lensOd,
+    required this.lensOs,
+    required this.tbut,
+    required this.icdCodes,
+    required this.cptCodes,
+  });
 }

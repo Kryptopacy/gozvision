@@ -16,6 +16,7 @@ import '../modules/clinic_directory_page.dart';
 import '../modules/optical_storefront_page.dart';
 import '../modules/developer_console_page.dart';
 import '../modules/clinic_crm_page.dart';
+import '../modules/ehr_hub_page.dart';
 
 /// GozVision Clinic Suite — Enterprise Multi-Tenant Clinical Shell.
 ///
@@ -106,6 +107,7 @@ class _ClinicShellState extends State<ClinicShell> {
       OpticalStorefrontPage(),
       DeveloperConsolePage(),
       ClinicCrmPage(),
+      EhrHubPage(),
     ];
 
     return Scaffold(
@@ -163,6 +165,7 @@ class _ClinicShellState extends State<ClinicShell> {
       'Optical Dispensary',
       'Developer Console',
       'Patient Recall & CRM',
+      'EHR & Interoperability Hub',
     ];
 
     final currentTitle = (_index >= 0 && _index < titles.length) ? titles[_index] : 'Practice Suite';
@@ -398,14 +401,22 @@ class _ClinicShellState extends State<ClinicShell> {
               icon: Icons.edit_note_rounded,
               activeIcon: Icons.edit_note_rounded,
               label: 'Scribe Studio',
-              badgeText: 'Drafts',
-              badgeColor: ClinicTheme.warningAmber,
+              badgeText: 'AI Live',
+              badgeColor: ClinicTheme.brandAccent,
             ),
             _buildNavItem(
               index: 3,
               icon: Icons.insights_rounded,
               activeIcon: Icons.insights_rounded,
               label: 'Practice Insights',
+            ),
+            _buildNavItem(
+              index: 9,
+              icon: Icons.sync_alt_rounded,
+              activeIcon: Icons.sync_alt_rounded,
+              label: 'EHR & Data Bridge',
+              badgeText: 'FHIR R4',
+              badgeColor: ClinicTheme.brandAccent,
             ),
           ],
 
@@ -546,42 +557,55 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
           ),
 
-          // Bottom EHR Status Indicator
+          // Bottom EHR Status Indicator (Interactive Shortcut)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: ClinicTheme.cardBackground.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: ClinicTheme.border),
+              border: Border.all(
+                color: _index == 9 ? ClinicTheme.brandAccent : ClinicTheme.border,
+                width: _index == 9 ? 1.5 : 1.0,
+              ),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.shield_outlined, size: 14, color: ClinicTheme.brandAccent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => setState(() => _index = 9),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Row(
                     children: [
-                      Text(
-                        'EHR Bridge Active',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: ClinicTheme.textPrimary,
+                      const Icon(Icons.shield_outlined, size: 14, color: ClinicTheme.brandAccent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'EHR Bridge Active',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: _index == 9 ? ClinicTheme.brandAccent : ClinicTheme.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              'Epic & Eyefinity Sync (Click to view)',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                color: ClinicTheme.textMuted,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        'Epic & Eyefinity Sync',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9,
-                          color: ClinicTheme.textMuted,
-                        ),
-                      ),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: ClinicTheme.textMuted),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ],

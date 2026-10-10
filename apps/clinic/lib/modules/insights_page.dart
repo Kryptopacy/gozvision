@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
 
-/// Insights — Clinical practice analytics and operational ROI.
+/// Insights — Clinical Practice Analytics, Operational ROI, and Rehabilitation Telemetry.
 ///
 /// Tracks the core continuum of care:
 /// 1. Low vision referral conversion and device adherence (preventing the 29% abandonment cliff).
@@ -20,45 +21,57 @@ class InsightsPage extends StatelessWidget {
     final referrals = scope.stream('low_vision_referrals');
 
     if (fits == null || referrals == null) {
-      return const Center(child: CircularProgressIndicator(color: ClinicTheme.malachite));
+      return const Center(child: CircularProgressIndicator(color: ClinicTheme.brandAccent));
     }
 
     return Padding(
       padding: const EdgeInsets.all(24),
       child: ListView(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('Insights & Practice Analytics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-                  Text(
-                    'Clinical adherence signals, operational ROI, and low-vision rehabilitation outcomes.',
-                    style: TextStyle(color: ClinicTheme.textSecondary),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: ClinicTheme.malachite.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: ClinicTheme.malachite.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: const [
-                    Icon(Icons.insights, color: ClinicTheme.malachite, size: 16),
-                    SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: ClinicTheme.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      'Live Supabase Telemetry',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: ClinicTheme.malachite),
+                      'Insights & Practice Analytics',
+                      style: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w800, color: ClinicTheme.textPrimary),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Clinical adherence signals, operational ROI, ambient scribe savings, and low-vision rehabilitation outcomes.',
+                      style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 13),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.brandAccentFaint,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.insights_rounded, color: ClinicTheme.brandAccent, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Live Supabase Telemetry',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: ClinicTheme.brandAccent),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           StreamBuilder<ClinicRows>(
@@ -79,9 +92,14 @@ class InsightsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Section 1: Low-Vision Pipeline
-                      const Text(
+                      Text(
                         'LOW-VISION CONTINUUM & ADHERENCE',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: ClinicTheme.textSecondary),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.1,
+                          color: ClinicTheme.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -97,13 +115,13 @@ class InsightsPage extends StatelessWidget {
                             label: 'Sustained use',
                             value: '$sustained',
                             sublabel: 'Maintaining independent living',
-                            accent: ClinicTheme.malachite,
+                            accent: const Color(0xFF10B981),
                           ),
                           _StatCard(
                             label: 'Abandoned fits',
                             value: '$abandoned',
                             sublabel: abandoned == 0 ? '0% abandonment (Target met)' : 'Requires follow-up intervention',
-                            accent: abandoned > 0 ? ClinicTheme.hazardAlert : ClinicTheme.malachite,
+                            accent: abandoned > 0 ? ClinicTheme.hazardAlert : const Color(0xFF10B981),
                           ),
                           _StatCard(
                             label: 'Referrals attended',
@@ -115,9 +133,14 @@ class InsightsPage extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       // Section 2: Clinical Productivity & Operations
-                      const Text(
+                      Text(
                         'PRACTICE PRODUCTIVITY & CLINICAL ROI',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: ClinicTheme.textSecondary),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.1,
+                          color: ClinicTheme.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -128,66 +151,69 @@ class InsightsPage extends StatelessWidget {
                             label: 'Scribe time saved',
                             value: '2.4 hrs',
                             sublabel: 'Per doctor daily on SOAP documentation',
-                            accent: ClinicTheme.malachite,
+                            accent: ClinicTheme.brandAccent,
                           ),
                           _StatCard(
                             label: 'Medication adherence',
                             value: '94.2%',
                             sublabel: 'Prescribed IOP drops logged on schedule',
-                            accent: ClinicTheme.malachite,
+                            accent: Color(0xFF10B981),
                           ),
                           _StatCard(
                             label: 'No-show recovery',
                             value: '68.5%',
                             sublabel: 'Re-booked via conversational recall',
-                            accent: ClinicTheme.malachite,
+                            accent: ClinicTheme.brandAccent,
                           ),
                           _StatCard(
                             label: 'Functional acuity gain',
                             value: '+1.8 lines',
                             sublabel: 'Average gain with CLAHE edge contrast',
-                            accent: ClinicTheme.malachite,
+                            accent: Color(0xFF10B981),
                           ),
                         ],
                       ),
                       const SizedBox(height: 28),
 
                       // Section 3: Industry Comparison Card
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: const [
-                                  Icon(Icons.verified, color: ClinicTheme.malachite, size: 20),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'GozVision Telemetry vs. Industry Clinical Benchmarks',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Traditional low-vision rehabilitation faces a 29% device abandonment rate within 90 days '
-                                'due to lack of follow-up. GozVision\'s real-time adherence stream detects quiet periods '
-                                'within 48 hours, enabling early practitioner re-engagement before patients disengage.',
-                                style: TextStyle(color: ClinicTheme.textSecondary, height: 1.4),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  _BenchmarkBadge(title: 'Industry Abandonment', value: '29.0%', isNegative: true),
-                                  const SizedBox(width: 16),
-                                  _BenchmarkBadge(title: 'GozVision Practice Rate', value: '4.8%', isNegative: false),
-                                  const SizedBox(width: 16),
-                                  _BenchmarkBadge(title: 'Recall Response Rate', value: '74.2%', isNegative: false),
-                                ],
-                              ),
-                            ],
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: ClinicTheme.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: ClinicTheme.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.verified, color: ClinicTheme.brandAccent, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'GozVision Telemetry vs. Industry Clinical Benchmarks',
+                                  style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Traditional low-vision rehabilitation faces a 29% device abandonment rate within 90 days '
+                              'due to lack of follow-up. GozVision\'s real-time adherence stream detects quiet periods '
+                              'within 48 hours, enabling early practitioner re-engagement before patients disengage.',
+                              style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, height: 1.5, fontSize: 13),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: const [
+                                _BenchmarkBadge(title: 'Industry Abandonment', value: '29.0%', isNegative: true),
+                                SizedBox(width: 16),
+                                _BenchmarkBadge(title: 'GozVision Practice Rate', value: '4.8%', isNegative: false),
+                                SizedBox(width: 16),
+                                _BenchmarkBadge(title: 'Recall Response Rate', value: '74.2%', isNegative: false),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -211,7 +237,7 @@ class _BenchmarkBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isNegative ? ClinicTheme.hazardAlert : ClinicTheme.malachite;
+    final color = isNegative ? ClinicTheme.hazardAlert : const Color(0xFF10B981);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -222,9 +248,9 @@ class _BenchmarkBadge extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 11, color: ClinicTheme.textSecondary)),
+          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textSecondary)),
           const SizedBox(height: 2),
-          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+          Text(value, style: GoogleFonts.sora(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
         ],
       ),
     );
@@ -241,31 +267,38 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: 250,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: accent ?? ClinicTheme.malachite,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: ClinicTheme.textPrimary)),
-              if (sublabel != null) ...[
-                const SizedBox(height: 4),
-                Text(sublabel!, style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
-              ],
-            ],
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: ClinicTheme.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.sora(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: accent ?? ClinicTheme.brandAccent,
+            ),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 13.5, color: ClinicTheme.textPrimary),
+          ),
+          if (sublabel != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              sublabel!,
+              style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11),
+            ),
+          ],
+        ],
       ),
     );
   }

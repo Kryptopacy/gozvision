@@ -60,28 +60,31 @@ create policy "crm_recalls_clinic_all"
 -- 3. Seed demo CRM recalls for instant testing in clinics
 insert into public.crm_recalls (clinic_id, patient_id, patient_name, pipeline_type, due_date, status, recipient_target, notes)
 select
-  c.id,
-  'demo_patient_001',
-  'Eleanor Vance',
+  p.clinic_id,
+  p.id,
+  p.name,
   'annual_exam',
   now() + interval '5 days',
   'pending',
   'both',
-  '11-month recall due. Severe low vision (macular degeneration). Alert caregiver.'
-from public.clinics c
+  '11-month recall due. Severe low vision. Alert caregiver.'
+from public.patients p
+where p.clinic_id is not null
 limit 1
 on conflict do nothing;
 
 insert into public.crm_recalls (clinic_id, patient_id, patient_name, pipeline_type, due_date, status, recipient_target, notes)
 select
-  c.id,
-  'demo_patient_001',
-  'Eleanor Vance',
+  p.clinic_id,
+  p.id,
+  p.name,
   'drop_refill',
   now() + interval '2 days',
   'pending',
   'both',
   'Latanoprost 0.005% bottle approaching 30-day depletion. Auto-reorder prompt.'
-from public.clinics c
+from public.patients p
+where p.clinic_id is not null
 limit 1
 on conflict do nothing;
+
