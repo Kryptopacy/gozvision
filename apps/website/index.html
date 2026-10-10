@@ -179,10 +179,10 @@
   /* Hero Section */
   header.hero {
     position: relative;
-    padding: 140px 0 100px;
+    padding: 120px 0 90px;
     text-align: center;
     overflow: hidden;
-    min-height: 82vh;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -202,6 +202,8 @@
     filter: brightness(1.05) contrast(1.18) saturate(1.25);
     animation: heroKenBurns 32s ease-in-out infinite alternate;
     transform-origin: 50% 20%;
+    will-change: transform;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes heroKenBurns {
     0% { transform: scale(1) translateY(0); }
@@ -246,27 +248,109 @@
     z-index: 3;
     max-width: 980px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+
+  /* Hero Title Stage with GozVision Navbar Lens behind "Visual autonomy" */
+  .hero-title-stage {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+    margin-bottom: 28px;
+  }
+  .hero-lens-backdrop {
+    position: absolute;
+    /* Positioned behind the headline "Visual autonomy in everyday life." */
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -42%);
+    width: clamp(260px, 30vw, 370px);
+    height: auto;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 78%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 78%, rgba(0, 0, 0, 0) 100%);
+  }
+  .hero-lens-halo {
+    position: absolute;
+    inset: -15px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.28) 0%, rgba(2, 132, 199, 0.1) 45%, transparent 70%);
+    filter: blur(35px);
+    pointer-events: none;
+    animation: lensHaloPulse 6s ease-in-out infinite alternate;
+  }
+  @keyframes lensHaloPulse {
+    0% { transform: scale(0.94); opacity: 0.5; }
+    100% { transform: scale(1.08); opacity: 0.85; }
+  }
+  .hero-lens-watermark {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.58;
+    filter: 
+      drop-shadow(0 0 24px rgba(56, 189, 248, 0.6)) 
+      drop-shadow(0 0 50px rgba(56, 189, 248, 0.25)) 
+      brightness(1.1) contrast(1.15);
+    animation: lensBreathe 6s ease-in-out infinite alternate;
+    pointer-events: none;
+    user-select: none;
+  }
+  @keyframes lensBreathe {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-6px); }
+  }
+
   h1.hero-title {
+    position: relative;
+    z-index: 2;
     font-size: clamp(40px, 6.2vw, 74px);
     letter-spacing: -0.04em;
     max-width: 18ch;
-    margin: 0 auto 24px;
-    line-height: 1.06;
+    margin: 0 auto;
+    line-height: 1.08;
     font-weight: 800;
-    background: linear-gradient(180deg, #FFFFFF 15%, #E2E8F0 60%, #7DD3FC 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 30px rgba(56, 189, 248, 0.3));
+    text-align: center;
+  }
+  .hero-title-lead {
+    display: block;
+    color: #ffffff;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 2px 6px rgba(0, 0, 0, 0.9);
+  }
+  .hero-title-sub {
+    display: block;
+    color: #ffffff;
+    text-shadow: 
+      0 4px 28px rgba(0, 0, 0, 0.98), 
+      0 2px 10px rgba(0, 0, 0, 0.95), 
+      0 0 35px rgba(56, 189, 248, 0.45);
   }
   .hero-desc {
-    color: #cbd5e1;
-    font-size: clamp(16px, 1.8vw, 19.5px);
+    position: relative;
+    z-index: 3;
+    color: #f1f5f9;
+    font-size: clamp(16.5px, 1.85vw, 20px);
     max-width: 58ch;
     margin: 0 auto 38px;
-    font-weight: 400;
-    line-height: 1.6;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9);
+    font-weight: 450;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    text-shadow: 
+      0 2px 12px rgba(0, 0, 0, 0.95),
+      0 4px 24px rgba(0, 0, 0, 0.98),
+      0 0 1px rgba(0, 0, 0, 1);
   }
   .hero-actions {
     display: flex; align-items: center; justify-content: center;
@@ -857,7 +941,7 @@
 
 <main>
   <!-- Hero Section -->
-  <header class="hero">
+  <header class="hero" id="heroSection">
     <div class="hero-bg-backdrop">
       <div class="hero-bg-image"></div>
       <div class="hero-ambient-glow"></div>
@@ -865,9 +949,18 @@
       <div class="hero-bg-gradient"></div>
     </div>
     <div class="wrap hero-content">
-      <h1 class="hero-title">
-        Clinical intelligence in the exam room.<br>Visual autonomy in everyday life.
-      </h1>
+      <div class="hero-title-stage">
+        <!-- GozVision Navbar Lens Logo positioned behind "Visual autonomy in everyday life." -->
+        <div class="hero-lens-backdrop" id="heroLensBackdrop">
+          <div class="hero-lens-halo"></div>
+          <img src="assets/gozvision_lens_clean_cut.png" alt="GozVision Optical Intelligence" class="hero-lens-watermark" id="heroLensWatermark" />
+        </div>
+
+        <h1 class="hero-title">
+          <span class="hero-title-lead">Clinical intelligence in the exam room.</span>
+          <span class="hero-title-sub">Visual autonomy in everyday life.</span>
+        </h1>
+      </div>
       <p class="hero-desc">
         Built by optometrists. Ambient Scribe EHR charting, low-vision referral recovery, and Goz — the voice-first multimodal copilot patients take home on smart glasses and mobile.
       </p>
@@ -1622,15 +1715,27 @@
     alert('Project Brief copied to clipboard!');
   }
 
-  // ── High-Performance Optical Canvas Animation ──
+  // ── High-Performance Optical Canvas & Interactive Volumetric Spotlight ──
   (function initHeroCanvas() {
     const canvas = document.getElementById('heroCanvas');
+    const hero = document.getElementById('heroSection');
+    const lensBackdrop = document.getElementById('heroLensBackdrop');
+    const bgImage = document.querySelector('.hero-bg-image');
     if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     let width = 0, height = 0;
-    let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let mouse = { x: 0, y: 0, targetX: 0, targetY: 0, rawX: -9999, rawY: -9999, isOver: false };
     let particles = [];
-    const PARTICLE_COUNT = 36;
+    const PARTICLE_COUNT = 48;
+
+    // Interactive 3D Parallax State
+    let targetRotX = 0, targetRotY = 0;
+    let currRotX = 0, currRotY = 0;
+    let targetLensX = 0, targetLensY = 0;
+    let currLensX = 0, currLensY = 0;
+    let targetBgX = 0, targetBgY = 0;
+    let currBgX = 0, currBgY = 0;
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
@@ -1644,78 +1749,153 @@
     window.addEventListener('resize', resize);
     resize();
 
-    window.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      if (e.clientY <= rect.bottom + 100) {
-        mouse.targetX = (e.clientX - width / 2) * 0.08;
-        mouse.targetY = (e.clientY - height / 2) * 0.08;
-      }
-    });
+    // Mouse Tracking across Hero Section
+    if (hero) {
+      hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
 
+        mouse.rawX = e.clientX - rect.left;
+        mouse.rawY = e.clientY - rect.top;
+        mouse.isOver = true;
+
+        mouse.targetX = normX * 45;
+        mouse.targetY = normY * 30;
+
+        // 3D Lens Parallax behind Visual Autonomy
+        targetRotX = -normY * 15;
+        targetRotY = normX * 16;
+        targetLensX = normX * 24;
+        targetLensY = normY * 18;
+
+        // Subtle Deep Background Parallax
+        targetBgX = -normX * 12;
+        targetBgY = -normY * 8;
+      });
+
+      hero.addEventListener('mouseleave', () => {
+        mouse.isOver = false;
+        mouse.targetX = 0;
+        mouse.targetY = 0;
+        targetRotX = 0;
+        targetRotY = 0;
+        targetLensX = 0;
+        targetLensY = 0;
+        targetBgX = 0;
+        targetBgY = 0;
+      });
+    }
+
+    // Initialize Upward Floating Photon Particles
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
         x: Math.random() * (width || window.innerWidth),
-        y: Math.random() * (height || 600),
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 2 + 1,
+        y: Math.random() * (height || 700),
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: -(Math.random() * 0.45 + 0.15), // Upward drift like light dust
+        radius: Math.random() * 2.2 + 0.8,
         alpha: Math.random() * 0.45 + 0.2,
-        pulseSpeed: Math.random() * 0.02 + 0.01,
+        pulseSpeed: Math.random() * 0.025 + 0.015,
         phase: Math.random() * Math.PI * 2
       });
     }
 
     let time = 0;
     function render() {
-      time += 0.015;
-      mouse.x += (mouse.targetX - mouse.x) * 0.05;
-      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+      time += 0.018;
+
+      // Smooth Lerp for Mouse Coordinates & Parallax
+      mouse.x += (mouse.targetX - mouse.x) * 0.06;
+      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+
+      currRotX += (targetRotX - currRotX) * 0.08;
+      currRotY += (targetRotY - currRotY) * 0.08;
+      currLensX += (targetLensX - currLensX) * 0.07;
+      currLensY += (targetLensY - currLensY) * 0.07;
+      currBgX += (targetBgX - currBgX) * 0.05;
+      currBgY += (targetBgY - currBgY) * 0.05;
+
+      // Apply 3D Transforms to Lens Backdrop
+      if (lensBackdrop) {
+        lensBackdrop.style.transform = `translate(calc(-50% + ${currLensX.toFixed(2)}px), calc(-15% + ${currLensY.toFixed(2)}px)) perspective(1000px) rotateX(${currRotX.toFixed(2)}deg) rotateY(${currRotY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+      }
+      if (bgImage) {
+        bgImage.style.transform = `scale(1.03) translate(${currBgX.toFixed(2)}px, ${currBgY.toFixed(2)}px)`;
+      }
 
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle refractive caustic rays
-      ctx.save();
-      ctx.translate(width / 2 + mouse.x * 1.4, height * 0.45 + mouse.y * 1.4);
-      
-      const rayCount = 6;
-      for (let r = 0; r < rayCount; r++) {
-        const angle = (r / rayCount) * Math.PI * 2 + time * 0.05;
-        const rayLen = 220 + Math.sin(time + r) * 40;
-        const grad = ctx.createLinearGradient(0, 0, Math.cos(angle) * rayLen, Math.sin(angle) * rayLen);
-        grad.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
-        grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.03)');
-        grad.addColorStop(1, 'transparent');
+      // ── 1. Draw Celestial Volumetric Spotlight Rays ──
+      const raySourceX = width / 2 + mouse.x * 1.8;
+      const raySourceY = -60;
+      const emblemCenterY = 175; // Approx pixel height of emblem in hero
 
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.8 + Math.sin(time * 2 + r) * 1.0;
+      ctx.save();
+      const shaftCount = 7;
+      for (let s = 0; s < shaftCount; s++) {
+        const spreadAngle = (s - (shaftCount - 1) / 2) * 0.085 + Math.sin(time * 0.5 + s) * 0.015;
+        const shaftLength = height * 0.95;
+        const targetX = raySourceX + Math.sin(spreadAngle) * shaftLength;
+        const targetY = raySourceY + Math.cos(spreadAngle) * shaftLength;
+
+        const shaftGrad = ctx.createLinearGradient(raySourceX, raySourceY, targetX, targetY);
+        const baseAlpha = 0.08 + Math.sin(time + s * 1.2) * 0.03;
+        shaftGrad.addColorStop(0, `rgba(224, 242, 254, ${baseAlpha * 1.5})`);
+        shaftGrad.addColorStop(0.25, `rgba(56, 189, 248, ${baseAlpha * 1.1})`);
+        shaftGrad.addColorStop(0.65, `rgba(56, 189, 248, ${baseAlpha * 0.3})`);
+        shaftGrad.addColorStop(1, 'transparent');
+
+        ctx.strokeStyle = shaftGrad;
+        ctx.lineWidth = 42 + Math.sin(time * 0.8 + s) * 12;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(angle) * rayLen, Math.sin(angle) * rayLen);
+        ctx.moveTo(raySourceX, raySourceY);
+        ctx.lineTo(targetX, targetY);
         ctx.stroke();
       }
       ctx.restore();
 
-      // Update & draw optical particles
+      // ── 2. Interactive Cursor Lens Bloom ──
+      if (mouse.isOver && mouse.rawX > 0 && mouse.rawY > 0) {
+        ctx.save();
+        const cursorBloom = ctx.createRadialGradient(mouse.rawX, mouse.rawY, 0, mouse.rawX, mouse.rawY, 260);
+        cursorBloom.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
+        cursorBloom.addColorStop(0.5, 'rgba(2, 132, 199, 0.04)');
+        cursorBloom.addColorStop(1, 'transparent');
+        ctx.fillStyle = cursorBloom;
+        ctx.beginPath();
+        ctx.arc(mouse.rawX, mouse.rawY, 260, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ── 3. Draw & Animate Photon Dust Particles ──
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        p.x += p.vx + mouse.x * 0.01;
-        p.y += p.vy + mouse.y * 0.01;
+        p.x += p.vx + mouse.x * 0.008;
+        p.y += p.vy;
 
+        // Wrap around viewport with reset to bottom
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
+        if (p.y < 0) {
+          p.y = height + 10;
+          p.x = Math.random() * width;
+        }
 
-        const currentAlpha = p.alpha * (0.6 + 0.4 * Math.sin(time * p.pulseSpeed * 60 + p.phase));
+        // Particles near the central spotlight beam illuminate brighter
+        const distFromCenter = Math.abs(p.x - width / 2);
+        const inBeamBoost = distFromCenter < 240 ? 1.6 : 0.8;
+        const currentAlpha = p.alpha * inBeamBoost * (0.6 + 0.4 * Math.sin(time * p.pulseSpeed * 60 + p.phase));
 
-        // Connect nearby particles with subtle caustic lines
+        // Subtle caustic web between close particles
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            const lineAlpha = (1 - dist / 100) * 0.16;
+          if (dist < 90) {
+            const lineAlpha = (1 - dist / 90) * 0.14 * (inBeamBoost > 1 ? 1.5 : 0.7);
             ctx.strokeStyle = `rgba(56, 189, 248, ${lineAlpha})`;
             ctx.lineWidth = 0.75;
             ctx.beginPath();
@@ -1725,17 +1905,17 @@
           }
         }
 
-        // Particle node glow
-        const radGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
-        radGrad.addColorStop(0, `rgba(56, 189, 248, ${currentAlpha})`);
+        // Particle Glow
+        const radGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3.5);
+        radGrad.addColorStop(0, `rgba(56, 189, 248, ${Math.min(currentAlpha, 0.9)})`);
         radGrad.addColorStop(1, 'transparent');
 
         ctx.fillStyle = radGrad;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius * 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = `rgba(240, 249, 255, ${currentAlpha * 1.2})`;
+        ctx.fillStyle = `rgba(240, 249, 255, ${Math.min(currentAlpha * 1.3, 1)})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius * 0.7, 0, Math.PI * 2);
         ctx.fill();
