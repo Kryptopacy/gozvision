@@ -36,29 +36,59 @@ _SECTIONS = ("subjective", "objective", "assessment", "plan")
 
 
 def build_chart_prompt(transcript: str, patient_context: str = "") -> str:
-    """Builds the charting prompt. Pure — unit-testable."""
+    """Builds the comprehensive optometric charting prompt with OLD CARTS case history. Pure — unit-testable."""
     context_line = f"\nPatient context: {patient_context}" if patient_context else ""
-    return f"""You are an optometric scribe. Convert the examination conversation below
-into a draft SOAP note for the treating optometrist to review and edit.
+    return f"""You are an expert optometric scribe assisting an eye care provider.
+Convert the examination conversation below into a comprehensive, professional draft SOAP chart for the treating optometrist to review, edit, and sign.
 
-Rules:
-- Record only what the conversation supports; where information is missing,
-  write "[not documented]" rather than inventing findings.
-- Never diagnose or add recommendations beyond what was discussed.
-- Use standard optometric terminology and abbreviations.
-- Keep each section concise (3-6 bullet lines).{context_line}
+Clinical Requirements:
+1. Grounding & Evidence:
+   - Record ONLY what the conversation explicitly supports; where critical information was not discussed, write "[not documented]" rather than inventing findings.
+   - Never diagnose conditions or prescribe medications beyond what the provider explicitly stated.
+   - Use standard optometric abbreviations (OD, OS, OU, IOP, VA, BCVA, DFE, SLE, C/D, cc, sc).
+
+2. SUBJECTIVE Section Structure:
+   - Chief Complaint (CC): Primary reason for visit in patient's words or provider summary.
+   - Optometric Case History (OLD CARTS framework):
+     • Onset: When visual symptoms began
+     • Location: OD (right), OS (left), or OU (both eyes)
+     • Duration: Constant vs. intermittent, frequency of episodes
+     • Characteristics: Description of blur, glare, floaters, pain, burning, or diplopia
+     • Aggravating / Relieving factors: Screen work, night driving, bright sunlight, artificial tears
+     • Radiation / Related symptoms: Brow ache, headaches, halos, flashes (photopsia)
+     • Timing: Worse in morning vs. evening, during near tasks vs. distance
+     • Severity: Mild / Moderate / Severe (scale 1-10)
+   - Past Ocular History (POHx): Prior surgeries (LASIK, cataract phaco), trauma, patching, amblyopia.
+   - Past Medical History (PMHx): Diabetes (HbA1c & duration if mentioned), hypertension, medications.
+   - Family Medical / Ocular History (FMHx): Glaucoma, macular degeneration (AMD), retinal detachment.
+   - Visual Ergonomics / Vocational Demands: Screen hours/day, occupational hazards, hobbies.
+
+3. OBJECTIVE Section Structure:
+   - Visual Acuity (VA): Distance and near, OD / OS / OU (uncorrected vs. habitual or best-corrected).
+   - Intraocular Pressure (IOP): Measured mmHg for OD and OS, with measurement modality and time.
+   - Refraction: Manifest or subjective refraction (Sphere, Cylinder, Axis, Add).
+   - Slit Lamp Examination (SLE): Lids, lashes, conjunctiva, cornea, anterior chamber, iris, lens (OD/OS).
+   - Posterior Segment / DFE: Optic nerve (cup-to-disc ratio), macula, retinal vessels, periphery (OD/OS).
+
+4. ASSESSMENT Section:
+   - Primary and secondary optometric diagnoses with clinical severity and ICD-10-CM codes where applicable.
+
+5. PLAN Section:
+   - Prescriptions (spectacle Rx, contact lens parameters, or therapeutic eye drops with dosage).
+   - Patient education provided.
+   - Follow-up interval (e.g. 1 year routine, 6 months glaucoma check, 1 week acute follow-up).
+   - Remote Therapeutic Monitoring (RTM) or specialty device referral if indicated.{context_line}
 
 Conversation:
 \"\"\"
 {transcript.strip()}
 \"\"\"
 
-Output exactly these four sections, each starting with its heading on its
-own line: SUBJECTIVE:, OBJECTIVE:, ASSESSMENT:, PLAN:"""
+Output exactly these four sections, each starting with its heading on its own line: SUBJECTIVE:, OBJECTIVE:, ASSESSMENT:, PLAN:"""
 
 
 def parse_chart(response_text: str) -> dict:
-    """Parses the model output into the four SOAP sections. Pure — testable."""
+    """Parses the model output into the four SOAP sections plus structured OLD CARTS metadata. Pure — testable."""
     sections = {name: "" for name in _SECTIONS}
     positions = []
     for name in _SECTIONS:
@@ -71,6 +101,17 @@ def parse_chart(response_text: str) -> dict:
         body_end = positions[i + 1][1] if i + 1 < len(positions) else len(response_text)
         body = (inline or "") + response_text[end:body_end]
         sections[name] = body.strip().strip(":").strip()
+
+    # Extract structured OLD CARTS sub-fields if present in Subjective text
+    old_carts = {}
+    subj_text = sections.get("subjective", "")
+    for field in ("onset", "location", "duration", "characteristics", "aggravating", "radiation", "timing", "severity"):
+        m = re.search(rf"(?:•|-)?\s*{field}\s*:\s*([^\n\r]+)", subj_text, re.IGNORECASE)
+        if m:
+            old_carts[field] = m.group(1).strip()
+    if old_carts:
+        sections["old_carts"] = old_carts
+
     return sections
 
 
