@@ -360,8 +360,6 @@ class _ClinicShellState extends State<ClinicShell> {
               icon: Icons.terminal_rounded,
               activeIcon: Icons.terminal,
               label: 'Developer Console',
-              badgeText: 'Root',
-              badgeColor: ClinicTheme.brandAccent,
             ),
             const SizedBox(height: 16),
           ],
@@ -385,8 +383,6 @@ class _ClinicShellState extends State<ClinicShell> {
               icon: Icons.visibility_outlined,
               activeIcon: Icons.visibility,
               label: 'Low Vision Hub',
-              badgeText: 'Live',
-              badgeColor: ClinicTheme.brandAccent,
             ),
           ],
           _buildNavItem(
@@ -401,8 +397,6 @@ class _ClinicShellState extends State<ClinicShell> {
               icon: Icons.edit_note_rounded,
               activeIcon: Icons.edit_note_rounded,
               label: 'Scribe Studio',
-              badgeText: 'AI Live',
-              badgeColor: ClinicTheme.brandAccent,
             ),
             _buildNavItem(
               index: 3,
@@ -415,8 +409,6 @@ class _ClinicShellState extends State<ClinicShell> {
               icon: Icons.sync_alt_rounded,
               activeIcon: Icons.sync_alt_rounded,
               label: 'EHR & Data Bridge',
-              badgeText: 'FHIR R4',
-              badgeColor: ClinicTheme.brandAccent,
             ),
           ],
 
@@ -467,8 +459,6 @@ class _ClinicShellState extends State<ClinicShell> {
             icon: Icons.storefront_outlined,
             activeIcon: Icons.storefront_rounded,
             label: 'Optical Dispensary',
-            badgeText: 'Bachs',
-            badgeColor: ClinicTheme.brandAccent,
           ),
 
           const SizedBox(height: 16),
@@ -489,8 +479,6 @@ class _ClinicShellState extends State<ClinicShell> {
             icon: Icons.people_alt_outlined,
             activeIcon: Icons.people_alt_rounded,
             label: 'Patient Recall & CRM',
-            badgeText: 'Active',
-            badgeColor: ClinicTheme.brandAccent,
           ),
 
           const Spacer(),

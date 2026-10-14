@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              'Sensory Copilot Active • Try saying: "Describe what is in front of me"',
+              'GozVision Ready • Try saying: "Describe what is in front of me"',
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 11.5,
@@ -334,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  /// Explicitly visible Goz View toggle with Voice Command hints
+  /// Explicitly visible Camera Preview toggle
   Widget _buildGozViewToggleHint() {
     return GestureDetector(
       onTap: () {
@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  _showDebugCamera ? 'HIDE GOZ VIEW' : 'SHOW GOZ VIEW',
+                  _showDebugCamera ? 'HIDE CAMERA PREVIEW' : 'SHOW CAMERA PREVIEW',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -388,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 6),
             const Text(
-              "Tap here or say 'Toggle Goz View'",
+              "Tap to see what your camera sees",
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 12,
@@ -424,17 +424,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       actions: [
         IconButton(
           icon: const Icon(Icons.storefront_outlined, color: GozAITheme.accentCyan),
-          tooltip: 'Optical Dispensary & Doctor Prescriptions (Bachs)',
+          tooltip: 'Prescription Glasses & Eye Drops',
           onPressed: () => PatientDispensarySheet.show(context),
         ),
         IconButton(
           icon: const Icon(Icons.domain_outlined, color: GozAITheme.accentCyan),
-          tooltip: 'Find Clinics, Working Hours & Appointments',
+          tooltip: 'Find Eye Clinics & Book Appointment',
           onPressed: () => ClinicDiscoverySheet.show(context),
         ),
         IconButton(
           icon: const Icon(Icons.account_circle_outlined, color: GozAITheme.accentCyan),
-          tooltip: 'Patient Profile & Care Hub',
+          tooltip: 'My Profile & Eye Drops',
           onPressed: () => context.push('/profile'),
         ),
         IconButton(
@@ -760,8 +760,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 14),
                 Text(
                   isActive
-                      ? 'Tap orb to pause · Hold to snapshot scene'
-                      : 'Tap to start hands-free copilot session',
+                      ? 'Tap button to pause · Press and hold to describe scene'
+                      : 'Tap to start · Or speak anytime',
                   style: TextStyle(
                     fontSize: 12.5,
                     color: GozAITheme.textSecondary,
@@ -803,8 +803,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           _buildTactileDockButton(
             icon: Icons.camera_alt_outlined,
-            label: 'Snapshot',
-            tooltip: 'Capture & Describe Scene',
+            label: 'Describe',
+            tooltip: 'Take picture & describe what is in front of you',
             onTap: () {
               HapticService.tap();
               _coordinator?.captureSnapshot();
@@ -814,7 +814,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           _buildTactileDockButton(
             icon: Icons.document_scanner_outlined,
             label: 'Read Text',
-            tooltip: 'Read Prescription or Document',
+            tooltip: 'Read prescription, letter, or medicine bottle',
             onTap: () {
               HapticService.tap();
               _coordinator?.selectMode(GozAIMode.reading, fromUserTap: true);
@@ -825,7 +825,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             icon: Icons.sos_outlined,
             label: 'Emergency',
             color: GozAITheme.hazardAlert,
-            tooltip: 'Trigger Caregiver Alert',
+            tooltip: 'Call caregiver or clinic for help',
             onTap: _triggerEmergencySos,
           ),
         ],
@@ -1226,7 +1226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'Goz View (Live Feed)',
+                              'Camera Preview (Live)',
                               style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                             ),
                             Row(

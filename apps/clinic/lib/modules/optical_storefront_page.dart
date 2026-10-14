@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,8 +10,9 @@ import '../services/bachs_payment_service.dart';
 /// Optical Dispensary & Practice Storefront Module
 ///
 /// Features:
-///  - Dispensary Catalog (Frames, Smart Glasses, Low-Vision Filters, Therapeutics)
-///  - Doctor/Optometrist Product & Frame management
+///  - Dispensary Catalog (Frames, Smart Glasses, Low-Vision Tech, Therapeutics & Clinical Services)
+///  - Walk-In Reception Desk POS Terminal (Non-GozVision patients, custom copays, instant receipt)
+///  - Multi-Purpose Dynamic QR Signage Suite (Desk Pay Stand, Waiting Room Booking Stand, Copilot App Stand)
 ///  - Interactive Bachs Overlay Checkout preview
 ///  - Multi-Tenant Payment Provider Toggle: Bachs (Default) vs Stripe Connect
 ///  - Bachs Payouts API integration (instant bank disbursements & destination manager)
@@ -26,8 +28,16 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedCategory = 'All';
+  String _searchQuery = '';
+  final TextEditingController _searchCtrl = TextEditingController();
 
-  // Optical catalog
+  // Walk-In POS State
+  final List<Map<String, dynamic>> _posCart = [];
+  String _posPatientName = 'Walk-In Patient / Guest';
+  double _posCopayDeduction = 0.0;
+  String _selectedQrSignageMode = 'front_desk'; // 'front_desk', 'waiting_room', 'copilot_download'
+
+  // Optical catalog & Clinical Services
   final List<Map<String, dynamic>> _catalog = [
     {
       'id': 'prod_01',
@@ -53,7 +63,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     },
     {
       'id': 'prod_03',
-      'name': 'FL-41 Photophobia Glare Relief Clip-On',
+      'name': 'FL-41 Glare & Light Sensitivity Clip-On',
       'category': 'Low-Vision Tech',
       'sku': 'FL41-CLP-01',
       'price': 65.00,
@@ -71,7 +81,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
       'stock': 40,
       'rx_required': false,
       'rating': '4.9 ★',
-      'attributes': 'Nano-droplet Lipid Tech · Dry Eye & Meibomian Gland Care',
+      'attributes': 'Nano-droplet Lipid Tech · Dry Eye & Soothing Care',
     },
     {
       'id': 'prod_05',
@@ -83,6 +93,50 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
       'rx_required': true,
       'rating': '5.0 ★',
       'attributes': 'High-Speed 4K OLED · Central Scotoma Remapping',
+    },
+    {
+      'id': 'srv_01',
+      'name': 'Comprehensive Dilated Eye Examination & Retinal Imaging',
+      'category': 'Clinical Services',
+      'sku': 'CPT-92004-92134',
+      'price': 145.00,
+      'stock': 99,
+      'rx_required': false,
+      'rating': '5.0 ★',
+      'attributes': 'Full Refraction · Optomap Retinal Ultra-widefield · Tonometry',
+    },
+    {
+      'id': 'srv_02',
+      'name': 'Specialty Scleral & Keratoconus Contact Lens Fitting',
+      'category': 'Clinical Services',
+      'sku': 'CPT-92072-TOPO',
+      'price': 220.00,
+      'stock': 99,
+      'rx_required': false,
+      'rating': '4.9 ★',
+      'attributes': 'Corneal Wavefront Topography · Diagnostic Lens Trial · Insertion Training',
+    },
+    {
+      'id': 'srv_03',
+      'name': 'In-Office Intense Pulsed Light (IPL) & Thermal Gland Therapy',
+      'category': 'Clinical Services',
+      'sku': 'IPL-DRYEYE-S1',
+      'price': 285.00,
+      'stock': 99,
+      'rx_required': false,
+      'rating': '5.0 ★',
+      'attributes': 'Targeted Periorbital IPL · Meibomian Expression · Tear Osmolarity Post-Check',
+    },
+    {
+      'id': 'srv_04',
+      'name': 'Low Vision Assistive Device Evaluation & Copilot Pairing',
+      'category': 'Clinical Services',
+      'sku': 'CPT-97535-LV',
+      'price': 195.00,
+      'stock': 99,
+      'rx_required': false,
+      'rating': '5.0 ★',
+      'attributes': 'Bioptic / Prism Assessment · Smart Frame Calibration · Functional OT Strategy',
     },
   ];
 
@@ -129,12 +183,13 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -876,12 +931,16 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
               labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
               tabs: [
                 Tab(
-                  icon: const Icon(Icons.remove_red_eye_outlined, size: 18),
-                  text: 'Frames & Dispensary Catalog (${_catalog.length})',
+                  icon: const Icon(Icons.storefront_outlined, size: 18),
+                  text: 'Products & Clinical Services (${_catalog.length})',
                 ),
                 Tab(
                   icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                  text: 'Patient Orders (${_orders.length})',
+                  text: 'Patient Orders & Booking (${_orders.length})',
+                ),
+                Tab(
+                  icon: const Icon(Icons.point_of_sale_rounded, size: 18),
+                  text: 'Walk-In POS & Dynamic QR Hub',
                 ),
                 Tab(
                   icon: const Icon(Icons.account_balance_outlined, size: 18),
@@ -897,6 +956,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                 children: [
                   _buildCatalogTab(paymentService),
                   _buildOrdersTab(),
+                  _buildWalkInPosAndQrTab(scope, paymentService),
                   (scope.isClinicManager || scope.isDeveloper)
                       ? (paymentService.isBachsActive
                           ? _buildBachsPayoutsTab(scope, paymentService)
@@ -1138,11 +1198,61 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
   Widget _buildCatalogTab(BachsPaymentService paymentService) {
     return Column(
       children: [
+        // Search & Category Filters Bar
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 42,
+                decoration: BoxDecoration(
+                  color: ClinicTheme.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: ClinicTheme.border),
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Search frames, smart glasses, dry eye therapeutics, or clinical services...',
+                    hintStyle: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                    prefixIcon: const Icon(Icons.search, size: 18, color: ClinicTheme.textSecondary),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 16, color: ClinicTheme.textSecondary),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: ClinicTheme.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: ClinicTheme.border),
+              ),
+              child: Text(
+                'Showing ${_filteredCatalog.length} Items',
+                style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
         // Category filters
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: ['All', 'Frames', 'Smart Glasses', 'Low-Vision Tech', 'Therapeutics'].map((cat) {
+            children: ['All', 'Frames', 'Smart Glasses', 'Low-Vision Tech', 'Therapeutics', 'Clinical Services'].map((cat) {
               final isSel = _selectedCategory == cat;
               return Padding(
                 padding: const EdgeInsets.only(right: 8, bottom: 12),
@@ -1165,113 +1275,191 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
           ),
         ),
         Expanded(
-          child: ListView.separated(
-            itemCount: _filteredCatalog.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, i) {
-              final prod = _filteredCatalog[i];
-              return Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: ClinicTheme.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: ClinicTheme.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
+          child: _filteredCatalog.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.search_off_rounded, size: 48, color: ClinicTheme.textSecondary),
+                      const SizedBox(height: 12),
+                      Text('No items match "$_searchQuery"', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 6),
+                      const Text('Try adjusting your search query or selected category filter.', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12)),
+                    ],
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: _filteredCatalog.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, i) {
+                    final prod = _filteredCatalog[i];
+                    final isService = prod['category'] == 'Clinical Services';
+                    return Container(
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: ClinicTheme.cardBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: ClinicTheme.border),
+                        color: ClinicTheme.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: isService ? ClinicTheme.malachite.withOpacity(0.3) : ClinicTheme.border),
                       ),
-                      child: Center(
-                        child: Icon(
-                          prod['category'] == 'Frames'
-                              ? Icons.remove_red_eye_outlined
-                              : (prod['category'] == 'Smart Glasses' ? Icons.headset_mic_outlined : Icons.medication_outlined),
-                          color: ClinicTheme.malachite,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                prod['name'] as String,
-                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: isService ? ClinicTheme.malachiteFaint : ClinicTheme.cardBackground,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: isService ? ClinicTheme.malachite.withOpacity(0.4) : ClinicTheme.border),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                isService
+                                    ? Icons.medical_services_outlined
+                                    : (prod['category'] == 'Frames'
+                                        ? Icons.remove_red_eye_outlined
+                                        : (prod['category'] == 'Smart Glasses'
+                                            ? Icons.headset_mic_outlined
+                                            : Icons.medication_outlined)),
+                                color: ClinicTheme.malachite,
+                                size: 26,
                               ),
-                              const SizedBox(width: 10),
-                              if (prod['rx_required'] == true) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: ClinicTheme.warningAmber.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.3)),
-                                  ),
-                                  child: const Text('Rx Required', style: TextStyle(color: ClinicTheme.warningAmber, fontSize: 10, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                          const SizedBox(width: 18),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        prod['name'] as String,
+                                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    if (isService) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: ClinicTheme.malachiteFaint,
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: ClinicTheme.malachite.withOpacity(0.4)),
+                                        ),
+                                        child: const Text('Clinical Procedure / Booking', style: TextStyle(color: ClinicTheme.malachite, fontSize: 10, fontWeight: FontWeight.w700)),
+                                      ),
+                                    ] else if (prod['rx_required'] == true) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: ClinicTheme.warningAmber.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.3)),
+                                        ),
+                                        child: const Text('Rx Required', style: TextStyle(color: ClinicTheme.warningAmber, fontSize: 10, fontWeight: FontWeight.w700)),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'SKU / Code: ${prod['sku']} · ${prod['attributes']}',
+                                  style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  isService ? 'Status: Available for Walk-In & Online Appointment Booking' : 'Stock Level: ${prod['stock']} units · Customer Rating: ${prod['rating']}',
+                                  style: TextStyle(color: ClinicTheme.malachiteDim, fontSize: 11, fontWeight: FontWeight.w600),
                                 ),
                               ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '\$${(prod['price'] as double).toStringAsFixed(2)}',
+                                    style: const TextStyle(color: ClinicTheme.malachite, fontSize: 19, fontWeight: FontWeight.w800),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Add to POS Cart
+                                      IconButton(
+                                        tooltip: 'Add to Walk-in POS Cart',
+                                        icon: const Icon(Icons.add_shopping_cart, size: 18, color: ClinicTheme.malachite),
+                                        onPressed: () {
+                                          _addToPosCart(prod);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Added "${prod['name']}" to Walk-In POS Cart!'),
+                                              duration: const Duration(seconds: 2),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(width: 4),
+                                      FilledButton.tonalIcon(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: ClinicTheme.cardBackground,
+                                          foregroundColor: ClinicTheme.malachite,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        ),
+                                        icon: const Icon(Icons.bolt, size: 14),
+                                        label: const Text('Test Checkout', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                                        onPressed: () => _testOverlayCheckout(context, prod, paymentService),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'SKU: ${prod['sku']} · ${prod['attributes']}',
-                            style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Stock Level: ${prod['stock']} units · Customer Rating: ${prod['rating']}',
-                            style: TextStyle(color: ClinicTheme.malachiteDim, fontSize: 11, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '\$${(prod['price'] as double).toStringAsFixed(2)}',
-                              style: const TextStyle(color: ClinicTheme.malachite, fontSize: 20, fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 6),
-                            FilledButton.tonalIcon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: ClinicTheme.cardBackground,
-                                foregroundColor: ClinicTheme.malachite,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                              ),
-                              icon: const Icon(Icons.bolt, size: 14),
-                              label: const Text('Test Bachs Overlay', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                              onPressed: () => _testOverlayCheckout(context, prod, paymentService),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
   }
 
+  void _addToPosCart(Map<String, dynamic> item) {
+    setState(() {
+      final existingIndex = _posCart.indexWhere((c) => c['id'] == item['id']);
+      if (existingIndex >= 0) {
+        _posCart[existingIndex]['qty'] = (_posCart[existingIndex]['qty'] as int) + 1;
+      } else {
+        _posCart.add({
+          'id': item['id'],
+          'name': item['name'],
+          'price': item['price'],
+          'category': item['category'],
+          'qty': 1,
+        });
+      }
+    });
+  }
+
   List<Map<String, dynamic>> get _filteredCatalog {
-    if (_selectedCategory == 'All') return _catalog;
-    return _catalog.where((item) => item['category'] == _selectedCategory).toList();
+    final list = _selectedCategory == 'All'
+        ? _catalog
+        : _catalog.where((item) => item['category'] == _selectedCategory).toList();
+    if (_searchQuery.trim().isEmpty) return list;
+    final q = _searchQuery.toLowerCase();
+    return list.where((item) {
+      final name = (item['name'] as String).toLowerCase();
+      final sku = (item['sku'] as String).toLowerCase();
+      final cat = (item['category'] as String).toLowerCase();
+      final attr = (item['attributes'] as String).toLowerCase();
+      return name.contains(q) || sku.contains(q) || cat.contains(q) || attr.contains(q);
+    }).toList();
   }
 
   // Tab 2: Orders
@@ -1369,7 +1557,808 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     );
   }
 
-  // Tab 3: Bachs Instant Payouts & Settlement
+  // Tab 3: Walk-In POS & Multi-Purpose QR Hub
+  Widget _buildWalkInPosAndQrTab(ClinicScope scope, BachsPaymentService paymentService) {
+    final subtotal = _posCart.fold(0.0, (sum, it) => sum + (it['price'] as double) * (it['qty'] as int));
+    final finalTotal = math.max(0.0, subtotal - _posCopayDeduction);
+    final clinicId = scope.clinicId ?? 'demo_clinic';
+
+    String currentQrUrl;
+    String currentQrTitle;
+    String currentQrSubtitle;
+    String currentQrBadge;
+
+    if (_selectedQrSignageMode == 'front_desk') {
+      currentQrUrl = 'https://pay.gozvision.com/$clinicId/checkout';
+      currentQrTitle = 'Front Desk Touchless Checkout';
+      currentQrSubtitle = 'Patients scan with their phone camera to pay optical balances, frame balances, or exam copays.';
+      currentQrBadge = 'RECEPTION DESK STAND';
+    } else if (_selectedQrSignageMode == 'waiting_room') {
+      currentQrUrl = 'https://gozvision.com/store/$clinicId';
+      currentQrTitle = 'Dispensary & Clinical Services Booking';
+      currentQrSubtitle = 'Patients in the waiting lounge browse frames, order therapeutic drops, and book specialized evaluations.';
+      currentQrBadge = 'WAITING ROOM ACRYLIC STAND';
+    } else {
+      currentQrUrl = 'https://gozvision.com/app?clinic=$clinicId';
+      currentQrTitle = 'Download GozVision Patient Copilot';
+      currentQrSubtitle = 'Patients scan to install the GozVision vision copilot app pre-linked to Dr. Ada & this clinic.';
+      currentQrBadge = 'EXAM LANE COUNTER STAND';
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 900;
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isWide)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left Column: Walk-In Reception POS Terminal
+                    Expanded(
+                      flex: 6,
+                      child: _buildPosTerminal(context, subtotal, finalTotal, scope, paymentService),
+                    ),
+                    const SizedBox(width: 20),
+                    // Right Column: Multi-Purpose QR Code Signage Suite
+                    Expanded(
+                      flex: 5,
+                      child: _buildQrSignageSuite(context, currentQrUrl, currentQrTitle, currentQrSubtitle, currentQrBadge),
+                    ),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    _buildPosTerminal(context, subtotal, finalTotal, scope, paymentService),
+                    const SizedBox(height: 20),
+                    _buildQrSignageSuite(context, currentQrUrl, currentQrTitle, currentQrSubtitle, currentQrBadge),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPosTerminal(
+    BuildContext context,
+    double subtotal,
+    double finalTotal,
+    ClinicScope scope,
+    BachsPaymentService paymentService,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.malachiteFaint,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: ClinicTheme.malachite.withOpacity(0.3)),
+                ),
+                child: const Icon(Icons.point_of_sale_rounded, color: ClinicTheme.malachite, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Walk-In Reception POS Terminal',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Direct checkout for walk-in patients or patients not yet enrolled on GozVision',
+                      style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              if (_posCart.isNotEmpty)
+                TextButton.icon(
+                  icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.white60),
+                  label: const Text('Clear Cart', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                  onPressed: () => setState(() => _posCart.clear()),
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          const Divider(color: ClinicTheme.border),
+          const SizedBox(height: 14),
+
+          // Patient Selection Row
+          Row(
+            children: [
+              const Text('Patient Name:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.cardBackground,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: ClinicTheme.border),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _posPatientName,
+                      dropdownColor: ClinicTheme.cardBackground,
+                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                      items: const [
+                        DropdownMenuItem(value: 'Walk-In Patient / Guest', child: Text('Walk-In Patient / Guest (No Goz Profile)')),
+                        DropdownMenuItem(value: 'Eleanor Vance', child: Text('Eleanor Vance (Active Rx #OPT-8021)')),
+                        DropdownMenuItem(value: 'Robert Chen', child: Text('Robert Chen (Active Rx #OPT-7419)')),
+                        DropdownMenuItem(value: 'Martha Alvarez', child: Text('Martha Alvarez (Refraction Due)')),
+                      ],
+                      onChanged: (val) => setState(() => _posPatientName = val ?? 'Walk-In Patient / Guest'),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Quick-Add Item Chips
+          const Text('Quick Add from Catalog & Clinical Services:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _catalog.take(6).map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ActionChip(
+                    backgroundColor: ClinicTheme.cardBackground,
+                    side: const BorderSide(color: ClinicTheme.border),
+                    avatar: Icon(
+                      item['category'] == 'Clinical Services'
+                          ? Icons.medical_services_outlined
+                          : (item['category'] == 'Frames' ? Icons.remove_red_eye_outlined : Icons.medication_outlined),
+                      size: 14,
+                      color: ClinicTheme.malachite,
+                    ),
+                    label: Text(
+                      '${item['name'].toString().split('—')[0].split('(')[0].trim()} · \$${(item['price'] as double).toStringAsFixed(0)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 11.5),
+                    ),
+                    onPressed: () {
+                      _addToPosCart(item);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Added "${item['name']}" to cart'), duration: const Duration(milliseconds: 1200)),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Cart List
+          Container(
+            constraints: const BoxConstraints(minHeight: 140, maxHeight: 220),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: ClinicTheme.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: _posCart.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shopping_basket_outlined, size: 36, color: ClinicTheme.textSecondary),
+                        SizedBox(height: 8),
+                        Text('No items in Walk-In Cart', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text('Click items above or in the Catalog tab to add to this transaction.', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: _posCart.length,
+                    separatorBuilder: (_, __) => const Divider(height: 12, color: ClinicTheme.border),
+                    itemBuilder: (context, idx) {
+                      final item = _posCart[idx];
+                      final lineTotal = (item['price'] as double) * (item['qty'] as int);
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item['name'] as String, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text('${item['category']} · \$${(item['price'] as double).toStringAsFixed(2)} each', style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle_outline, size: 16, color: ClinicTheme.textSecondary),
+                                onPressed: () {
+                                  setState(() {
+                                    if ((item['qty'] as int) > 1) {
+                                      item['qty'] = (item['qty'] as int) - 1;
+                                    } else {
+                                      _posCart.removeAt(idx);
+                                    }
+                                  });
+                                },
+                              ),
+                              Text('${item['qty']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle_outline, size: 16, color: ClinicTheme.malachite),
+                                onPressed: () => setState(() => item['qty'] = (item['qty'] as int) + 1),
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 70,
+                                child: Text(
+                                  '\$${lineTotal.toStringAsFixed(2)}',
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white38),
+                                onPressed: () => setState(() => _posCart.removeAt(idx)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+          ),
+          const SizedBox(height: 18),
+
+          // Totals and Copay adjustment
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: ClinicTheme.surfaceDark,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Dispensary & Services Subtotal:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13)),
+                    Text('\$${subtotal.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: const [
+                        Text('Vision Insurance / Co-Pay Deduction:', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12)),
+                        SizedBox(width: 6),
+                        Icon(Icons.shield_outlined, size: 14, color: ClinicTheme.malachiteDim),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          child: Text(_posCopayDeduction == 0.0 ? 'Apply \$25 Copay' : 'Clear Copay', style: const TextStyle(color: ClinicTheme.malachite, fontSize: 11)),
+                          onPressed: () {
+                            setState(() {
+                              _posCopayDeduction = _posCopayDeduction == 0.0 ? 25.0 : 0.0;
+                            });
+                          },
+                        ),
+                        Text('-\$${_posCopayDeduction.toStringAsFixed(2)}', style: const TextStyle(color: ClinicTheme.warningAmber, fontSize: 13, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ],
+                ),
+                const Divider(height: 18, color: ClinicTheme.border),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Total Patient Balance Due:', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+                    Text(
+                      '\$${finalTotal.toStringAsFixed(2)}',
+                      style: const TextStyle(color: ClinicTheme.malachite, fontSize: 22, fontWeight: FontWeight.w900),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Payment Trigger Buttons
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: ClinicTheme.malachite,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                label: const Text('Dynamic Scan-to-Pay QR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                onPressed: _posCart.isEmpty
+                    ? null
+                    : () => _showScanToPayModal(context, finalTotal, _posPatientName, scope, paymentService),
+              ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: ClinicTheme.border),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.contactless_rounded, size: 18, color: ClinicTheme.malachite),
+                label: const Text('In-Person Card / Tap Reader', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                onPressed: _posCart.isEmpty
+                    ? null
+                    : () => _processInPersonCardPayment(context, finalTotal, _posPatientName),
+              ),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: ClinicTheme.textSecondary,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                ),
+                icon: const Icon(Icons.money_rounded, size: 18),
+                label: const Text('Cash / Copay', style: TextStyle(fontSize: 13)),
+                onPressed: _posCart.isEmpty
+                    ? null
+                    : () => _processCashPayment(context, finalTotal, _posPatientName),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQrSignageSuite(
+    BuildContext context,
+    String qrUrl,
+    String title,
+    String subtitle,
+    String badge,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.malachiteFaint,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: ClinicTheme.malachite.withOpacity(0.3)),
+                ),
+                child: const Icon(Icons.qr_code_2_rounded, color: ClinicTheme.malachite, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Multi-Purpose Clinic QR Hub',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Ready-to-print & digital QR code signage tailored for each clinical touchpoint',
+                      style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          const Divider(color: ClinicTheme.border),
+          const SizedBox(height: 14),
+
+          // 3 Mode Selector Pills
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildQrModePill(
+                modeKey: 'front_desk',
+                label: '1. Front Desk Pay Stand',
+                icon: Icons.point_of_sale_rounded,
+              ),
+              _buildQrModePill(
+                modeKey: 'waiting_room',
+                label: '2. Waiting Room Storefront',
+                icon: Icons.storefront_rounded,
+              ),
+              _buildQrModePill(
+                modeKey: 'copilot_download',
+                label: '3. Exam Lane Copilot Stand',
+                icon: Icons.install_mobile_rounded,
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+
+          // The Physical Acrylic Desk Stand Simulation Card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Stand Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.remove_red_eye, color: Color(0xFF00E5FF), size: 14),
+                          const SizedBox(width: 6),
+                          Text(
+                            badge,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 11.5,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // QR Code
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                  ),
+                  child: _ClinicQrCodeWidget(data: qrUrl, size: 160),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Point phone camera at QR code to open',
+                  style: TextStyle(
+                    color: Color(0xFF475569),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  qrUrl,
+                  style: const TextStyle(
+                    color: Color(0xFF0284C7),
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Action Toolbar
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.cardBackground,
+                    foregroundColor: ClinicTheme.malachite,
+                    side: BorderSide(color: ClinicTheme.malachite.withOpacity(0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.print_rounded, size: 16),
+                  label: const Text('Print Counter Stand', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('✓ Generating high-resolution printable acrylic stand for "$title"')),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              IconButton(
+                tooltip: 'Copy Direct Link',
+                icon: const Icon(Icons.copy_rounded, size: 18, color: ClinicTheme.malachite),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Copied "$qrUrl" to clipboard!')),
+                  );
+                },
+              ),
+              IconButton(
+                tooltip: 'Download Vector PNG',
+                icon: const Icon(Icons.file_download_outlined, size: 18, color: ClinicTheme.textSecondary),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('✓ Downloaded QR asset to downloads folder')),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQrModePill({
+    required String modeKey,
+    required String label,
+    required IconData icon,
+  }) {
+    final isSel = _selectedQrSignageMode == modeKey;
+    return ChoiceChip(
+      avatar: Icon(icon, size: 14, color: isSel ? Colors.black : ClinicTheme.textSecondary),
+      label: Text(label),
+      selected: isSel,
+      selectedColor: ClinicTheme.malachite,
+      backgroundColor: ClinicTheme.cardBackground,
+      labelStyle: TextStyle(
+        color: isSel ? Colors.black : ClinicTheme.textSecondary,
+        fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
+        fontSize: 11.5,
+      ),
+      side: BorderSide(color: isSel ? ClinicTheme.malachite : ClinicTheme.border),
+      onSelected: (_) => setState(() => _selectedQrSignageMode = modeKey),
+    );
+  }
+
+  void _showScanToPayModal(
+    BuildContext context,
+    double total,
+    String patientName,
+    ClinicScope scope,
+    BachsPaymentService paymentService,
+  ) {
+    final clinicId = scope.clinicId ?? 'demo_clinic';
+    final txId = 'TXN-POS-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+    final payUrl = 'https://pay.gozvision.com/$clinicId/checkout?tx=$txId&amt=$total';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ClinicTheme.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: ClinicTheme.border),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: ClinicTheme.malachiteFaint,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.qr_code_scanner_rounded, color: ClinicTheme.malachite, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Scan to Pay at Reception', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text('Order total: \$${total.toStringAsFixed(2)} for $patientName', style: const TextStyle(color: ClinicTheme.textSecondary, fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    _ClinicQrCodeWidget(data: payUrl, size: 200),
+                    const SizedBox(height: 10),
+                    const Text('Point camera to pay instantly', style: TextStyle(color: Color(0xFF0F172A), fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text('Accepts Apple Pay, Google Pay, Card & Bachs', style: TextStyle(color: Color(0xFF64748B), fontSize: 10)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.timer_outlined, size: 16, color: ClinicTheme.warningAmber),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text('Session active · Awaiting patient scan...', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+                    ),
+                    Text(txId, style: const TextStyle(color: ClinicTheme.malachite, fontSize: 11, fontFamily: 'monospace')),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel', style: TextStyle(color: ClinicTheme.textSecondary)),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: ClinicTheme.malachite, foregroundColor: Colors.black),
+            icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+            label: const Text('Simulate Patient Scan & Pay'),
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _orders.insert(0, {
+                  'order_no': 'ORD-${DateTime.now().year}-${DateTime.now().millisecondsSinceEpoch % 100000}',
+                  'patient_name': patientName,
+                  'patient_id': 'walkin_guest',
+                  'items': _posCart.map((it) => '${it['name']} (x${it['qty']})').join(', '),
+                  'total': total,
+                  'payment_status': 'Paid (Bachs Instant QR)',
+                  'provider': 'bachs',
+                  'fulfillment': 'Dispensed In-Clinic at Reception',
+                  'date': 'Just Now',
+                  'status_color': ClinicTheme.malachite,
+                });
+                _posCart.clear();
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: ClinicTheme.surfaceGlass,
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: ClinicTheme.malachite),
+                      const SizedBox(width: 10),
+                      Text('✓ Walk-In Payment of \$${total.toStringAsFixed(2)} confirmed via QR! Receipt #$txId generated.'),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _processInPersonCardPayment(BuildContext context, double total, String patientName) {
+    final txId = 'TXN-CARD-${DateTime.now().millisecondsSinceEpoch % 100000}';
+    setState(() {
+      _orders.insert(0, {
+        'order_no': 'ORD-${DateTime.now().year}-${DateTime.now().millisecondsSinceEpoch % 100000}',
+        'patient_name': patientName,
+        'patient_id': 'walkin_guest',
+        'items': _posCart.map((it) => '${it['name']} (x${it['qty']})').join(', '),
+        'total': total,
+        'payment_status': 'Paid (Card Reader / EMV)',
+        'provider': 'card_terminal',
+        'fulfillment': 'Dispensed In-Clinic at Reception',
+        'date': 'Just Now',
+        'status_color': ClinicTheme.malachite,
+      });
+      _posCart.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('✓ Contactless card payment of \$${total.toStringAsFixed(2)} processed! Receipt #$txId.'),
+      ),
+    );
+  }
+
+  void _processCashPayment(BuildContext context, double total, String patientName) {
+    final txId = 'TXN-CASH-${DateTime.now().millisecondsSinceEpoch % 100000}';
+    setState(() {
+      _orders.insert(0, {
+        'order_no': 'ORD-${DateTime.now().year}-${DateTime.now().millisecondsSinceEpoch % 100000}',
+        'patient_name': patientName,
+        'patient_id': 'walkin_guest',
+        'items': _posCart.map((it) => '${it['name']} (x${it['qty']})').join(', '),
+        'total': total,
+        'payment_status': 'Paid (Cash / Clinic Ledger)',
+        'provider': 'cash',
+        'fulfillment': 'Dispensed In-Clinic at Reception',
+        'date': 'Just Now',
+        'status_color': ClinicTheme.malachiteDim,
+      });
+      _posCart.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('✓ Cash transaction of \$${total.toStringAsFixed(2)} logged into Clinic Ledger.'),
+      ),
+    );
+  }
+
+  // Tab 4: Bachs Instant Payouts & Settlement
   Widget _buildBachsPayoutsTab(ClinicScope scope, BachsPaymentService paymentService) {
     return SingleChildScrollView(
       child: Column(
@@ -1726,4 +2715,125 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Custom High-Fidelity Enterprise QR Code Component
+// ─────────────────────────────────────────────────────────────────────────────
+class _ClinicQrCodeWidget extends StatelessWidget {
+  final String data;
+  final double size;
+
+  const _ClinicQrCodeWidget({
+    required this.data,
+    this.size = 180,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _QrCodePainter(data: data),
+    );
+  }
+}
+
+class _QrCodePainter extends CustomPainter {
+  final String data;
+
+  _QrCodePainter({required this.data});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintDark = Paint()..color = const Color(0xFF0F172A);
+    final paintCyan = Paint()..color = const Color(0xFF00E5FF);
+    final paintWhite = Paint()..color = Colors.white;
+
+    // Background
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paintWhite);
+
+    const int modules = 21; // Standard QR Version 1 size
+    final double blockSize = size.width / modules;
+
+    // Helper: Draw 7x7 Finder Pattern
+    void drawFinder(int startX, int startY) {
+      // Outer 7x7 black
+      canvas.drawRect(
+        Rect.fromLTWH(startX * blockSize, startY * blockSize, 7 * blockSize, 7 * blockSize),
+        paintDark,
+      );
+      // Inner 5x5 white
+      canvas.drawRect(
+        Rect.fromLTWH((startX + 1) * blockSize, (startY + 1) * blockSize, 5 * blockSize, 5 * blockSize),
+        paintWhite,
+      );
+      // Center 3x3 black
+      canvas.drawRect(
+        Rect.fromLTWH((startX + 2) * blockSize, (startY + 2) * blockSize, 3 * blockSize, 3 * blockSize),
+        paintDark,
+      );
+    }
+
+    // Draw the 3 finder patterns
+    drawFinder(0, 0); // Top-left
+    drawFinder(modules - 7, 0); // Top-right
+    drawFinder(0, modules - 7); // Bottom-left
+
+    // Timing tracks (alternating dots at row 6 and col 6)
+    for (int i = 7; i < modules - 7; i++) {
+      if (i % 2 == 0) {
+        canvas.drawRect(Rect.fromLTWH(i * blockSize, 6 * blockSize, blockSize, blockSize), paintDark);
+        canvas.drawRect(Rect.fromLTWH(6 * blockSize, i * blockSize, blockSize, blockSize), paintDark);
+      }
+    }
+
+    // Deterministic module generation for data area based on data hash
+    int hash = data.hashCode;
+    for (int r = 0; r < modules; r++) {
+      for (int c = 0; c < modules; c++) {
+        // Skip finder areas
+        if (r < 7 && c < 7) continue;
+        if (r < 7 && c >= modules - 7) continue;
+        if (r >= modules - 7 && c < 7) continue;
+        if (r == 6 || c == 6) continue; // timing tracks
+
+        // Center logo cutout
+        if (r >= 8 && r <= 12 && c >= 8 && c <= 12) continue;
+
+        // Pseudo-random bit based on position and hash
+        final bit = ((r * 31 + c * 17 + hash.abs()) ^ (r * c)) % 3 == 0;
+        if (bit) {
+          canvas.drawRect(
+            Rect.fromLTWH(c * blockSize, r * blockSize, blockSize, blockSize),
+            paintDark,
+          );
+        }
+      }
+    }
+
+    // Center GozVision Emblem / Accent
+    final centerRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: blockSize * 4.5,
+      height: blockSize * 4.5,
+    );
+    canvas.drawRRect(RRect.fromRectAndRadius(centerRect, Radius.circular(blockSize)), paintDark);
+
+    final innerCenter = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: blockSize * 2.8,
+      height: blockSize * 2.8,
+    );
+    canvas.drawOval(innerCenter, paintCyan);
+
+    final pupil = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: blockSize * 1.2,
+      height: blockSize * 1.2,
+    );
+    canvas.drawOval(pupil, paintDark);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

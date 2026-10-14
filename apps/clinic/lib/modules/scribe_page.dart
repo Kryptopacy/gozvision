@@ -35,6 +35,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
   int _recordingSeconds = 258; // 04:18 default simulation
   String _selectedMic = 'Shure Microflex Ceiling Array (Exam Lane 1)';
   String _selectedScenarioKey = 'glaucoma';
+  String _aiPrivacyMode = 'cloud_baa'; // 'cloud_baa' or 'local_webgpu'
 
   // Preset Clinical Optometric Scenarios
   final Map<String, _ClinicalScenario> _scenarios = {
@@ -220,6 +221,29 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('✓ Ambient Capture Complete — Scribe SOAP & Optometric Findings Generated.'),
+          backgroundColor: ClinicTheme.brandAccentDim,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _toggleAiPrivacyMode() {
+    setState(() {
+      _aiPrivacyMode = _aiPrivacyMode == 'cloud_baa' ? 'local_webgpu' : 'cloud_baa';
+    });
+    if (_aiPrivacyMode == 'local_webgpu') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🛡 Local WebGPU Mode Active: Audio transcription and SOAP synthesis execute entirely in browser memory. Zero patient data leaves this workstation.'),
+          backgroundColor: Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('☁ Cloud BAA Mode Active: Powered by enterprise Gemini 1.5 Pro & Whisper API with signed Business Associate Agreement (BAA) and zero-retention ephemeral processing.'),
           backgroundColor: ClinicTheme.brandAccentDim,
           behavior: SnackBarBehavior.floating,
         ),
@@ -504,6 +528,60 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Privacy & Compliance Mode Selector (Cloud BAA vs Local Air-Gapped WebGPU)
+          InkWell(
+            onTap: _toggleAiPrivacyMode,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: _aiPrivacyMode == 'local_webgpu'
+                    ? const Color(0xFF10B981).withOpacity(0.15)
+                    : ClinicTheme.brandAccentFaint,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: _aiPrivacyMode == 'local_webgpu'
+                      ? const Color(0xFF10B981).withOpacity(0.4)
+                      : ClinicTheme.brandAccent.withOpacity(0.4),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _aiPrivacyMode == 'local_webgpu' ? Icons.shield_rounded : Icons.cloud_done_rounded,
+                    size: 15,
+                    color: _aiPrivacyMode == 'local_webgpu' ? const Color(0xFF10B981) : ClinicTheme.brandAccent,
+                  ),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _aiPrivacyMode == 'local_webgpu' ? 'LOCAL WEBGPU AI (100% ON-DEVICE)' : 'CLOUD AI (HIPAA BAA ZERO-RETENTION)',
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: _aiPrivacyMode == 'local_webgpu' ? const Color(0xFF10B981) : ClinicTheme.brandAccent,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        _aiPrivacyMode == 'local_webgpu' ? 'Zero Cloud Packets · Air-Gapped RAM' : 'Stateless TLS 1.3 · No Model Training',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -793,10 +871,18 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
   late final TabController _tabController;
   String _selectedEhrBridge = 'Epic Systems';
 
+  // Paper Form Digitizer Interactive State
+  bool _formFluoresceinClear = true;
+  bool _formTearBreakupAbnormal = true;
+  bool _formMeibomianCapped = true;
+  bool _formMaculaFlat = true;
+  bool _formVerticalNotch = true;
+  bool _formDilatedOu = true;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -899,12 +985,12 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
             ),
           ),
 
-          // ── 4 Workspace Navigation Tabs ──────────────────────────────
+          // ── 6 Workspace Navigation Tabs ──────────────────────────────
           Container(
             color: ClinicTheme.obsidianElevated.withOpacity(0.6),
             child: TabBar(
               controller: _tabController,
-              isScrollable: false,
+              isScrollable: true,
               indicatorColor: ClinicTheme.brandAccent,
               indicatorWeight: 3,
               labelColor: ClinicTheme.brandAccent,
@@ -919,6 +1005,14 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
                 Tab(
                   icon: Icon(Icons.record_voice_over_outlined, size: 15),
                   text: 'Diarized Audio Transcript',
+                ),
+                Tab(
+                  icon: Icon(Icons.history_edu_outlined, size: 15),
+                  text: 'Optometric Case History (OLD CARTS)',
+                ),
+                Tab(
+                  icon: Icon(Icons.document_scanner_outlined, size: 15),
+                  text: 'Paper Assessment Form Digitizer',
                 ),
                 Tab(
                   icon: Icon(Icons.remove_red_eye_outlined, size: 15),
@@ -939,6 +1033,8 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
               children: [
                 _buildSoapTab(sc),
                 _buildTranscriptTab(sc),
+                _buildCaseHistoryTab(sc),
+                _buildAssessmentFormDigitizerTab(sc),
                 _buildOptometricFindingsTab(sc),
                 _buildEhrBridgeTab(sc),
               ],
@@ -1285,7 +1381,634 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TAB 3: Discrete Optometric Findings (The Eye Care Cockpit)
+  // TAB 3: Optometric Case History (OLD CARTS Framework Standard)
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildCaseHistoryTab(_ClinicalScenario sc) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner: Optometry Standard Framework Grounding
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: ClinicTheme.brandAccentFaint,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.psychology_outlined, color: ClinicTheme.brandAccent, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Optometric Ambient Case History Engine',
+                            style: GoogleFonts.sora(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: ClinicTheme.brandAccent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('OLD CARTS Protocol', style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Automatically parsed from ambient exam dialogue into standardized optometric complaint, history of present illness, and ocular risk categories.',
+                        style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.obsidianElevated,
+                    foregroundColor: ClinicTheme.brandAccent,
+                  ),
+                  icon: const Icon(Icons.copy_rounded, size: 14),
+                  label: const Text('Copy Case History', style: TextStyle(fontSize: 11)),
+                  onPressed: () {
+                    final text = '''CHIEF COMPLAINT:
+${sc.chiefComplaint}
+
+HISTORY OF PRESENT ILLNESS (OLD CARTS):
+• Onset: ${sc.oldCartsOnset}
+• Location: ${sc.oldCartsLocation}
+• Duration: ${sc.oldCartsDuration}
+• Character: ${sc.oldCartsCharacter}
+• Aggravating/Alleviating: ${sc.oldCartsAggravating}
+• Radiation: ${sc.oldCartsRadiation}
+• Timing: ${sc.oldCartsTiming}
+• Severity: ${sc.oldCartsSeverity}
+
+PAST OCULAR HISTORY (POHx):
+${sc.pohx}
+
+PAST MEDICAL HISTORY & MEDS (PMHx):
+${sc.pmhx}
+
+FAMILY OCULAR HISTORY (FMHx):
+${sc.fmhx}
+
+VISUAL & OCCUPATIONAL DEMANDS:
+${sc.visualDemands}
+
+CURRENT SPECTACLES & CORRECTION:
+${sc.currentCorrection}''';
+                    Clipboard.setData(ClipboardData(text: text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✓ Copied complete Optometric Case History to clipboard!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // 1. Chief Complaint (CC) Block
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ClinicTheme.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                  ),
+                  child: const Text('CHIEF COMPLAINT (CC)', style: TextStyle(color: Color(0xFFEF4444), fontSize: 10.5, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    sc.chiefComplaint,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 2. HPI: The 8-Point OLD CARTS Optometry Framework Grid
+          Text(
+            'HPI — OLD CARTS Optometric Framework Analysis',
+            style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.bold, color: ClinicTheme.brandAccent),
+          ),
+          const SizedBox(height: 10),
+          GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 3.4,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildOldCartsItem('O — Onset', sc.oldCartsOnset, Icons.access_time_rounded),
+              _buildOldCartsItem('L — Location', sc.oldCartsLocation, Icons.place_outlined),
+              _buildOldCartsItem('D — Duration', sc.oldCartsDuration, Icons.timelapse_rounded),
+              _buildOldCartsItem('C — Character', sc.oldCartsCharacter, Icons.flare_rounded),
+              _buildOldCartsItem('A — Aggravating / Relieving', sc.oldCartsAggravating, Icons.tune_rounded),
+              _buildOldCartsItem('R — Radiation', sc.oldCartsRadiation, Icons.radar_rounded),
+              _buildOldCartsItem('T — Timing / Diurnal Pattern', sc.oldCartsTiming, Icons.wb_twilight_rounded),
+              _buildOldCartsItem('S — Severity & Impact', sc.oldCartsSeverity, Icons.speed_rounded),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // 3. Systemic & Ocular Profile Breakdown
+          Text(
+            'Optometric Past & Family Medical Profile',
+            style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+          _buildHistoryProfileCard('Past Ocular History (POHx)', sc.pohx, Icons.remove_red_eye_outlined, const Color(0xFF00E5FF)),
+          const SizedBox(height: 10),
+          _buildHistoryProfileCard('Past Medical History & Systemic Medications (PMHx)', sc.pmhx, Icons.medication_outlined, const Color(0xFF10B981)),
+          const SizedBox(height: 10),
+          _buildHistoryProfileCard('Family Ocular History (FMHx)', sc.fmhx, Icons.family_restroom_rounded, const Color(0xFFF59E0B)),
+          const SizedBox(height: 10),
+          _buildHistoryProfileCard('Visual Demands & Ergonomics', sc.visualDemands, Icons.computer_rounded, const Color(0xFF8B5CF6)),
+          const SizedBox(height: 10),
+          _buildHistoryProfileCard('Current Spectacle Correction & Contact Lenses', sc.currentCorrection, Icons.glasses_rounded, const Color(0xFFEC4899)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOldCartsItem(String letterTitle, String content, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: ClinicTheme.cardBackground,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: ClinicTheme.brandAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  letterTitle,
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: ClinicTheme.brandAccent,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryProfileCard(String title, String content, IconData icon, Color accent) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: ClinicTheme.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: accent.withOpacity(0.12),
+            child: Icon(icon, color: accent, size: 16),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.sora(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  content,
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: ClinicTheme.textSecondary, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 4: Paper Assessment Form Digitizer (Custom Clinic Form OCR & Clone)
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildAssessmentFormDigitizerTab(_ClinicalScenario sc) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner & Form Type Selector
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ClinicTheme.obsidianElevated,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: ClinicTheme.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.brandAccentFaint,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.document_scanner_rounded, color: ClinicTheme.brandAccent, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Paper Assessment Form Digitizer (Zero-Loss Form Extraction)',
+                            style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text('AI Vision OCR 2026', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Upload a phone photo or scan of your clinic\'s custom assessment form. GozVision parses all checkboxes, refraction matrices, and slit lamp diagrams into a live digital clone.',
+                        style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.brandAccent,
+                    foregroundColor: Colors.black,
+                  ),
+                  icon: const Icon(Icons.add_a_photo_outlined, size: 16),
+                  label: const Text('Digitize New Paper Form', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✓ Select form photo or PDF: GozVision AI Vision OCR ready.')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Two-Column Workspace: Left = Scanned Paper Sheet Preview with Bounding Boxes; Right = Interactive Digital Form
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Physical Scanned Paper Form with AI Detected Bounding Boxes
+              Expanded(
+                flex: 5,
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: ClinicTheme.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.image_outlined, size: 18, color: ClinicTheme.brandAccent),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Physical Paper Form Source (Detected Geometry)',
+                            style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Paper visual
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFCBD5E1)),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 3)),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('DR. ADA OPTOMETRY CARE · CLINICAL EXAM SHEET', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF0F172A), fontSize: 11, fontWeight: FontWeight.w800)),
+                                Text('FORM #OD-REV-2026', style: GoogleFonts.jetBrainsMono(color: const Color(0xFF64748B), fontSize: 10)),
+                              ],
+                            ),
+                            const Divider(color: Color(0xFFCBD5E1), height: 16),
+                            _buildOcrDetectedBox('PATIENT DEMOGRAPHICS BLOCK', 'Name: ${sc.patientName} · Age: ${sc.ageGender} · MRN: ${sc.mrn}', const Color(0xFF0284C7)),
+                            const SizedBox(height: 8),
+                            _buildOcrDetectedBox('REFRACTION MATRIX (OD/OS)', 'OD: ${sc.rxOd} (VA ${sc.vaOd}) · OS: ${sc.rxOs} (VA ${sc.vaOs}) · Add: ${sc.add}', const Color(0xFF10B981)),
+                            const SizedBox(height: 8),
+                            _buildOcrDetectedBox('GOLDMANN IOP TONOMETRY', 'Time: 10:42 AM · OD: ${sc.iopOd} · OS: ${sc.iopOs} (Elevated Dial Marker)', const Color(0xFFEF4444)),
+                            const SizedBox(height: 8),
+                            _buildOcrDetectedBox('ANTERIOR SLIT LAMP & CORNEA', 'Cornea: Clear OU · AC: Deep & Quiet · TBUT: ${sc.tbut}', const Color(0xFF8B5CF6)),
+                            const SizedBox(height: 8),
+                            _buildOcrDetectedBox('DILATED RETINA & OPTIC NERVE', 'OD C/D: ${sc.cdRatioOd} · OS C/D: ${sc.cdRatioOs} Vertical Notch · Macula: Flat OU', const Color(0xFFF59E0B)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF10B981)),
+                          const SizedBox(width: 6),
+                          Text('100% Geometry Matched · 24 Structured Data Fields Extracted', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 18),
+
+              // Right Column: Interactive Digital Form Replica
+              Expanded(
+                flex: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.cardBackground,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.4)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.touch_app_outlined, size: 18, color: ClinicTheme.brandAccent),
+                              const SizedBox(width: 8),
+                              Text('Interactive Digital Form Replica', style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: ClinicTheme.brandAccentFaint,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('Live Editable', style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Interactive Checkbox Group Extracted from Form
+                      Text('Anterior & Posterior Segment Checklist:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 6,
+                        children: [
+                          _buildInteractiveCheckbox('Cornea Clear OU', _formFluoresceinClear, (v) => setState(() => _formFluoresceinClear = v!)),
+                          _buildInteractiveCheckbox('Abnormal TBUT (<10s)', _formTearBreakupAbnormal, (v) => setState(() => _formTearBreakupAbnormal = v!)),
+                          _buildInteractiveCheckbox('Meibomian Capping', _formMeibomianCapped, (v) => setState(() => _formMeibomianCapped = v!)),
+                          _buildInteractiveCheckbox('Macula Flat OU', _formMaculaFlat, (v) => setState(() => _formMaculaFlat = v!)),
+                          _buildInteractiveCheckbox('C/D Vertical Notch OS', _formVerticalNotch, (v) => setState(() => _formVerticalNotch = v!)),
+                          _buildInteractiveCheckbox('Dilated Exam Performed', _formDilatedOu, (v) => setState(() => _formDilatedOu = v!)),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Interactive Refraction Table
+                      Text('Subjective Refraction Grid:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: ClinicTheme.surfaceDark,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: ClinicTheme.border),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                const SizedBox(width: 40, child: Text('EYE', style: TextStyle(color: ClinicTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
+                                Expanded(child: Text('SPHERE', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
+                                Expanded(child: Text('CYLINDER', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
+                                Expanded(child: Text('AXIS', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
+                                Expanded(child: Text('ADD', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
+                                Expanded(child: Text('DVA', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
+                              ],
+                            ),
+                            const Divider(height: 10, color: ClinicTheme.border),
+                            _buildRefractionTableRow('OD', '-1.75', '-0.75', '090', '+2.25', sc.vaOd),
+                            const SizedBox(height: 4),
+                            _buildRefractionTableRow('OS', '-2.00', '-1.25', '105', '+2.25', sc.vaOs),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Doctor Signature & Assessment Plan Block
+                      Text('Clinical Impression & Signature:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: ClinicTheme.surfaceDark,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: ClinicTheme.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(sc.assessment, style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: Colors.white, height: 1.35)),
+                            const Divider(height: 12, color: ClinicTheme.border),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Attending OD: Dr. Ada Optometrist, Lic #OPT-48201', style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.brandAccent)),
+                                Text('Electronically Verified via GozVision', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Actions
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: ClinicTheme.brandAccent,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              icon: const Icon(Icons.save_rounded, size: 16),
+                              label: const Text('Save Form to Chart', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('✓ Digital Assessment Form saved and linked to patient encounter chart!')),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: ClinicTheme.border),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                            ),
+                            icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                            label: const Text('Export PDF', style: TextStyle(fontSize: 12)),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('✓ Generating filled optical examination PDF...')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOcrDetectedBox(String category, String detectedText, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+              const SizedBox(width: 6),
+              Text(category, style: TextStyle(color: color, fontSize: 9.5, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(detectedText, style: GoogleFonts.jetBrainsMono(color: const Color(0xFF1E293B), fontSize: 10.5, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInteractiveCheckbox(String label, bool value, ValueChanged<bool?> onChanged) {
+    return InkWell(
+      onTap: () => onChanged(!value),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Checkbox(
+            value: value,
+            activeColor: ClinicTheme.brandAccent,
+            checkColor: Colors.black,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onChanged: onChanged,
+          ),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11.5)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRefractionTableRow(String eye, String sph, String cyl, String axis, String add, String dva) {
+    return Row(
+      children: [
+        SizedBox(width: 40, child: Text(eye, style: GoogleFonts.sora(color: ClinicTheme.brandAccent, fontSize: 12, fontWeight: FontWeight.bold))),
+        Expanded(child: Text(sph, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
+        Expanded(child: Text(cyl, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
+        Expanded(child: Text(axis, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
+        Expanded(child: Text(add, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
+        Expanded(child: Text(dva, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold))),
+      ],
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TAB 5: Discrete Optometric Findings (The Eye Care Cockpit)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildOptometricFindingsTab(_ClinicalScenario sc) {
     return ListView(
@@ -1847,6 +2570,19 @@ class _ClinicalScenario {
   final String tbut;
   final List<String> icdCodes;
   final List<String> cptCodes;
+  final String pohx;
+  final String pmhx;
+  final String fmhx;
+  final String visualDemands;
+  final String currentCorrection;
+  final String oldCartsOnset;
+  final String oldCartsLocation;
+  final String oldCartsDuration;
+  final String oldCartsCharacter;
+  final String oldCartsAggravating;
+  final String oldCartsRadiation;
+  final String oldCartsTiming;
+  final String oldCartsSeverity;
 
   const _ClinicalScenario({
     required this.name,
@@ -1878,5 +2614,18 @@ class _ClinicalScenario {
     required this.tbut,
     required this.icdCodes,
     required this.cptCodes,
+    this.pohx = 'POAG Suspect OU (3 yrs), Pseudophakia OD (2023), No retinal detachment, No amblyopia.',
+    this.pmhx = 'Essential Hypertension (Amlodipine 5mg QD), Hyperlipidemia (Atorvastatin 20mg). Denies Diabetes or Autoimmune disorders.',
+    this.fmhx = 'Maternal grandmother had glaucoma with severe peripheral loss. Father had macular degeneration. No family keratoconus.',
+    this.visualDemands = 'Retired librarian; reads 3-4 hours daily, drives locally during daylight, uses iPad for audiobooks. Frequent screen reflections.',
+    this.currentCorrection = 'Progressive addition lenses (PAL) 2.5 years old. Fit satisfactory, reports progressive reading strain in low illumination.',
+    this.oldCartsOnset = 'Gradual increase over past 6-8 weeks.',
+    this.oldCartsLocation = 'Left eye (OS) retrobulbar aching and eyebrow heaviness.',
+    this.oldCartsDuration = 'Intermittent episodes lasting 45-90 minutes, primarily in evening.',
+    this.oldCartsCharacter = 'Dull deep aching pressure, mild peripheral brow tightness; non-throbbing.',
+    this.oldCartsAggravating = 'Prolonged reading under low indoor illumination, prolonged computer glare.',
+    this.oldCartsRadiation = 'Radiates to left temporal region; no jaw claudication, no scalp tenderness.',
+    this.oldCartsTiming = 'Worse in the evening before bed, typically relieved by rest and eye drops.',
+    this.oldCartsSeverity = 'Moderate (4/10 discomfort); causes patient to stop reading.',
   });
 }

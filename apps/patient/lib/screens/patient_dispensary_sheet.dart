@@ -43,8 +43,8 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
       'category': 'Frames',
       'price': 185.00,
       'currency': 'USD',
-      'rx': 'Prescribed by Dr. Ada (OD: -2.50, OS: -2.25)',
-      'description': 'Featherweight Japanese titanium with deep bevel for low-vision lenses.',
+      'rx': 'Prescribed by Dr. Ada (Right Eye: -2.50, Left Eye: -2.25)',
+      'description': 'Ultra-lightweight, durable frame custom-shaped for comfort and special lenses.',
       'tag': 'Doctor Prescribed',
       'icon': Icons.remove_red_eye_outlined,
     },
@@ -54,20 +54,20 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
       'category': 'Smart Glasses',
       'price': 299.00,
       'currency': 'USD',
-      'rx': 'Connected to Goz Copilot via Bluetooth',
-      'description': 'Directional open-ear speakers whisper AI vision scene descriptions discreetly.',
-      'tag': 'AI Copilot Ready',
+      'rx': 'Connected to your Goz Vision Copilot',
+      'description': 'Lightweight glasses with built-in voice audio that gently reads signs, labels, and your surroundings to you.',
+      'tag': 'Voice Copilot Ready',
       'icon': Icons.headset_mic_outlined,
     },
     {
       'id': 'prod_03',
-      'name': 'FL-41 Photophobia Relief Clip-On',
+      'name': 'FL-41 Light Sensitivity & Glare Clip-On',
       'category': 'Filters',
       'price': 65.00,
       'currency': 'USD',
-      'rx': 'Recommended for Light Sensitivity',
-      'description': 'Blocks 480-520nm fluorescent glare and relieves digital eye strain.',
-      'tag': 'Glare Relief',
+      'rx': 'Recommended for Bright Lights & Screens',
+      'description': 'Soothing rose-tinted lens that filters harsh indoor lights, computer screens, and fluorescent glare.',
+      'tag': 'Glare & Screen Relief',
       'icon': Icons.wb_sunny_outlined,
     },
     {
@@ -76,9 +76,9 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
       'category': 'Drops',
       'price': 34.50,
       'currency': 'USD',
-      'rx': 'Daily Meibomian Gland Therapy',
-      'description': 'Nano-droplet lipid formula providing all-day moisture for dry eyes.',
-      'tag': 'Dry Eye Care',
+      'rx': 'Daily Soothing Eye Drops for Dryness & Itch',
+      'description': 'Gentle, preservative-free drops that protect your eyes from dryness, stinging, and tiredness throughout the day.',
+      'tag': 'Dry Eye Relief',
       'icon': Icons.medication_outlined,
     },
   ];
@@ -106,7 +106,7 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Opening Bachs Checkout for "${item['name']}"...',
+                'Opening Secure Checkout for "${item['name']}"...',
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -129,7 +129,7 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Bachs Checkout opened: $checkoutUrl'),
+          content: Text('Secure Checkout opened: $checkoutUrl'),
           action: SnackBarAction(
             label: 'Open',
             textColor: GozAITheme.accentCyan,
@@ -201,7 +201,14 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
                             color: GozAITheme.accentCyan.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text('Bachs Pay', style: TextStyle(color: GozAITheme.accentCyan, fontSize: 10, fontWeight: FontWeight.bold)),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.verified_rounded, size: 10, color: GozAITheme.accentCyan),
+                              SizedBox(width: 4),
+                              Text('Verified Clinic Store', style: TextStyle(color: GozAITheme.accentCyan, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -320,9 +327,9 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
                             foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
-                          icon: const Icon(Icons.bolt, size: 18),
+                          icon: const Icon(Icons.shopping_bag_outlined, size: 18),
                           label: const Text(
-                            'Order Now via Bachs Checkout',
+                            'Order Now (Secure Checkout)',
                             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                           ),
                           onPressed: () => _purchaseProduct(context, item, bachsService),
