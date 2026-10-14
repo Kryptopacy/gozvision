@@ -11,8 +11,28 @@ import '../data/clinic_scope.dart';
 /// 1. Low vision referral conversion and device adherence (preventing the 29% abandonment cliff).
 /// 2. Clinical productivity gains (ambient scribe documentation time saved).
 /// 3. Practice scheduling efficiency (no-show recovery via automated conversational recall).
-class InsightsPage extends StatelessWidget {
+class InsightsPage extends StatefulWidget {
   const InsightsPage({super.key});
+
+  @override
+  State<InsightsPage> createState() => _InsightsPageState();
+}
+
+class _InsightsPageState extends State<InsightsPage> {
+  String _selectedHorizon = '30d';
+
+  void _exportReport() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '✓ Practice Clinical Performance & Rehabilitation Audit Report exported (${_selectedHorizon.toUpperCase()}).',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: ClinicTheme.brandAccentDim,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,23 +72,36 @@ class InsightsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: ClinicTheme.brandAccentFaint,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.insights_rounded, color: ClinicTheme.brandAccent, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Live Supabase Telemetry',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: ClinicTheme.brandAccent),
+                Row(
+                  children: [
+                    // Horizon Selector
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: ClinicTheme.obsidianElevated,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: ClinicTheme.border),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          _buildHorizonChip('7D', '7d'),
+                          _buildHorizonChip('30D', '30d'),
+                          _buildHorizonChip('QTD', 'qtd'),
+                          _buildHorizonChip('Annual', 'ytd'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: ClinicTheme.brandAccent.withOpacity(0.4)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      ),
+                      icon: const Icon(Icons.download_rounded, size: 16, color: ClinicTheme.brandAccent),
+                      label: const Text('Export Audit', style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                      onPressed: _exportReport,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -223,6 +256,29 @@ class InsightsPage extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHorizonChip(String label, String value) {
+    final active = _selectedHorizon == value;
+    return InkWell(
+      onTap: () => setState(() => _selectedHorizon = value),
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? ClinicTheme.brandAccent : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: active ? FontWeight.bold : FontWeight.w600,
+            color: active ? ClinicTheme.obsidian : ClinicTheme.textSecondary,
+          ),
+        ),
       ),
     );
   }

@@ -26,6 +26,8 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   bool _isSyncing = false;
   String? _syncSuccessMessage;
   String _selectedFhirResource = 'DocumentReference';
+  final TextEditingController _syncSearchCtrl = TextEditingController();
+  String _syncDirFilter = 'ALL';
 
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   @override
   void dispose() {
     _tabController.dispose();
+    _syncSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -394,7 +397,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
           protocol: 'Eyefinity Cloud REST API v2 & Webhooks',
           endpoint: 'https://api.eyefinity.com/v2/practices/eyecare-702',
           description:
-              'Seamless optical dispensary and optometry exam integration. Syncs spectacle/contact lens prescriptions directly to Bachs Dispensary and VSP claims.',
+              'Seamless optical dispensary and optometry exam integration. Syncs spectacle/contact lens prescriptions directly to Optical Dispensary and VSP claims.',
           lastSync: '1 minute ago',
           latency: '42 ms',
           features: ['Spectacle Rx Bridge', 'VSP Insurance Eligibility', 'Discrete Slit Lamp Findings'],
@@ -592,7 +595,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   }
 
   Widget _buildSyncStreamTab() {
-    final streamEvents = [
+    final allEvents = [
       {
         'dir': 'OUTBOUND',
         'type': 'FHIR R4 DocumentReference',
@@ -619,7 +622,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       },
       {
         'dir': 'OUTBOUND',
-        'type': 'Bachs Optical Rx Order',
+        'type': 'Optical Lab Direct Order (Rx Sync)',
         'desc': 'Spectacle Rx Dispatched — Eleanor Vance (OD -1.75/-0.75, OS -2.00/-1.25) to Lab Direct',
         'status': 'DISPATCHED',
         'time': '10:38:22 AM',
@@ -642,6 +645,16 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
         'color': ClinicTheme.brandAccent,
       },
     ];
+
+    final query = _syncSearchCtrl.text.trim().toLowerCase();
+    final streamEvents = allEvents.where((ev) {
+      final matchesDir = _syncDirFilter == 'ALL' || ev['dir'] == _syncDirFilter;
+      final type = (ev['type'] as String).toLowerCase();
+      final desc = (ev['desc'] as String).toLowerCase();
+      final status = (ev['status'] as String).toLowerCase();
+      final matchesQuery = query.isEmpty || type.contains(query) || desc.contains(query) || status.contains(query);
+      return matchesDir && matchesQuery;
+    }).toList();
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -672,74 +685,157 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
             ],
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: ListView.separated(
-              itemCount: streamEvents.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
-              itemBuilder: (context, i) {
-                final ev = streamEvents[i];
-                final color = ev['color'] as Color;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: (ev['dir'] == 'OUTBOUND' ? ClinicTheme.brandAccent : Colors.purple).withOpacity(0.14),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          ev['dir'] as String,
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: ev['dir'] == 'OUTBOUND' ? ClinicTheme.brandAccent : Colors.purpleAccent,
-                          ),
-                        ),
+          // Scalable Search & Direction Filter Bar
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: TextField(
+                    controller: _syncSearchCtrl,
+                    onChanged: (_) => setState(() {}),
+                    style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Search audit logs (patient, resource, LOINC, status)...',
+                      hintStyle: const TextStyle(fontSize: 12, color: ClinicTheme.textMuted),
+                      prefixIcon: const Icon(Icons.search, size: 16, color: ClinicTheme.textMuted),
+                      suffixIcon: _syncSearchCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 14, color: ClinicTheme.textMuted),
+                              onPressed: () {
+                                _syncSearchCtrl.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      filled: true,
+                      fillColor: ClinicTheme.surfaceDark.withOpacity(0.5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: ClinicTheme.brandAccent),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Direction Filters
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: ['ALL', 'OUTBOUND', 'INBOUND'].map((dir) {
+                  final isSelected = _syncDirFilter == dir;
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: ChoiceChip(
+                      label: Text(dir, style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w700)),
+                      selected: isSelected,
+                      selectedColor: ClinicTheme.brandAccent,
+                      labelStyle: TextStyle(
+                        color: isSelected ? ClinicTheme.obsidian : ClinicTheme.textSecondary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      backgroundColor: ClinicTheme.surfaceDark,
+                      side: BorderSide(color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border.withOpacity(0.5)),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      onSelected: (selected) {
+                        if (selected) setState(() => _syncDirFilter = dir);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: streamEvents.isEmpty
+                ? Center(
+                    child: Text(
+                      'No transaction records matching filter criteria.',
+                      style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textMuted, fontSize: 13),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: streamEvents.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
+                    itemBuilder: (context, i) {
+                      final ev = streamEvents[i];
+                      final color = ev['color'] as Color;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
                           children: [
-                            Text(
-                              ev['type'] as String,
-                              style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: (ev['dir'] == 'OUTBOUND' ? ClinicTheme.brandAccent : Colors.purple).withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                ev['dir'] as String,
+                                style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: ev['dir'] == 'OUTBOUND' ? ClinicTheme.brandAccent : Colors.purpleAccent,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ev['type'] as String,
+                                    style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    ev['desc'] as String,
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: color.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                ev['status'] as String,
+                                style: GoogleFonts.jetBrainsMono(fontSize: 10.5, fontWeight: FontWeight.w700, color: color),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
                             Text(
-                              ev['desc'] as String,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary),
+                              ev['time'] as String,
+                              style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: color.withOpacity(0.3)),
-                        ),
-                        child: Text(
-                          ev['status'] as String,
-                          style: GoogleFonts.jetBrainsMono(fontSize: 10.5, fontWeight: FontWeight.w700, color: color),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Text(
-                        ev['time'] as String,
-                        style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
+        ],
+      ),
+    );
+  }
         ],
       ),
     );

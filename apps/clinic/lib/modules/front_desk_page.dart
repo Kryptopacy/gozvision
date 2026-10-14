@@ -22,6 +22,14 @@ class FrontDeskPage extends StatefulWidget {
 
 class _FrontDeskPageState extends State<FrontDeskPage> {
   String _filter = 'all';
+  String _searchQuery = '';
+  final TextEditingController _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +72,37 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Controls Header: Date Navigator & Filter Chips
                         Row(
                           children: [
-                            Text(
-                              'TODAY\'S CLINIC SCHEDULE',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.1,
-                                color: ClinicTheme.textSecondary,
+                            // Date Navigator
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: ClinicTheme.obsidianElevated,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: ClinicTheme.border),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  InkWell(
+                                    onTap: () {},
+                                    child: const Icon(Icons.chevron_left, size: 18, color: ClinicTheme.textSecondary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(Icons.calendar_today, size: 12, color: ClinicTheme.brandAccent),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Today, Oct 14, 2026',
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.bold, color: ClinicTheme.textPrimary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  InkWell(
+                                    onTap: () {},
+                                    child: const Icon(Icons.chevron_right, size: 18, color: ClinicTheme.textSecondary),
+                                  ),
+                                ],
                               ),
                             ),
                             const Spacer(),
@@ -84,6 +114,38 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                             const SizedBox(width: 6),
                             _buildFilterChip('Completed', 'completed'),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Real-Time Schedule Search Input
+                        Container(
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: ClinicTheme.obsidianElevated,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: ClinicTheme.border),
+                          ),
+                          child: TextField(
+                            controller: _searchCtrl,
+                            onChanged: (v) => setState(() => _searchQuery = v),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: ClinicTheme.textPrimary),
+                            decoration: InputDecoration(
+                              hintText: 'Search patient, procedure, doctor, or exam suite...',
+                              hintStyle: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textMuted),
+                              prefixIcon: const Icon(Icons.search, size: 16, color: ClinicTheme.textSecondary),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 14, color: ClinicTheme.textSecondary),
+                                      onPressed: () {
+                                        _searchCtrl.clear();
+                                        setState(() => _searchQuery = '');
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 14),
                         Expanded(
@@ -131,9 +193,21 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                     ];
 
                               final filtered = scheduleItems.where((d) {
-                                if (_filter == 'all') return true;
-                                final s = (d['status'] as String?) ?? '';
-                                return s == _filter;
+                                if (_filter != 'all') {
+                                  final s = (d['status'] as String?) ?? '';
+                                  if (s != _filter) return false;
+                                }
+                                if (_searchQuery.trim().isNotEmpty) {
+                                  final q = _searchQuery.toLowerCase();
+                                  final pName = PatientUtils.resolveName(d['patient_id']).toLowerCase();
+                                  final type = (d['type'] as String? ?? '').toLowerCase();
+                                  final lane = (d['lane'] as String? ?? '').toLowerCase();
+                                  final doc = (d['doctor'] as String? ?? '').toLowerCase();
+                                  if (!pName.contains(q) && !type.contains(q) && !lane.contains(q) && !doc.contains(q)) {
+                                    return false;
+                                  }
+                                }
+                                return true;
                               }).toList();
 
                               return ListView.separated(
@@ -176,7 +250,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                   'kind': 'reminder',
                                   'patient_name': 'Eleanor Vance',
                                   'status': 'delivered',
-                                  'channel': 'SMS via AWS EUM',
+                                  'channel': 'Two-Way SMS',
                                   'time': '10:00 AM',
                                   'message':
                                       'GozVision Clinic: Hi Eleanor, your Glaucoma Follow-up appointment is today at 10:30 AM in Suite 1.',
@@ -194,7 +268,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                   'kind': 'recovery',
                                   'patient_name': 'Maria Gonzalez',
                                   'status': 'sent',
-                                  'channel': 'SMS via AWS EUM',
+                                  'channel': 'Two-Way SMS',
                                   'time': 'Yesterday',
                                   'message':
                                       'We missed you yesterday for your contact lens check! Tap here to reschedule with one click.',
@@ -233,7 +307,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Automated conversational reminders, no-show recovery, and annual recall sweeps via AWS End User Messaging.',
+                              'Automated conversational reminders, no-show recovery, and annual recall sweeps via two-way SMS & WhatsApp.',
                               style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textMuted),
                             ),
                             const SizedBox(height: 14),
@@ -408,7 +482,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
         const SizedBox(width: 14),
         _buildMetricCard('Waiting Room', '1 Checked In', 'Average wait time: 4 min', Icons.chair_rounded, ClinicTheme.warningAmber),
         const SizedBox(width: 14),
-        _buildMetricCard('Recall Delivery', '98.4%', 'AWS SMS & WhatsApp delivery', Icons.mark_email_read_rounded, const Color(0xFF38BDF8)),
+        _buildMetricCard('Recall Delivery', '98.4%', 'Two-way SMS & WhatsApp delivery', Icons.mark_email_read_rounded, const Color(0xFF38BDF8)),
       ],
     );
   }
@@ -621,7 +695,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✓ Recall sweep ran! Outbound reminder queued for delivery via AWS End User Messaging.'),
+            content: Text('✓ Recall sweep ran! Outbound reminders queued for patient delivery via two-way SMS & WhatsApp.'),
             backgroundColor: ClinicTheme.brandAccentDim,
             behavior: SnackBarBehavior.floating,
           ),

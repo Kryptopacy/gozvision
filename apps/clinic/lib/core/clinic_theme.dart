@@ -19,6 +19,7 @@ class ClinicTheme {
   static const Color surface          = Color(0xFF131722);
   static const Color surfaceDark      = Color(0xFF0E1117);
   static const Color surfaceLight     = Color(0x1AFFFFFF);
+  static const Color surfaceGlass     = Color(0xFF131722);
 
   // Typography Palette
   static const Color textPrimary      = Color(0xFFF8FAFC);

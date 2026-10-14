@@ -1552,7 +1552,7 @@ ${sc.currentCorrection}''';
           const SizedBox(height: 10),
           _buildHistoryProfileCard('Visual Demands & Ergonomics', sc.visualDemands, Icons.computer_rounded, const Color(0xFF8B5CF6)),
           const SizedBox(height: 10),
-          _buildHistoryProfileCard('Current Spectacle Correction & Contact Lenses', sc.currentCorrection, Icons.glasses_rounded, const Color(0xFFEC4899)),
+          _buildHistoryProfileCard('Current Spectacle Correction & Contact Lenses', sc.currentCorrection, Icons.visibility_rounded, const Color(0xFFEC4899)),
         ],
       ),
     );

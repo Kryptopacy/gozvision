@@ -163,7 +163,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'Live RAG Engine: Grounded in AAO PPP, AOA, NEI & dynamic Supabase `rag_documents`.',
+                      'Clinical Decision Support: Grounded in AAO Preferred Practice Patterns, AOA Guidelines & NEI protocols.',
                       style: TextStyle(fontSize: 12, color: ClinicTheme.textSecondary),
                     ),
                   ),
@@ -185,7 +185,7 @@ class _DoctorReferenceDialogState extends State<DoctorReferenceDialog> {
                           ),
                           const SizedBox(height: 4),
                           const Text(
-                            'New guidelines can be added via the Supabase rag_documents table.',
+                            'Practice-specific clinical protocols can be added in Practice Settings.',
                             style: TextStyle(fontSize: 11, color: ClinicTheme.textSecondary),
                           ),
                         ],

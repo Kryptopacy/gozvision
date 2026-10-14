@@ -25,6 +25,8 @@ class LowVisionHubPage extends StatefulWidget {
 
 class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController _rtmSearchCtrl = TextEditingController();
+  String _rtmComplianceFilter = 'all';
 
   // Fallback referral cohort data for resilient, high-fidelity clinical presentation
   final List<Map<String, dynamic>> _fallbackReferrals = [
@@ -185,6 +187,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   @override
   void dispose() {
     _tabController.dispose();
+    _rtmSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -514,6 +517,81 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             ),
           ),
           const SizedBox(height: 16),
+          // Scalable RTM Search & Compliance Status Filter Bar
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: TextField(
+                    controller: _rtmSearchCtrl,
+                    onChanged: (_) => setState(() {}),
+                    style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Search RTM ledger by patient, MRN, or device...',
+                      hintStyle: const TextStyle(fontSize: 12, color: ClinicTheme.textMuted),
+                      prefixIcon: const Icon(Icons.search, size: 16, color: ClinicTheme.textMuted),
+                      suffixIcon: _rtmSearchCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 14, color: ClinicTheme.textMuted),
+                              onPressed: () {
+                                _rtmSearchCtrl.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      filled: true,
+                      fillColor: ClinicTheme.surfaceDark.withOpacity(0.5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: ClinicTheme.brandAccent),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ('all', 'All Patients'),
+                  ('compliant', 'Compliant (>=16d)'),
+                  ('pending', 'Pending (<16d)'),
+                ].map((item) {
+                  final isSelected = _rtmComplianceFilter == item.$1;
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: ChoiceChip(
+                      label: Text(item.$2, style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w700)),
+                      selected: isSelected,
+                      selectedColor: ClinicTheme.brandAccent,
+                      labelStyle: TextStyle(
+                        color: isSelected ? ClinicTheme.obsidian : ClinicTheme.textSecondary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      backgroundColor: ClinicTheme.surfaceDark,
+                      side: BorderSide(color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border.withOpacity(0.5)),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      onSelected: (selected) {
+                        if (selected) setState(() => _rtmComplianceFilter = item.$1);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           // Ledger Table
           Expanded(
             child: SingleChildScrollView(
@@ -542,7 +620,26 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                       _buildHeaderCell('ACTION'),
                     ],
                   ),
-                  ...fits.map((f) {
+                  ...(() {
+                    final q = _rtmSearchCtrl.text.trim().toLowerCase();
+                    final filteredFits = fits.where((f) {
+                      final patient = (f['patient_id'] as String? ?? '').toLowerCase();
+                      final mrn = (f['patient_mrn'] as String? ?? '').toLowerCase();
+                      final device = (f['device'] as Map<String, dynamic>?) ?? {};
+                      final model = (device['model'] as String? ?? '').toLowerCase();
+                      final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
+                      final isCompliant = rtmDays >= 16;
+                      
+                      final matchesQuery = q.isEmpty || patient.contains(q) || mrn.contains(q) || model.contains(q);
+                      final matchesCompliance = switch (_rtmComplianceFilter) {
+                        'compliant' => isCompliant,
+                        'pending' => !isCompliant,
+                        _ => true,
+                      };
+                      return matchesQuery && matchesCompliance;
+                    }).toList();
+
+                    return filteredFits.map((f) {
                     final device = (f['device'] as Map<String, dynamic>?) ?? {};
                     final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
                     final staffMins = (device['staff_review_mins'] as num?)?.toInt() ?? 20;
@@ -643,7 +740,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                         ),
                       ],
                     );
-                  }).toList(),
+                  }).toList();
+                })(),
                 ],
               ),
             ),
@@ -1310,22 +1408,47 @@ class _MetricCard extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Referral Panel (Left Column)
 // ─────────────────────────────────────────────────────────────────────────────
-class _ReferralPanel extends StatelessWidget {
-  const _ReferralPanel({required this.rows});
+class _ReferralPanel extends StatefulWidget {
+  const _ReferralPanel({super.key, required this.rows});
 
   final List<Map<String, dynamic>> rows;
 
   @override
+  State<_ReferralPanel> createState() => _ReferralPanelState();
+}
+
+class _ReferralPanelState extends State<_ReferralPanel> {
+  final _searchCtrl = TextEditingController();
+  String _statusFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final byStatus = <String, int>{};
-    for (final row in rows) {
+    for (final row in widget.rows) {
       final status = (row['status'] as String?) ?? 'made';
       byStatus[status] = (byStatus[status] ?? 0) + 1;
     }
 
     final attendedCount = byStatus['attended'] ?? 0;
-    final total = rows.length;
+    final total = widget.rows.length;
     final attendedPercent = total > 0 ? (attendedCount / total * 100).round() : 0;
+
+    final q = _searchCtrl.text.trim().toLowerCase();
+    final filteredRows = widget.rows.where((r) {
+      final patient = (r['patient_id'] as String? ?? '').toLowerCase();
+      final condition = (r['condition'] as String? ?? '').toLowerCase();
+      final status = (r['status'] as String?) ?? 'made';
+
+      final matchesQuery = q.isEmpty || patient.contains(q) || condition.contains(q);
+      final matchesStatus = _statusFilter == 'all' || status == _statusFilter;
+      return matchesQuery && matchesStatus;
+    }).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -1415,92 +1538,178 @@ class _ReferralPanel extends StatelessWidget {
               ),
             ),
 
-          // Referral List
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              itemCount: rows.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
-                final r = rows[i];
-                final status = (r['status'] as String?) ?? 'made';
-                final patient = (r['patient_id'] as String?) ?? '?';
-                final condition = (r['condition'] as String?) ?? 'Low Vision Condition';
-                final formatted = PatientUtils.formatName(patient);
-
-                final (dotColor, label) = switch (status) {
-                  'attended' => (ClinicTheme.brandAccent, 'Attended & Evaluated'),
-                  'made' => (ClinicTheme.warningAmber, 'Referral Pending'),
-                  'lost_to_followup' => (ClinicTheme.hazardAlert, 'Lost to Follow-up'),
-                  _ => (ClinicTheme.textSecondary, status),
-                };
-
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: ClinicTheme.surfaceDark.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white.withOpacity(0.04)),
+          // Search & Status Filters
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 36,
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (_) => setState(() {}),
+                    style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Filter referrals by patient or condition...',
+                      hintStyle: const TextStyle(fontSize: 11.5, color: ClinicTheme.textMuted),
+                      prefixIcon: const Icon(Icons.search, size: 15, color: ClinicTheme.textMuted),
+                      suffixIcon: _searchCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 14, color: ClinicTheme.textMuted),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      filled: true,
+                      fillColor: ClinicTheme.surfaceDark.withOpacity(0.5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: ClinicTheme.brandAccent),
+                      ),
+                    ),
                   ),
+                ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: dotColor,
-                          boxShadow: [
-                            BoxShadow(color: dotColor, blurRadius: 4, spreadRadius: 0.5),
-                          ],
+                      ('all', 'All ($total)'),
+                      ('attended', 'Attended (${byStatus['attended'] ?? 0})'),
+                      ('made', 'Pending (${byStatus['made'] ?? 0})'),
+                      ('lost_to_followup', 'Lost (${byStatus['lost_to_followup'] ?? 0})'),
+                    ].map((item) {
+                      final isSelected = _statusFilter == item.$1;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ChoiceChip(
+                          label: Text(item.$2, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700)),
+                          selected: isSelected,
+                          selectedColor: ClinicTheme.brandAccent,
+                          labelStyle: TextStyle(
+                            color: isSelected ? ClinicTheme.obsidian : ClinicTheme.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          backgroundColor: ClinicTheme.surfaceDark,
+                          side: BorderSide(color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border.withOpacity(0.5)),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          visualDensity: VisualDensity.compact,
+                          onSelected: (selected) {
+                            if (selected) setState(() => _statusFilter = item.$1);
+                          },
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              formatted,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: ClinicTheme.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              condition,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: ClinicTheme.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              label,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: dotColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right_rounded, size: 18, color: ClinicTheme.textMuted),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Opened referral details for $formatted')),
-                          );
-                        },
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ],
+                      );
+                    }).toList(),
                   ),
-                );
-              },
+                ),
+              ],
             ),
+          ),
+
+          // Referral List
+          Expanded(
+            child: filteredRows.isEmpty
+                ? Center(
+                    child: Text(
+                      'No matching referrals found',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textMuted),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    itemCount: filteredRows.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, i) {
+                      final r = filteredRows[i];
+                      final status = (r['status'] as String?) ?? 'made';
+                      final patient = (r['patient_id'] as String?) ?? '?';
+                      final condition = (r['condition'] as String?) ?? 'Low Vision Condition';
+                      final formatted = PatientUtils.formatName(patient);
+
+                      final (dotColor, label) = switch (status) {
+                        'attended' => (ClinicTheme.brandAccent, 'Attended & Evaluated'),
+                        'made' => (ClinicTheme.warningAmber, 'Referral Pending'),
+                        'lost_to_followup' => (ClinicTheme.hazardAlert, 'Lost to Follow-up'),
+                        _ => (ClinicTheme.textSecondary, status),
+                      };
+
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: ClinicTheme.surfaceDark.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white.withOpacity(0.04)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: dotColor,
+                                boxShadow: [
+                                  BoxShadow(color: dotColor, blurRadius: 4, spreadRadius: 0.5),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    formatted,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: ClinicTheme.textPrimary,
+                                    ),
+                                  ),
+                                  Text(
+                                    condition,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11,
+                                      color: ClinicTheme.textMuted,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    label,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: dotColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right_rounded, size: 18, color: ClinicTheme.textMuted),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Opened referral details for $formatted')),
+                                );
+                              },
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -1511,8 +1720,9 @@ class _ReferralPanel extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Device Fits Panel (Right Column)
 // ─────────────────────────────────────────────────────────────────────────────
-class _DeviceFitPanel extends StatelessWidget {
+class _DeviceFitPanel extends StatefulWidget {
   const _DeviceFitPanel({
+    super.key,
     required this.rows,
     required this.onInspectTelemetry,
   });
@@ -1521,11 +1731,43 @@ class _DeviceFitPanel extends StatelessWidget {
   final void Function(Map<String, dynamic> fit) onInspectTelemetry;
 
   @override
+  State<_DeviceFitPanel> createState() => _DeviceFitPanelState();
+}
+
+class _DeviceFitPanelState extends State<_DeviceFitPanel> {
+  final _searchCtrl = TextEditingController();
+  String _riskFilter = 'all';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final risky = rows
+    final risky = widget.rows
         .map(DeviceFitView.fromMap)
         .where((f) => f.risk == AbandonmentRisk.elevated)
         .length;
+
+    final q = _searchCtrl.text.trim().toLowerCase();
+    final filteredRows = widget.rows.where((row) {
+      final fit = DeviceFitView.fromMap(row);
+      final patient = (row['patient_id'] as String? ?? '').toLowerCase();
+      final mrn = (row['patient_mrn'] as String? ?? '').toLowerCase();
+      final device = (row['device'] as Map<String, dynamic>?) ?? {};
+      final model = (device['model'] as String? ?? '').toLowerCase();
+
+      final matchesQuery = q.isEmpty || patient.contains(q) || mrn.contains(q) || model.contains(q);
+      final matchesRisk = switch (_riskFilter) {
+        'elevated' => fit.risk == AbandonmentRisk.elevated,
+        'watch' => fit.risk == AbandonmentRisk.watch,
+        'healthy' => fit.risk == AbandonmentRisk.healthy,
+        _ => true,
+      };
+      return matchesQuery && matchesRisk;
+    }).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -1591,22 +1833,110 @@ class _DeviceFitPanel extends StatelessWidget {
           ),
           const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
 
+          // Search & Risk Filter Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: TextField(
+                      controller: _searchCtrl,
+                      onChanged: (_) => setState(() {}),
+                      style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Search device fits by patient, MRN, or device...',
+                        hintStyle: const TextStyle(fontSize: 12, color: ClinicTheme.textMuted),
+                        prefixIcon: const Icon(Icons.search, size: 16, color: ClinicTheme.textMuted),
+                        suffixIcon: _searchCtrl.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 14, color: ClinicTheme.textMuted),
+                                onPressed: () {
+                                  _searchCtrl.clear();
+                                  setState(() {});
+                                },
+                              )
+                            : null,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                        filled: true,
+                        fillColor: ClinicTheme.surfaceDark.withOpacity(0.5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: ClinicTheme.border.withOpacity(0.5)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: ClinicTheme.brandAccent),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ('all', 'All Fits'),
+                    ('elevated', 'Elevated Risk'),
+                    ('watch', 'Watch Status'),
+                    ('healthy', 'Active & Sustained'),
+                  ].map((item) {
+                    final isSelected = _riskFilter == item.$1;
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: ChoiceChip(
+                        label: Text(item.$2, style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w700)),
+                        selected: isSelected,
+                        selectedColor: item.$1 == 'elevated'
+                            ? ClinicTheme.hazardAlert
+                            : (item.$1 == 'watch' ? ClinicTheme.warningAmber : ClinicTheme.brandAccent),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.black : ClinicTheme.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        backgroundColor: ClinicTheme.surfaceDark,
+                        side: BorderSide(color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        visualDensity: VisualDensity.compact,
+                        onSelected: (selected) {
+                          if (selected) setState(() => _riskFilter = item.$1);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+
           // Cards List
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: rows.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, i) {
-                final row = rows[i];
-                final fit = DeviceFitView.fromMap(row);
-                return _FitCard(
-                  fit: fit,
-                  rawMap: row,
-                  onInspectTelemetry: () => onInspectTelemetry(row),
-                );
-              },
-            ),
+            child: filteredRows.isEmpty
+                ? Center(
+                    child: Text(
+                      'No matching device fits found.',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: ClinicTheme.textMuted),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredRows.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, i) {
+                      final row = filteredRows[i];
+                      final fit = DeviceFitView.fromMap(row);
+                      return _FitCard(
+                        fit: fit,
+                        rawMap: row,
+                        onInspectTelemetry: () => widget.onInspectTelemetry(row),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
