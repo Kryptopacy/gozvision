@@ -836,10 +836,6 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       ),
     );
   }
-        ],
-      ),
-    );
-  }
 
   Widget _buildFhirExplorerTab() {
     final resources = {

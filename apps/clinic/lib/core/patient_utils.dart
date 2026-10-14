@@ -33,4 +33,6 @@ class PatientUtils {
 
     return 'Patient $str';
   }
+
+  static String resolveName(dynamic idOrName) => formatName(idOrName);
 }

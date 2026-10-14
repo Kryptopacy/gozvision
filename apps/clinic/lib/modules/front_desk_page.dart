@@ -199,7 +199,7 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                 }
                                 if (_searchQuery.trim().isNotEmpty) {
                                   final q = _searchQuery.toLowerCase();
-                                  final pName = PatientUtils.resolveName(d['patient_id']).toLowerCase();
+                                  final pName = PatientUtils.formatName(d['patient_id']).toLowerCase();
                                   final type = (d['type'] as String? ?? '').toLowerCase();
                                   final lane = (d['lane'] as String? ?? '').toLowerCase();
                                   final doc = (d['doctor'] as String? ?? '').toLowerCase();
