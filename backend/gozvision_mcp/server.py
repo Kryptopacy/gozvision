@@ -29,6 +29,7 @@ from gozvision_agent.tools import (
     get_medication_info,
     get_low_vision_statistics,
     log_adherence_event,
+    amazon_pharmacy_auto_refill,
     format_ehr_encounter_note,
     find_clinics,
     get_clinic_schedule_and_hours,
@@ -277,6 +278,39 @@ def log_patient_medication_adherence(
 
 
 @mcp.tool()
+def amazon_pharmacy_reorder_drops(
+    medication_name: str,
+    patient_id: str = "demo_patient_001",
+    delivery_speed: str = "prime_same_day",
+    quantity_bottles: int = 1,
+    clinic_id: Optional[str] = None,
+) -> dict[str, Any]:
+    """Order or auto-refill ocular medications directly through Amazon Pharmacy Prime fulfillment.
+
+    Provides direct doorstep delivery for patients:
+    - Standalone Mode (clinic_id=None): Independent low-vision patients can order OTC ocular therapeutics
+      (e.g., PreserVision AREDS 2, Systane Complete PF, Refresh Optive) or transfer active prescriptions
+      with ZERO hospital or clinic affiliation required.
+    - Clinic-Connected Mode: Automatically ties back to the optometrist's encounter prescription.
+
+    Args:
+        medication_name: Name of eye drops or ocular supplement (e.g., 'Latanoprost 0.005%', 'Systane Complete PF').
+        patient_id: Patient identifier.
+        delivery_speed: 'prime_same_day', 'prime_one_day', or 'standard'.
+        quantity_bottles: Number of units or bottles requested.
+        clinic_id: Optional clinic ID. If None, operates in Direct-to-Consumer standalone mode.
+    """
+    res = amazon_pharmacy_auto_refill(
+        medication_name=medication_name,
+        patient_id=patient_id,
+        delivery_speed=delivery_speed,
+        quantity_bottles=quantity_bottles,
+        clinic_id=clinic_id,
+    )
+    return res
+
+
+@mcp.tool()
 def format_ehr_chart_note(
     encounter_id: str = "demo_enc_1",
     provider_name: str = "Dr. Miller, OD",
@@ -436,6 +470,79 @@ def ring_list_monitored_devices() -> dict[str, Any]:
         "devices": devices,
         "count": len(devices),
     }
+
+
+@mcp.tool()
+def ring_identify_doorstep_entity(
+    device_id: str = "front_doorbell",
+    person_query_hint: Optional[str] = None,
+    patient_id: str = "demo_patient_001",
+) -> dict[str, Any]:
+    """Identify who or what is at the doorstep via Ring camera feeds with legal BIPA/GDPR privacy compliance.
+
+    Dual-Layer Architecture:
+    1. Layer 1 (Consented Care Circle): Matches pre-registered family, visiting nurses, and optometrists
+       who have signed explicit BIPA/GDPR written consent (e.g. "Your daughter Sarah is at the front door").
+    2. Layer 2 (Semantic Role Vision): For couriers and public visitors, strictly avoids biometric facial
+       vectors and instead classifies uniforms, vests, parcels, and posture (e.g. "An Amazon delivery carrier
+       in a blue vest with a parcel is at the front door").
+
+    Args:
+        device_id: Ring device ID ('front_doorbell', 'hallway_indoor').
+        person_query_hint: Optional acoustic or query hint (e.g., 'sarah', 'amazon delivery', 'nurse').
+        patient_id: Identifier of the resident.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.identify_doorstep_person_or_role(
+        device_id=device_id,
+        person_query_hint=person_query_hint,
+        patient_id=patient_id,
+    )
+
+
+@mcp.tool()
+def ring_list_care_circle(patient_id: str = "demo_patient_001") -> dict[str, Any]:
+    """List all registered, BIPA/GDPR-consented Care Circle members (family, caregivers, doctors).
+
+    Args:
+        patient_id: Identifier of the resident.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    members = ring_monitor.list_care_circle(patient_id=patient_id)
+    return {
+        "status": "success",
+        "patient_id": patient_id,
+        "care_circle_members": members,
+        "count": len(members),
+        "bipa_compliance": "Explicit written consent on file for all enrolled biometric facial matches",
+    }
+
+
+@mcp.tool()
+def ring_register_care_circle_contact(
+    member_id: str,
+    name: str,
+    relationship: str,
+    phone: str,
+    bipa_gdpr_consent_verified: bool = True,
+) -> dict[str, Any]:
+    """Enroll a new family member, doctor, or home health aide into the patient's verified Care Circle.
+
+    Args:
+        member_id: Unique handle (e.g., 'son_michael', 'aide_elena').
+        name: Full name.
+        relationship: Relation to patient (e.g., 'Son', 'Physical Therapist', 'Neighbor').
+        phone: SMS/calling number for emergency dispatch.
+        bipa_gdpr_consent_verified: True confirming explicit consent under Illinois BIPA & GDPR Art. 9.
+    """
+    from gozvision_ring.ring_client import ring_monitor
+    return ring_monitor.register_care_circle_member(
+        member_id=member_id,
+        name=name,
+        relationship=relationship,
+        phone=phone,
+        bipa_gdpr_consent_verified=bipa_gdpr_consent_verified,
+    )
 
 
 # ============================================================================

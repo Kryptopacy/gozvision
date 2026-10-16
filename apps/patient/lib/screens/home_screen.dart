@@ -810,7 +810,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               _coordinator?.captureSnapshot();
             },
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           _buildTactileDockButton(
             icon: Icons.document_scanner_outlined,
             label: 'Read Text',
@@ -820,7 +820,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               _coordinator?.selectMode(GozAIMode.reading, fromUserTap: true);
             },
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
+          _buildTactileDockButton(
+            icon: Icons.sensor_door_outlined,
+            label: 'Doorstep',
+            tooltip: 'Check who is at the front door (Ring Vision)',
+            onTap: () {
+              HapticService.tap();
+              _showDoorstepModal(context);
+            },
+          ),
+          const SizedBox(width: 8),
           _buildTactileDockButton(
             icon: Icons.sos_outlined,
             label: 'Emergency',
@@ -903,6 +913,246 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       }
     } catch (_) {}
+  }
+
+  void _showDoorstepModal(BuildContext context) {
+    HapticService.tap();
+    String spokenText = 'Your daughter Sarah Vance is at the front door.';
+    String guidance = 'Safe to unlock and open the door.';
+    String entityName = 'Sarah Vance (Daughter)';
+    bool isTrusted = true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF131722),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: GozAITheme.malachite.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: GozAITheme.malachite.withValues(alpha: 0.3)),
+                        ),
+                        child: const Icon(Icons.sensor_door_outlined, color: GozAITheme.malachite, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Front Doorstep Vision', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text('Ring Video Doorbell Pro • Dual-Layer Vision', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white70),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isTrusted ? GozAITheme.malachite.withValues(alpha: 0.4) : Colors.amber.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          isTrusted ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                          color: isTrusted ? GozAITheme.malachite : Colors.amber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          entityName,
+                          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Guidance: $guidance',
+                      style: TextStyle(
+                        color: isTrusted ? GozAITheme.accentCyan : Colors.amber,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.volume_up_rounded, color: GozAITheme.malachite, size: 28),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'SPOKEN AUDIO ANNOUNCEMENT (PATIENT EARS ONLY)',
+                                  style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '"$spokenText"',
+                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: GozAITheme.malachite.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.shield_outlined, size: 14, color: GozAITheme.malachite),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Silent Audit: BIPA 740 ILCS 14/ & GDPR Art. 9 verified in background logs. Zero legal jargon spoken to patient.',
+                              style: TextStyle(color: Colors.white54, fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'TEST SCENARIO DETECTION:',
+                style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: GozAITheme.malachite,
+                        side: BorderSide(color: GozAITheme.malachite.withValues(alpha: 0.4)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('Daughter Sarah', style: TextStyle(fontSize: 11)),
+                      onPressed: () {
+                        setModalState(() {
+                          spokenText = 'Your daughter Sarah Vance is at the front door.';
+                          guidance = 'Safe to unlock and open the door.';
+                          entityName = 'Sarah Vance (Daughter)';
+                          isTrusted = true;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFFF9900),
+                        side: BorderSide(color: const Color(0xFFFF9900).withValues(alpha: 0.4)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('Amazon Courier', style: TextStyle(fontSize: 11)),
+                      onPressed: () {
+                        setModalState(() {
+                          spokenText = 'An Amazon delivery carrier in a blue vest with a parcel is at the front door.';
+                          guidance = 'Package being placed on doorstep. Obstacle alert active.';
+                          entityName = 'Amazon Logistics Carrier';
+                          isTrusted = true;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                        side: const BorderSide(color: Colors.white24),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('Unknown Visitor', style: TextStyle(fontSize: 11)),
+                      onPressed: () {
+                        setModalState(() {
+                          spokenText = 'A visitor is waiting at the front door.';
+                          guidance = 'Use Ring two-way intercom to speak before opening.';
+                          entityName = 'Visitor';
+                          isTrusted = false;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: GozAITheme.malachite,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.people_alt_outlined, size: 18),
+                  label: const Text('Manage Care Circle Contacts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    context.push('/caregiver');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   /// Mode selector buttons utilizing high-contrast interaction guidelines.
@@ -1465,6 +1715,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     _buildCompanionChip('Find eye clinics nearby', action: () => ClinicDiscoverySheet.show(context)),
                     _buildCompanionChip('Clinic working hours & doctors', action: () => ClinicDiscoverySheet.show(context)),
                     _buildCompanionChip('Book doctor appointment', action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Who is at the Door? (Ring Vision)', action: () => _showDoorstepModal(context)),
+                    _buildCompanionChip('Order Drops (Amazon Pharmacy Refill)', action: () => PatientDispensarySheet.show(context)),
+                    _buildCompanionChip('Care Circle & Doorstep Safety', action: () => context.push('/caregiver')),
                     _buildCompanionChip('Why take drops at bedtime?'),
                     _buildCompanionChip('Relief for dry tired eyes'),
                     _buildCompanionChip('What does 20/20 mean?'),

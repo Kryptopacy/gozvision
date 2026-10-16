@@ -80,6 +80,32 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
       'description': 'Gentle, preservative-free drops that protect your eyes from dryness, stinging, and tiredness throughout the day.',
       'tag': 'Dry Eye Relief',
       'icon': Icons.medication_outlined,
+      'isPharmacyRefillable': true,
+    },
+    {
+      'id': 'prod_05',
+      'name': 'PreserVision AREDS 2 Formula',
+      'category': 'Drops',
+      'price': 39.99,
+      'currency': 'USD',
+      'rx': 'Clinically Proven Macular Support Vitamins (AREDS 2)',
+      'description': 'Patented antioxidant and carotenoid blend designed to support retinal health and slow macular degeneration.',
+      'tag': 'Macular Health',
+      'icon': Icons.health_and_safety_outlined,
+      'isPharmacyRefillable': true,
+    },
+    {
+      'id': 'prod_06',
+      'name': 'Latanoprost 0.005% Ophthalmic Drops',
+      'category': 'Drops',
+      'price': 22.00,
+      'currency': 'USD',
+      'rx': 'Doctor Prescribed (1 drop nightly OU for IOP control)',
+      'description': 'Prostaglandin analog ophthalmic solution for lowering intraocular pressure in glaucoma or ocular hypertension.',
+      'tag': 'Rx Glaucoma Therapy',
+      'icon': Icons.water_drop_outlined,
+      'isPharmacyRefillable': true,
+      'isRx': true,
     },
   ];
 
@@ -138,6 +164,247 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
         ),
       );
     }
+  }
+
+  void _showAmazonPharmacyRefillDialog(BuildContext context, Map<String, dynamic> item) {
+    HapticService.tap();
+    String selectedSpeed = 'Prime Same-Day (Delivered Today by 7 PM)';
+    int quantity = 1;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF131722),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final totalPrice = (item['price'] as double) * quantity;
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 28,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF9900).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFF9900).withValues(alpha: 0.4)),
+                      ),
+                      child: const Icon(Icons.local_shipping_rounded, color: Color(0xFFFF9900), size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Amazon Pharmacy',
+                                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00A8E1).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Prime Refill',
+                                  style: TextStyle(color: Color(0xFF00A8E1), fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Text(
+                            'Direct Doorstep Delivery • Standalone (Zero Clinic Lock-In)',
+                            style: TextStyle(color: Colors.white60, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(item['icon'] as IconData, color: GozAITheme.accentCyan, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['name'] as String,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            Text(
+                              item['rx'] as String,
+                              style: const TextStyle(color: GozAITheme.accentCyan, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '\$${totalPrice.toStringAsFixed(2)}',
+                        style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'DELIVERY SPEED',
+                  style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedSpeed,
+                  dropdownColor: const Color(0xFF1E2433),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.white12)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Prime Same-Day (Delivered Today by 7 PM)',
+                      child: Text('Prime Same-Day (Delivered Today by 7 PM)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Prime One-Day (Delivered Tomorrow Morning)',
+                      child: Text('Prime One-Day (Delivered Tomorrow Morning)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Standard Doorstep (2-3 Business Days)',
+                      child: Text('Standard Doorstep (2-3 Business Days)'),
+                    ),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setModalState(() => selectedSpeed = v);
+                  },
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'QUANTITY',
+                      style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline, color: Colors.white70),
+                          onPressed: quantity > 1 ? () => setModalState(() => quantity--) : null,
+                        ),
+                        Text(
+                          '$quantity bottle${quantity > 1 ? 's' : ''}',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline, color: GozAITheme.accentCyan),
+                          onPressed: quantity < 5 ? () => setModalState(() => quantity++) : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A8E1).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF00A8E1).withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.home_outlined, color: Color(0xFF00A8E1), size: 18),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Ring Integration: When package arrives at your front door, Ring chime & Smart Glasses announce safe parcel arrival with obstacle clearance.',
+                          style: TextStyle(color: Color(0xFFB0E2FF), fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF9900),
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.flash_on_rounded, size: 20),
+                    label: Text(
+                      'Confirm 1-Click Refill • \$${totalPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      HapticService.tap();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: const Color(0xFF1E2433),
+                          duration: const Duration(seconds: 4),
+                          content: Row(
+                            children: [
+                              const Icon(Icons.check_circle_rounded, color: Color(0xFFFF9900), size: 22),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '✓ Amazon Pharmacy Order AMZN-RX-${(10000 + item['name'].hashCode % 89999).abs()} confirmed! Delivering to your doorstep via Prime.',
+                                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -253,6 +520,44 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
           ),
 
           const SizedBox(height: 16),
+          // Direct-to-Consumer / Standalone Refill Callout
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFFF9900).withValues(alpha: 0.12),
+                  const Color(0xFF00A8E1).withValues(alpha: 0.08),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFF9900).withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.bolt_rounded, color: Color(0xFFFF9900), size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: RichText(
+                    text: const TextSpan(
+                      style: TextStyle(fontSize: 11.5, color: Colors.white, height: 1.3),
+                      children: [
+                        TextSpan(
+                          text: 'Direct-to-Consumer Autonomy: ',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFF9900)),
+                        ),
+                        TextSpan(
+                          text: 'Patients can refill drops & ocular vitamins directly through Amazon Prime doorstep delivery without requiring a hospital storefront.',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
           // Product List
           Expanded(
             child: ListView.separated(
@@ -318,23 +623,68 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
                         style: const TextStyle(color: GozAITheme.accentCyan, fontSize: 11.5, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 44,
-                        child: FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: GozAITheme.accentCyan,
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          icon: const Icon(Icons.shopping_bag_outlined, size: 18),
-                          label: const Text(
-                            'Order Now (Secure Checkout)',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                          ),
-                          onPressed: () => _purchaseProduct(context, item, bachsService),
+                      if (item['isPharmacyRefillable'] == true) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: SizedBox(
+                                height: 44,
+                                child: FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9900),
+                                    foregroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  icon: const Icon(Icons.flash_on_rounded, size: 16),
+                                  label: const Text(
+                                    'Amazon Prime Refill',
+                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                                  ),
+                                  onPressed: () => _showAmazonPharmacyRefillDialog(context, item),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 2,
+                              child: SizedBox(
+                                height: 44,
+                                child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: GozAITheme.accentCyan,
+                                    side: const BorderSide(color: GozAITheme.accentCyan),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  child: const Text(
+                                    'Clinic Pay',
+                                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                                  ),
+                                  onPressed: () => _purchaseProduct(context, item, bachsService),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      ] else ...[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: GozAITheme.accentCyan,
+                              foregroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                            label: const Text(
+                              'Order Now (Secure Checkout)',
+                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                            ),
+                            onPressed: () => _purchaseProduct(context, item, bachsService),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 );

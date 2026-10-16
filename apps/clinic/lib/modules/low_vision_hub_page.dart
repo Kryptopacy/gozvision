@@ -934,12 +934,12 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Caregiver & Certified Low Vision Therapist (CLVT) Tele-Bridge',
+                    'Caregiver, Care Circle & Ring Doorstep Tele-Bridge',
                     style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Direct 1-click video tele-rehabilitation dispatch and family caregiver notification network.',
+                    'Direct 1-click video tele-rehabilitation dispatch, Ring doorstep safety monitoring, and Amazon Pharmacy refill telemetry.',
                     style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
                   ),
                 ],
@@ -973,6 +973,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 final device = (fit['device'] as Map<String, dynamic>?) ?? {};
                 final caregiver = fit['caregiver_name'] as String? ?? 'Designated Family Aide';
                 final phone = fit['caregiver_phone'] as String? ?? '+1 (555) 000-0000';
+                final patientName = fit['patient_id'] as String? ?? 'Patient';
+                final isArthur = patientName == 'Arthur Pendelton';
 
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -995,7 +997,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                           children: [
                             Row(
                               children: [
-                                Text(fit['patient_id'] as String? ?? 'Patient', style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700)),
+                                Text(patientName, style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700)),
                                 const Text('  •  ', style: TextStyle(color: ClinicTheme.textMuted)),
                                 Text('Caregiver: $caregiver', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.brandAccent, fontWeight: FontWeight.w600)),
                               ],
@@ -1005,11 +1007,87 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                               'Phone: $phone · Device: ${device['model']} · Adherence Status: ${device['cpt_status']}',
                               style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary),
                             ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: ClinicTheme.brandAccent.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.sensor_door_outlined, size: 11, color: ClinicTheme.brandAccent),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Ring Doorbell: ${isArthur ? 'Standby' : 'Pro Online'}',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.brandAccent, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF9900).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: const Color(0xFFFF9900).withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.local_shipping_outlined, size: 11, color: Color(0xFFFF9900)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Amazon Pharmacy: ${isArthur ? 'Rx Transfer Pending' : 'Prime Refill Active'}',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 10, color: const Color(0xFFFF9900), fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: ClinicTheme.malachite.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: ClinicTheme.malachite.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.verified_rounded, size: 11, color: ClinicTheme.malachite),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Care Circle BIPA Verified',
+                                        style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.malachite, fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
                       Row(
                         children: [
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: ClinicTheme.accentCyan,
+                              side: BorderSide(color: ClinicTheme.accentCyan.withOpacity(0.4)),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.sensor_door_outlined, size: 14),
+                            label: const Text('Doorstep & Circle', style: TextStyle(fontSize: 11)),
+                            onPressed: () => _showCareCircleRingDialog(context, fit),
+                          ),
+                          const SizedBox(width: 6),
                           OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: ClinicTheme.brandAccent,
@@ -1025,7 +1103,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                               );
                             },
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           FilledButton.icon(
                             style: FilledButton.styleFrom(
                               backgroundColor: ClinicTheme.malachite,
@@ -1037,7 +1115,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                             label: const Text('Connect OT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Invited Low Vision Rehab Therapist to review ${fit['patient_id']}!')),
+                                SnackBar(content: Text('Invited Low Vision Rehab Therapist to review $patientName!')),
                               );
                             },
                           ),
@@ -1048,6 +1126,199 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCareCircleRingDialog(BuildContext context, Map<String, dynamic> fit) {
+    final patientName = fit['patient_id'] as String? ?? 'Patient';
+    final caregiver = fit['caregiver_name'] as String? ?? 'Family Aide';
+    final phone = fit['caregiver_phone'] as String? ?? '+1 (555) 349-8821';
+    final isArthur = patientName == 'Arthur Pendelton';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ClinicTheme.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: ClinicTheme.border),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.sensor_door_outlined, color: ClinicTheme.brandAccent, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Care Circle & Doorstep Safety: $patientName',
+                style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 520,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Dual-layer Ring Video Doorbell & Care Circle entity verification profile.',
+                style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'VERIFIED CARE CIRCLE (BIPA/GDPR OPT-IN)',
+                          style: TextStyle(color: ClinicTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: ClinicTheme.malachite.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text('Written Consent On File', style: TextStyle(color: ClinicTheme.malachite, fontSize: 9.5, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 14,
+                          backgroundColor: Colors.white12,
+                          child: Icon(Icons.person, size: 14, color: Colors.white),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '$caregiver • $phone',
+                            style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: const [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: Colors.white12,
+                          child: Icon(Icons.medical_services_outlined, size: 14, color: ClinicTheme.brandAccent),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Nurse David (Visiting Clinical Aide) • +1 (555) 782-9904',
+                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'RING DOORSTEP & OBSTACLE SAFETY TELEMETRY',
+                      style: TextStyle(color: ClinicTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.videocam_rounded, size: 16, color: isArthur ? Colors.amber : ClinicTheme.malachite),
+                        const SizedBox(width: 8),
+                        Text(
+                          isArthur ? 'Ring Doorbell: Standby' : 'Ring Video Doorbell Pro: Online (Front Porch Cam)',
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      '• Obstacle Audio Cue: Enabled (Dispatches voice alert upon parcel placement)\n• Two-Way Audio Intercom: Ready for Low-Vision Autonomy\n• Compliance Audit: Zero facial biometrics extracted for public couriers.',
+                      style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: ClinicTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFF9900).withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(Icons.local_shipping_outlined, size: 16, color: Color(0xFFFF9900)),
+                        SizedBox(width: 8),
+                        Text(
+                          'AMAZON PHARMACY 1-CLICK PRIME REFILL TELEMETRY',
+                          style: TextStyle(color: Color(0xFFFF9900), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      isArthur
+                          ? '• Refill Status: Prescription Transfer in Progress (Latanoprost 0.005%)\n• Direct Doorstep Delivery: Direct-to-consumer standalone mode.'
+                          : '• Active Prescription: Systane Complete Preservative-Free Drops\n• Last Delivery: Oct 12, 2026 (Delivered via Prime to Doorstep)\n• Adherence Sync: 98% (Doses automatically registered on Alexa & Ring audio cue).',
+                      style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Close', style: TextStyle(color: ClinicTheme.textSecondary)),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: ClinicTheme.brandAccent, foregroundColor: ClinicTheme.obsidian),
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text('Ping Ring & Pharmacy Hub'),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('✓ Ingested Ring Doorbell health & Amazon Pharmacy refill telemetry for $patientName!'),
+                  backgroundColor: ClinicTheme.brandAccentDim,
+                ),
+              );
+            },
           ),
         ],
       ),

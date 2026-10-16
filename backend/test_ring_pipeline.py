@@ -36,6 +36,49 @@ class TestRingPipeline(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["rendered_audio_status"], "queued_for_playback")
 
+    def test_identify_care_circle_member(self):
+        # Layer 1: Consented family member
+        result = self.monitor.identify_doorstep_person_or_role(
+            device_id="front_doorbell",
+            person_query_hint="Sarah Vance",
+            patient_id="pat_42",
+        )
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["identification_layer"], "care_circle_opt_in")
+        self.assertEqual(result["person_name"], "Sarah Vance")
+        self.assertTrue(result["is_trusted"])
+        self.assertIn("Sarah Vance", result["spoken_announcement"])
+        self.assertIn("BIPA 740 ILCS", result["privacy_compliance"]["standard"])
+
+    def test_identify_semantic_role_courier(self):
+        # Layer 2: Non-biometric semantic VLM classification
+        result = self.monitor.identify_doorstep_person_or_role(
+            device_id="front_doorbell",
+            person_query_hint="Amazon delivery carrier",
+            patient_id="pat_42",
+        )
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["identification_layer"], "semantic_role_non_biometric")
+        self.assertIn("Amazon", result["detected_role"])
+        self.assertFalse(result["privacy_compliance"]["facial_vectors_extracted"])
+        self.assertIn("Amazon delivery carrier", result["spoken_announcement"])
+
+    def test_care_circle_management(self):
+        # List care circle
+        members = self.monitor.list_care_circle()
+        self.assertGreaterEqual(len(members), 3)
+
+        # Register new member
+        enrolled = self.monitor.register_care_circle_member(
+            member_id="aide_elena",
+            name="Elena Rostova",
+            relationship="Mobility Specialist",
+            phone="+1-555-019-7733",
+            bipa_gdpr_consent_verified=True,
+        )
+        self.assertEqual(enrolled["status"], "success")
+        self.assertEqual(enrolled["member"]["name"], "Elena Rostova")
+
 
 if __name__ == "__main__":
     unittest.main()
