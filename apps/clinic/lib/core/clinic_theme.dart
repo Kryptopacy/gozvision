@@ -35,6 +35,7 @@ class ClinicTheme {
   // Backward-compatible aliases pointing to Brand Accent
   static const Color malachite        = brandAccent;
   static const Color opticalCyan      = brandAccent;
+  static const Color accentCyan       = brandAccent;
   static const Color malachiteDim     = brandAccentDim;
   static const Color opticalAzure     = brandAccentDim;
   static const Color malachiteFaint   = brandAccentFaint;

@@ -553,20 +553,84 @@
     position: relative; z-index: 3;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 16px; margin: auto 0;
+    width: 100%;
   }
   .hud-bounding-box {
     position: relative;
     border: 2px solid var(--accent);
     border-radius: 12px;
-    padding: 18px 26px;
-    background: rgba(8, 9, 12, 0.82);
+    padding: 16px 22px;
+    background: rgba(8, 9, 12, 0.88);
     backdrop-filter: blur(16px);
     box-shadow: 0 0 24px rgba(56, 189, 248, 0.28), inset 0 0 16px rgba(56, 189, 248, 0.08);
     text-align: center;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    max-width: 92%;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 90%;
     overflow: hidden;
   }
+  /* Mode specific visual chemistry anchors */
+  .hud-bounding-box.mode-scene {
+    margin-top: auto;
+    margin-bottom: 12px;
+    border-color: #ef4444;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.35);
+  }
+  .hud-bounding-box.mode-read {
+    border-color: #10b981;
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
+    max-width: 360px;
+  }
+  .hud-bounding-box.mode-screen {
+    border-color: #38bdf8;
+    box-shadow: 0 0 35px rgba(56, 189, 248, 0.4);
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: 8%;
+  }
+  .hud-bounding-box.mode-light {
+    border-color: #f59e0b;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.35);
+  }
+
+  /* Interactive overlay reticle for elevator button */
+  .hud-target-reticle {
+    position: absolute;
+    width: 64px; height: 64px;
+    border: 2.5px solid #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #38bdf8;
+    pointer-events: none;
+    z-index: 2;
+    top: 50%; left: 60%;
+    transform: translate(-50%, -50%);
+    display: none;
+    animation: targetRingPulse 1.5s infinite;
+  }
+  .hud-target-reticle.active { display: block; }
+  @keyframes targetRingPulse {
+    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+  }
+
+  /* Floor hazard highlight band */
+  .hud-floor-hazard {
+    position: absolute;
+    bottom: 64px; left: 6%; right: 6%;
+    height: 6px;
+    background: repeating-linear-gradient(45deg, #ef4444, #ef4444 12px, #f59e0b 12px, #f59e0b 24px);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.9);
+    border-radius: 4px;
+    z-index: 2;
+    display: none;
+    animation: hazardGlow 1.2s infinite alternate;
+  }
+  .hud-floor-hazard.active { display: block; }
+  @keyframes hazardGlow {
+    0% { opacity: 0.75; transform: scaleY(1); }
+    100% { opacity: 1; transform: scaleY(1.3); }
+  }
+
   .hud-scan-line {
     position: absolute; top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, transparent, #10b981, transparent);
@@ -1070,9 +1134,9 @@
     <div class="wrap">
       <div class="section-intro">
         <span class="section-tag">Interactive Preview</span>
-        <h2 class="section-title">Experience the Goz Copilot in Action</h2>
+        <h2 class="section-title">See Goz in Action</h2>
         <p class="section-sub">
-          Test how Goz assists low-vision patients in daily living using 1-FPS computer vision, real-time spatial OCR, and synchronized vibro-acoustic cues.
+          Explore how Goz guides patients in daily living with clear spoken cues, floor hazard alerts, and accurate medication label reading.
         </p>
       </div>
 
@@ -1080,35 +1144,35 @@
         <div class="sim-container">
           <div class="sim-header">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--ink-secondary);text-transform:uppercase;">VIEWFINDER HUD</span>
+              <span style="font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--ink-secondary);text-transform:uppercase;">CAMERA VIEWFINDER</span>
             </div>
             <div class="sim-tabs">
-              <button class="sim-tab active" onclick="switchSimMode('scene')">Scene Awareness</button>
-              <button class="sim-tab" onclick="switchSimMode('read')">Prescription OCR</button>
-              <button class="sim-tab" onclick="switchSimMode('screen')">UI Navigator</button>
-              <button class="sim-tab" onclick="switchSimMode('light')">Glare & Light</button>
+              <button class="sim-tab active" onclick="switchSimMode('scene')">Walking & Obstacles</button>
+              <button class="sim-tab" onclick="switchSimMode('read')">Reading Eye Drops</button>
+              <button class="sim-tab" onclick="switchSimMode('screen')">Finding Buttons & Signs</button>
+              <button class="sim-tab" onclick="switchSimMode('light')">Handling Harsh Glare</button>
             </div>
             <div class="hud-badge">
-              STREAM ACTIVE
+              LIVE VIEW
             </div>
           </div>
 
           <div class="sim-body">
-            <!-- Left Viewport (Live Simulated Smart Glasses Camera POV) -->
+            <!-- Left Viewport (Real-time Camera Viewfinder) -->
             <div class="sim-viewport">
               <div class="sim-scene-backdrop" id="simSceneBackdrop"></div>
-              <div class="sim-glasses-vignette"></div>
+              <div class="sim-viewfinder-corners"></div>
               <div class="sim-camera-mesh"></div>
               <div class="sim-impairment-overlay" id="simImpairmentOverlay"></div>
               <div class="sim-impairment-banner" id="simImpairmentBanner">
-                ⚠️ SIMULATED IMPAIRMENT: Central Scotoma & Field Loss — Notice how the threshold step becomes invisible without Goz AI contours!
+                ⚠️ SIMULATED LOW VISION: Notice how the floor step blends into the background without Goz highlighting it!
               </div>
 
-              <!-- Top HUD Telemetry & Interactive View Toggle -->
+              <!-- Top Status Bar & View Toggle -->
               <div class="sim-hud-top">
                 <div style="display:flex;gap:8px;align-items:center;">
-                  <span class="hud-badge" id="simFpsBadge">1.0 FPS · 16kHz Audio</span>
-                  <span class="hud-badge" id="simModeBadge">MODE: SCENE AWARENESS</span>
+                  <span class="hud-badge" id="simFpsBadge">Live Camera & Voice</span>
+                  <span class="hud-badge" id="simModeBadge">WALKING SAFETY</span>
                 </div>
                 <button class="hud-toggle-btn" id="simImpairmentToggle" onclick="toggleImpairmentFilter()">
                   <span>👁️</span>
@@ -1116,27 +1180,33 @@
                 </button>
               </div>
 
-              <!-- Center Computer Vision Bounding Box & Active Tracking -->
+              <!-- Interactive Floor Hazard Highlight Band -->
+              <div class="hud-floor-hazard active" id="simFloorHazard"></div>
+
+              <!-- Interactive Targeting Reticle for Buttons -->
+              <div class="hud-target-reticle" id="simTargetReticle"></div>
+
+              <!-- Responsive Computer Vision Callout Box -->
               <div class="sim-hud-center">
-                <div class="hud-bounding-box" id="simBox">
+                <div class="hud-bounding-box mode-scene" id="simBox">
                   <div class="hud-scan-line" id="simScanLine"></div>
                   <div class="hud-bounding-header">
                     <span class="hud-bounding-icon" id="simBoxIcon">⚠️</span>
-                    <span class="hud-bounding-label" id="simBoxTag">HAZARD DETECTED · STEP +12CM</span>
+                    <span class="hud-bounding-label" id="simBoxTag">HAZARD DETECTED · STEP DOWN</span>
                   </div>
-                  <div class="hud-bounding-text" id="simBoxText">Threshold Step @ 2.8m · Low Contrast</div>
-                  <div class="hud-bounding-meta" id="simBoxMeta">Floor contrast differential: 14% (High Fall Risk)</div>
+                  <div class="hud-bounding-text" id="simBoxText">Floor Step in 3 Paces</div>
+                  <div class="hud-bounding-meta" id="simBoxMeta">Watch your footing: 12cm drop ahead</div>
                 </div>
               </div>
 
-              <!-- Bottom Real-time Sensor & Haptic Status -->
+              <!-- Bottom Status Indicators -->
               <div class="sim-hud-bottom">
                 <div class="hud-sensor-tag" id="simSensorTag">
                   <span>⚡</span>
-                  <span id="simSensorText">NYU VIBRO-ACOUSTIC: ACTIVE (240Hz)</span>
+                  <span id="simSensorText">VOICE & VIBRATION ALERT: ON</span>
                 </div>
                 <div class="haptic-pulse-meter">
-                  <span style="font-weight:700;">HAPTIC:</span>
+                  <span style="font-weight:700;">GUIDANCE:</span>
                   <div class="pulse-bar"></div>
                   <div class="pulse-bar"></div>
                   <div class="pulse-bar"></div>
@@ -1145,36 +1215,36 @@
               </div>
             </div>
 
-            <!-- Right Telemetry, Trigger Explanation, Voice Audio & Clinical Impact -->
+            <!-- Right Telemetry & Voice Audio Pane -->
             <div class="sim-telemetry">
               <!-- Mode Title & Urgency Indicator -->
               <div class="sim-telemetry-header">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
                   <div>
-                    <span class="telemetry-sub" id="simTriggerType">TRIGGER: REAL-TIME LIDAR & CONTRAST SCAN</span>
-                    <h3 id="simTitle">Continuous Scene Guidance & Fall Prevention</h3>
+                    <span class="telemetry-sub" id="simTriggerType">ALERT: WALKING SAFETY</span>
+                    <h3 id="simTitle">Safe Walking & Fall Prevention</h3>
                   </div>
-                  <div class="clinical-urgency-badge" id="simUrgencyBadge">FALL RISK: CRITICAL</div>
+                  <div class="clinical-urgency-badge" id="simUrgencyBadge">WATCH YOUR STEP</div>
                 </div>
               </div>
 
-              <!-- What Triggered This Guidance (Sensor Root Cause) -->
+              <!-- What Triggered This Guidance (Plain English) -->
               <div class="sim-trigger-card">
                 <div class="trigger-card-title">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                  <span id="simTriggerTitle">WHAT TRIGGERED THIS GUIDANCE:</span>
+                  <span id="simTriggerTitle">WHAT GOZ SAW:</span>
                 </div>
                 <div class="trigger-card-body" id="simTriggerBody">
-                  Depth-sensing LiDAR & edge gradient identified an unpainted 12cm floor elevation drop. At 14% lighting contrast, this transition is nearly invisible to patients with central scotoma or glaucoma, creating an immediate trip-and-fall hazard.
+                  Goz spotted an unmarked step ahead on the floor. In dim lighting, steps can blend into the floor and cause trips. Goz warns the user ahead of time so they step down safely.
                 </div>
               </div>
 
-              <!-- Goz Natural Voice Dialogue + Real Interactive Voice Playback -->
+              <!-- Natural Spoken Voice Guidance -->
               <div class="sim-speech-bubble">
                 <div class="sim-speech-top">
                   <div class="sim-speech-title">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                    Goz Voice Synthesis (24kHz Natural Audio)
+                    Goz Spoken Guidance
                   </div>
                   <button class="audio-play-btn" id="simAudioBtn" onclick="playSimVoice()">
                     <span id="audioPlayIcon">▶</span>
@@ -1190,25 +1260,25 @@
                 </div>
 
                 <div class="sim-speech-body" id="simSpeech">
-                  "Hallway is clear ahead. There is one slight threshold step in approximately three paces. Gentle floor contrast transition."
+                  "Hallway is clear ahead. There is a slight step down in three paces."
                 </div>
               </div>
 
-              <!-- Clinical Importance & Conversion Value ROI -->
+              <!-- Clinical Importance & Daily Value -->
               <div class="sim-impact-card">
                 <div class="impact-header">
-                  <span class="impact-title">CLINICAL IMPORTANCE & PRACTICE OUTCOME</span>
-                  <span class="impact-stat" id="simMetricTag">84% Fall Reduction</span>
+                  <span class="impact-title">PATIENT BENEFIT</span>
+                  <span class="impact-stat" id="simMetricTag">84% Fewer Falls</span>
                 </div>
                 <div class="impact-desc" id="simMetricDesc">
-                  73% of low-vision trauma admissions stem from unmarked home thresholds. Real-time vibro-acoustic guidance eliminates elevation trip hazards before contact.
+                  Most home accidents happen when people with low vision miss a floor step or threshold. Spoken cues and gentle vibration alerts prevent falls before they happen.
                 </div>
               </div>
 
-              <!-- Direct High-Converting Action Row -->
+              <!-- Direct Action Row -->
               <div class="sim-action-row">
                 <button class="btn btn-primary btn-sm" onclick="openLeadModal()">
-                  Request Practice Clinical Trial →
+                  Request Clinic Trial →
                 </button>
                 <a href="/clinic" class="btn btn-secondary btn-sm">
                   Launch Clinic Suite
@@ -1225,53 +1295,53 @@
   <section id="modules">
     <div class="wrap">
       <div class="section-intro">
-        <span class="section-tag">Enterprise Clinical Architecture</span>
-        <h2 class="section-title">One Unified Ecosystem for Practice & Patient</h2>
+        <span class="section-tag">Clinical Suite & Patient Platform</span>
+        <h2 class="section-title">Built for Real Clinical Care</h2>
         <p class="section-sub">
-          Replacing four fractured vendor contracts with a single, multi-tenant clinical suite where every encounter powers continuous care.
+          Everything your practice needs to examine patients, document findings, and keep low-vision patients safe at home.
         </p>
       </div>
 
       <div class="bento-grid">
-        <!-- Card 1: Ambient Scribe & Optometric Case History (Large, Col 2) -->
+        <!-- Card 1: Ambient Scribe -->
         <div class="bento-card bento-col-2">
-          <span class="card-tag">All Clinic Encounters · Practice Wide</span>
+          <span class="card-tag">Practice Wide · Exam Documentation</span>
           <div class="card-icon">✎</div>
           <div>
-            <h3>Ambient Scribe & Optometric Case History</h3>
+            <h3>AI Clinical Exam Scribe</h3>
             <p>
-              Transcribes multi-speaker exam room audio into structured optometric SOAP notes in real time. Features a specialized <strong>OLD CARTS</strong> Case History engine (Onset, Location, Duration, Characteristics, Aggravating/Relieving, Radiation, Timing, Severity), discrete POHx, PMHx (HbA1c/diabetes), FMHx, and visual ergonomics with discrete OD/OS clinical metrics.
+              Listens during the patient consultation and automatically writes up a complete, structured clinical SOAP note in real time. Doctors spend their time looking at the patient's eyes instead of typing into a computer screen.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">✓ 1-Click Clipboard EHR Formatting</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">✓ 1-Click Copy to Any EHR</span>
             <a href="/clinic" class="btn btn-ghost btn-sm">Try Scribe Demo →</a>
           </div>
         </div>
 
         <!-- Card 2: Paper Assessment Form Digitizer -->
         <div class="bento-card">
-          <span class="card-tag">Paper to Digital · Vision OCR</span>
+          <span class="card-tag">Paper to Digital</span>
           <div class="card-icon">📄</div>
           <div>
-            <h3>Paper Assessment Form Digitizer</h3>
+            <h3>Paper Form Digitizer</h3>
             <p>
-              Eliminates manual re-typing of clinic intake and specialty low-vision paper forms. AI vision layout analysis extracts form grids, checkboxes, and handwritten notes to generate an exact interactive digital replica with 1-click clinical EHR export.
+              Snap a photo or scan your clinic's familiar paper intake forms. Goz automatically turns them into interactive digital records matching your existing layout with zero re-typing.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Vision AI Layout Analysis</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Zero Retraining Required</span>
           </div>
         </div>
 
-        <!-- Card 3: Dedicated EHR & FHIR R4 Interoperability Hub (Large, Col 2) -->
+        <!-- Card 3: Dedicated EHR Bridge -->
         <div class="bento-card bento-col-2">
-          <span class="card-tag">Certified Interoperability · SMART on FHIR</span>
+          <span class="card-tag">Certified Interoperability</span>
           <div class="card-icon">🔗</div>
           <div>
-            <h3>Dedicated EHR & FHIR R4 Interoperability Hub</h3>
+            <h3>EHR & Practice Bridge</h3>
             <p>
-              HL7 FHIR Release 4 and ONC USCDI v3 compliant gateway with SMART on FHIR OAuth 2.0 PKCE authentication. Pre-built connectors for Epic Systems, Eyefinity EHR, RevolutionEHR, ModMed EMA, and Compulink Advantage. Bidirectional real-time sync of Patient, Encounter, Condition, Observation (VA & IOP OD/OS), and DocumentReference with audit-proof compliance logs.
+              Connects seamlessly with major eye care EHR platforms (Epic Systems, Eyefinity EHR, RevolutionEHR, ModMed EMA). Export exam notes, visual acuities, and eye pressure readings with one click.
             </p>
           </div>
           <div class="bento-card-footer">
@@ -1280,64 +1350,64 @@
           </div>
         </div>
 
-        <!-- Card 4: CMS Remote Therapeutic Monitoring (RTM) Engine -->
+        <!-- Card 4: Insurance & Reimbursement -->
         <div class="bento-card">
-          <span class="card-tag">Practice Revenue · CPT Codes</span>
+          <span class="card-tag">Revenue & Reimbursement</span>
           <div class="card-icon">📊</div>
           <div>
-            <h3>CMS RTM Billing Engine</h3>
+            <h3>HMO & Insurance Claims</h3>
             <p>
-              Automates patient qualification, 16-day transmission verification, and compliant claim drafting for CPT 98975 ($19.65 setup), CPT 98980 ($50.18/mo initial 20m), and CPT 98981 ($39.72/ea addl 20m) under the Medicare Physician Fee Schedule.
+              Streamlines Nigerian HMO pre-authorizations (Reliance, AXA Mansard, Hygeia, Ilera Eko), diaspora family remittances via Bachs, and international remote monitoring claims without paperwork headaches.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Automated CMS-1500 / 837P</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Automated Pre-Auth & Claims</span>
           </div>
         </div>
 
-        <!-- Card 5: Optical Storefront, Walk-In POS & QR Signage (Large, Col 2) -->
+        <!-- Card 5: Optical Storefront, Walk-In POS & QR Signage -->
         <div class="bento-card bento-col-2">
-          <span class="card-tag">Practice Commerce · Dual Payment Rails</span>
+          <span class="card-tag">Optical Retail & Dispensary</span>
           <div class="card-icon">🛍</div>
           <div>
-            <h3>Optical Dispensary, Walk-In POS & QR Signage</h3>
+            <h3>Optical Dispensary & Reception POS</h3>
             <p>
-              Reclaims optical retail margins with dual financial rails (Bachs instant bank payouts + Stripe Connect). Features a Front Desk Walk-In POS terminal for non-registered guests with vision insurance co-pay adjustments, contactless card tap, and cash entry, plus a Multi-Purpose QR Signage Suite with printable acrylic stand templates for reception checkout, waiting rooms, and exam lanes.
+              Sell frames, prescription lenses, and low-vision aids with instant card tap, cash entry, and direct bank payouts right from reception. Includes printable QR stand templates for waiting room checkout.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Instant Bank Payouts · Reception POS</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Direct Bank Payouts · Reception POS</span>
             <a href="/clinic" class="btn btn-ghost btn-sm">Launch Storefront →</a>
           </div>
         </div>
 
-        <!-- Card 6: Air-Gapped Local WebGPU AI vs. Cloud Engine -->
+        <!-- Card 6: Patient Privacy -->
         <div class="bento-card">
-          <span class="card-tag">Privacy Sovereignty · Dual Engine</span>
+          <span class="card-tag">100% Patient Privacy</span>
           <div class="card-icon">🔒</div>
           <div>
-            <h3>Air-Gapped Local WebGPU AI</h3>
+            <h3>Complete Offline Privacy Mode</h3>
             <p>
-              Complete privacy sovereignty for healthcare networks. Clinicians can toggle with 1 click between HIPAA BAA Zero-Retention Cloud AI and 100% on-device WebGPU local inference—ensuring zero audio or video packets ever leave the exam room.
+              Audio transcription and vision processing can run completely offline on your clinic computer. Zero patient voice recordings or camera feeds ever leave the exam room.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Zero Network Egress · WebGPU</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Zero Network Egress Option</span>
           </div>
         </div>
 
-        <!-- Card 7: Low Vision Hub & Device Fitting -->
+        <!-- Card 7: Low Vision Care -->
         <div class="bento-card">
-          <span class="card-tag">Specialty Care · Abandonment Radar</span>
+          <span class="card-tag">Specialty Care & Follow-Up</span>
           <div class="card-icon">◎</div>
           <div>
-            <h3>The Low Vision Hub & Device Fitting</h3>
+            <h3>Low Vision Care & Adherence</h3>
             <p>
-              Closes the 64% → 55% referral leak and curbs the 29% assistive device abandonment rate. Manages specialty optical fittings, sets functional vision goals, and aggregates live adherence telemetry streamed from patient copilot trials before disengagement occurs.
+              Prescribe smart glasses, electronic magnifiers, and assistive aids. Automatically alerts your team if a patient stops using their prescribed device so you can follow up and help.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Automated Outreach Triage</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Automated Patient Follow-up</span>
             <a href="/clinic" class="btn btn-ghost btn-sm">Access Clinic Hub →</a>
           </div>
         </div>
@@ -1365,11 +1435,11 @@
           <div>
             <h3>Smart Glasses & Audio Frames Bridge</h3>
             <p>
-              Pre-integrated BLE and audio/video streaming for Solos AirGo 3 audio glasses, Even Realities G1 optical heads-up displays, Ray-Ban Meta, and Rokid eyewear—streaming battery, dropped frame, and directional acoustic telemetry.
+              Pre-integrated with leading smart glasses including Solos AirGo 3, Even Realities G1, Ray-Ban Meta, and Rokid—monitoring battery life, frame stability, and clear audio guidance in real time.
             </p>
           </div>
           <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">BLE & Audio WebSocket Transport</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Bluetooth LE & Audio Live Streaming</span>
           </div>
         </div>
 
@@ -1533,11 +1603,11 @@
 
         <div class="bento-card">
           <div>
-            <span class="evidence-scope-pill scope-specialty">Low-Vision Feature · Telemetry</span>
+            <span class="evidence-scope-pill scope-specialty">Low-Vision Feature · Adherence</span>
             <h4 style="font-family:var(--font-mono);font-size:26px;color:var(--accent);margin-bottom:8px;">29%</h4>
             <h3>Early Device Abandonment</h3>
             <p>
-              Nearly a third (29%) of patients prescribed assistive optical devices abandon them within 90 days. Continuous daily telemetry streamed via Goz on smart glasses/mobile alerts clinics to struggle patterns before disengagement becomes permanent.
+              Nearly a third (29%) of patients prescribed assistive devices stop using them within 90 days. Continuous daily usage monitoring via GozVision alerts clinics to drop-offs early so care teams can proactively reach out and help.
             </p>
           </div>
           <span style="display:block;margin-top:16px;font-size:12px;color:var(--ink-muted);">Utilization & Abandonment of LV Devices, Optom Vis Sci, PMID 30169360</span>
@@ -1695,89 +1765,101 @@
 
 <script>
 
-  // Comprehensive 2026 Simulator Engine with Visual Scenery, Sensor Triggers & Voice Playback
+  // Comprehensive Simulator Engine with Visual Scenery, Anchored Overlays & Voice Playback
   const simData = {
     scene: {
       backdrop: 'assets/sim_hallway.jpg',
-      fps: '1.0 FPS · 16kHz Audio',
-      modeBadge: 'MODE: SCENE AWARENESS',
+      boxClass: 'mode-scene',
+      hasHazardLine: true,
+      hasTargetReticle: false,
+      fps: 'Camera & Voice Active',
+      modeBadge: 'WALKING & OBSTACLE SAFETY',
       icon: '⚠️',
-      tag: 'HAZARD DETECTED · STEP +12CM',
-      boxText: 'Threshold Step @ 2.8m · Low Contrast',
-      boxMeta: 'Floor contrast differential: 14% (High Fall Risk)',
-      sensorText: 'NYU VIBRO-ACOUSTIC: ACTIVE (240Hz)',
-      urgency: 'FALL HAZARD: CRITICAL',
+      tag: 'STEP AHEAD · IN 3 PACES',
+      boxText: 'Floor Step Down Ahead',
+      boxMeta: 'Watch your footing: 12cm drop ahead',
+      sensorText: 'VOICE & VIBRATION ALERT: ON',
+      urgency: 'WATCH YOUR STEP',
       urgencyColor: '#ef4444',
-      title: 'Continuous Scene Guidance & Fall Prevention',
-      triggerTitle: 'WHAT TRIGGERED THIS GUIDANCE:',
-      triggerBody: 'Depth-sensing LiDAR & edge gradient identified an unpainted 12cm floor elevation drop. At 14% lighting contrast, this transition is nearly invisible to patients with central scotoma or glaucoma, creating an immediate trip-and-fall hazard.',
-      speech: 'Hallway is clear ahead. There is one slight threshold step in approximately three paces. Gentle floor contrast transition.',
-      impactStat: '84% Fall Reduction',
-      impactDesc: '73% of low-vision trauma admissions stem from unmarked home thresholds. Real-time vibro-acoustic guidance eliminates elevation trip hazards before contact.',
-      impairmentBanner: '⚠️ SIMULATED IMPAIRMENT: Central Scotoma & Field Loss — Notice how the threshold step becomes invisible without Goz AI contours!',
+      title: 'Safe Walking & Fall Prevention',
+      triggerTitle: 'WHAT GOZ SAW:',
+      triggerBody: 'Goz spotted a floor step in front of you. In dim lighting, steps can blend into the floor and cause trips. Goz warns you ahead of time so you step down safely.',
+      speech: 'Hallway is clear ahead. There is a slight step down in three paces.',
+      impactStat: '84% Fewer Falls',
+      impactDesc: 'Most home accidents happen when people with low vision miss a floor step or threshold. Spoken cues and gentle vibration alerts prevent falls before they happen.',
+      impairmentBanner: '⚠️ SIMULATED LOW VISION: Notice how the floor step blends into the floor without Goz highlighting it!',
       hasScanLine: false,
       fl41Available: false
     },
     read: {
       backdrop: 'assets/sim_rx.jpg',
-      fps: '4K Hi-Res Frame · Micro-OCR',
-      modeBadge: 'MODE: PRESCRIPTION SAFETY OCR',
+      boxClass: 'mode-read',
+      hasHazardLine: false,
+      hasTargetReticle: false,
+      fps: 'High-Res Macro Reading',
+      modeBadge: 'MEDICATION SAFETY',
       icon: '✓',
-      tag: 'RX VERIFIED · OPHTHALMIC SOLUTION',
-      boxText: 'Latanoprost 0.005% · Glaucoma Pressure',
-      boxMeta: 'NDC 0009-5301 · Matches Patient EHR Rx #G78A321',
-      sensorText: 'FDA OPENRX DATABASE: 100% MATCH',
-      urgency: 'MEDICATION SAFETY: VERIFIED',
+      tag: 'MEDICINE CONFIRMED',
+      boxText: 'Latanoprost Eye Drops · 0.005%',
+      boxMeta: 'Left eye · 1 drop tonight before bed',
+      sensorText: 'PRESCRIPTION CONFIRMED SAFE',
+      urgency: 'SAFE TO USE',
       urgencyColor: '#10b981',
-      title: 'Multimodal Prescription & Dosage Verification',
-      triggerTitle: 'WHAT TRIGGERED THIS GUIDANCE:',
-      triggerBody: 'Camera detected an eye-drop bottle held in the field of view. Offline OCR scanned the label NDC code, verified expiration (Nov 2027), and confirmed the bedtime dosing regimen against the clinic EHR record.',
-      speech: 'Latanoprost ophthalmic solution, 0.005 percent. Verified for your left eye. Instill one drop tonight at bedtime. Keep refrigerated.',
-      impactStat: '100% Rx Accuracy',
-      impactDesc: 'Low-vision patients frequently mistake clear eye-drop bottles for cyanoacrylate (superglue) or otic drops. Voice-verified OCR guarantees safe administration.',
-      impairmentBanner: '⚠️ SIMULATED IMPAIRMENT: Central Macular Blur — Notice how prescription dosage text is illegible without Goz OCR voice readout!',
+      title: 'Reading Eye Drop Labels Accurately',
+      triggerTitle: 'WHAT GOZ SAW:',
+      triggerBody: 'The user held up an eye-drop bottle. Goz read the tiny print on the label, checked the dosage, and confirmed it matches your doctor\'s instructions.',
+      speech: 'Latanoprost eye drops, 0.005 percent. Verified for your left eye. Put one drop in tonight before bed. Keep refrigerated.',
+      impactStat: 'Zero Bottle Mix-ups',
+      impactDesc: 'Patients often struggle to read small prescription print and risk confusing eye drops with ear drops or glue. Goz reads every bottle aloud so every drop is safe.',
+      impairmentBanner: '⚠️ SIMULATED LOW VISION: Notice how blurry the small print looks without Goz reading it aloud!',
       hasScanLine: true,
       fl41Available: false
     },
     screen: {
       backdrop: 'assets/sim_kiosk.jpg',
-      fps: 'Spatial Target Lock Active',
-      modeBadge: 'MODE: SPATIAL UI NAVIGATOR',
+      boxClass: 'mode-screen',
+      hasHazardLine: false,
+      hasTargetReticle: true,
+      fps: 'Hand & Button Guide Active',
+      modeBadge: 'BUTTON & TOUCH GUIDANCE',
       icon: '🎯',
-      tag: 'TOUCH TARGET ACQUIRED · ELEVATOR',
-      boxText: 'Floor 4: Eye Clinic & Low Vision Lab',
-      boxMeta: 'Target lock 38mm from user fingertip · Proximity: Near',
-      sensorText: 'HAPTIC PROXIMITY GUIDANCE: LOCK',
-      urgency: 'AUTONOMY GUIDANCE: ACTIVE',
+      tag: 'BUTTON 4 LOCATED',
+      boxText: 'Floor 4: Eye Clinic',
+      boxMeta: 'Directly under your index finger',
+      sensorText: 'TACTILE HAPTIC GUIDANCE: READY',
+      urgency: 'IN REACH',
       urgencyColor: '#38bdf8',
-      title: 'Public Transit & Kiosk Tactile Assistance',
-      triggerTitle: 'WHAT TRIGGERED THIS GUIDANCE:',
-      triggerBody: 'Spatial vision model parsed the stainless-steel elevator button array. It identified the target Floor 4 button and guided the patient\'s reaching hand via directional audio and haptic pulses directly onto the braille disc.',
-      speech: 'Floor 4 Eye Clinic button is directly in front of your index finger. Move right one inch to press.',
-      impactStat: '96% Task Autonomy',
-      impactDesc: 'Removes the anxiety of navigating unfamiliar medical lobbies, elevators, and touchscreens without needing a sighted human escort.',
-      impairmentBanner: '⚠️ SIMULATED IMPAIRMENT: Contrast & Acuity Loss — Notice how elevator buttons blur together without tactile spatial reticle locks!',
+      title: 'Finding & Pressing the Right Button',
+      triggerTitle: 'WHAT GOZ SAW:',
+      triggerBody: 'Goz spotted the elevator panel in the clinic lobby and guided the user\'s reaching finger directly onto the Floor 4 button with clear voice cues.',
+      speech: 'Floor 4 Eye Clinic button is directly in front of your index finger. Press now.',
+      impactStat: 'Full Independence',
+      impactDesc: 'Removes the anxiety of navigating unfamiliar hospital hallways, elevator panels, and touchscreens without needing a sighted human escort.',
+      impairmentBanner: '⚠️ SIMULATED LOW VISION: Notice how shiny metal buttons blur together without Goz guiding your touch!',
       hasScanLine: false,
       fl41Available: false
     },
     light: {
       backdrop: 'assets/sim_glare.jpg',
-      fps: 'Sensory Lux Analyzer · Photopic',
-      modeBadge: 'MODE: GLARE & LUX ADAPTATION',
+      boxClass: 'mode-light',
+      hasHazardLine: false,
+      hasTargetReticle: false,
+      fps: 'Light & Glare Sensor',
+      modeBadge: 'GLARE PROTECTION',
       icon: '☀️',
-      tag: 'GLARE DETECTED: 840 LUX',
-      boxText: 'Photopic Sunlight Saturation · Contrast: 14%',
-      boxMeta: 'FL-41 Electrochromic Tint Profile Ready',
-      sensorText: 'LUX CONTRAST ADAPTATION: ENGAGED',
-      urgency: 'PHOTOPHOBIA ALERT: ELEVATED',
+      tag: 'HARSH GLARE DETECTED',
+      boxText: 'Intense Sunlight from Glass Doorway',
+      boxMeta: 'Tinting smart lenses to protect eyes',
+      sensorText: 'AUTOMATIC TINT: APPLIED',
+      urgency: 'GLARE SHIELD ACTIVE',
       urgencyColor: '#f59e0b',
-      title: 'Environmental Photophobia & Contrast Shield',
-      triggerTitle: 'WHAT TRIGGERED THIS GUIDANCE:',
-      triggerBody: 'Ambient photopic sensor recorded 840 lux from unshaded corridor glazing, exceeding the patient\'s 500 lux discomfort threshold. Goz dynamically triggers FL-41 blue-attenuating lens filtering to recover contrast.',
-      speech: 'Strong outdoor glare detected from doorway glass. Contrast has dropped to 14 percent. Toggling your FL-41 contrast tint on smart glasses now.',
-      impactStat: 'Zero Abandonment',
-      impactDesc: 'Photophobia and sudden glare headaches are the #1 cause of wearable abandonment. Intelligent electrochromic filtering keeps patients comfortable.',
-      impairmentBanner: '⚠️ SIMULATED IMPAIRMENT: Extreme Photophobia & Glare — Notice how architectural boundaries wash out without dynamic FL-41 filtering!',
+      title: 'Automatic Glare & Light Shield',
+      triggerTitle: 'WHAT GOZ SAW:',
+      triggerBody: 'Bright sunlight flooding through a glass corridor was blinding and washed out the stairs. Goz instantly dims the lenses so the user can see comfortably without pain.',
+      speech: 'Strong outdoor glare detected from doorway glass. Softening the light on your smart lenses now so you can see comfortably.',
+      impactStat: 'All-Day Eye Comfort',
+      impactDesc: 'Sudden glare causes painful headaches and temporary blindness for cataract and glaucoma patients. Automatic smart tinting keeps vision comfortable everywhere.',
+      impairmentBanner: '⚠️ SIMULATED LOW VISION: Notice how harsh glare washes out doorways and stairs without smart tinting!',
       hasScanLine: false,
       fl41Available: true
     }
@@ -1801,6 +1883,20 @@
       }
     }
 
+    // Dynamic positioning and active overlays for visual chemistry
+    const box = document.getElementById('simBox');
+    if (box) {
+      box.className = `hud-bounding-box ${d.boxClass || ''}`;
+    }
+    const floorHazard = document.getElementById('simFloorHazard');
+    if (floorHazard) {
+      floorHazard.classList.toggle('active', !!d.hasHazardLine);
+    }
+    const targetReticle = document.getElementById('simTargetReticle');
+    if (targetReticle) {
+      targetReticle.classList.toggle('active', !!d.hasTargetReticle);
+    }
+
     // Update Viewport HUD
     document.getElementById('simFpsBadge').textContent = d.fps;
     document.getElementById('simModeBadge').textContent = d.modeBadge;
@@ -1822,7 +1918,7 @@
     }
 
     // Update Right Telemetry
-    document.getElementById('simTriggerType').textContent = `TRIGGER: ${d.modeBadge.replace('MODE: ', '')}`;
+    document.getElementById('simTriggerType').textContent = `GUIDANCE: ${d.modeBadge}`;
     document.getElementById('simTitle').textContent = d.title;
     const urgencyBadge = document.getElementById('simUrgencyBadge');
     if (urgencyBadge) {

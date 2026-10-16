@@ -7,12 +7,12 @@ import '../core/clinic_theme.dart';
 import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 
-/// Front Desk — Enterprise Clinic Floor Schedule & Patient Flow Cockpit.
+/// Front Desk — Clinic Floor Schedule & Patient Flow Management.
 ///
 /// Features:
-/// - Clinic Floor Flow Telemetry (Scheduled, In Exam Lane, Waiting Room, Completed)
+/// - Patient Queue & Floor Status (Scheduled, In Exam Lane, Waiting Room, Completed)
 /// - High-Density Interactive Schedule Cards with Lane Assignments & Scribe Launch
-/// - Outreach & Automated Recall Queue (AWS End User Messaging SMS / WhatsApp)
+/// - Outreach & Automated Recall Queue (SMS / WhatsApp)
 class FrontDeskPage extends StatefulWidget {
   const FrontDeskPage({super.key});
 

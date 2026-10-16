@@ -21,7 +21,7 @@ import '../modules/ehr_hub_page.dart';
 /// GozVision Clinic Suite — Enterprise Multi-Tenant Clinical Shell.
 ///
 /// Clean, dark clinical obsidian aesthetics with frosted glass surfaces,
-/// intelligent patient queue badges, instant doctor reference RAG dialogs,
+/// intelligent patient queue badges, instant doctor clinical reference dialogs,
 /// and responsive sidebar navigation.
 class ClinicShell extends StatefulWidget {
   const ClinicShell({super.key});
@@ -156,16 +156,16 @@ class _ClinicShellState extends State<ClinicShell> {
 
   Widget _buildContentHeader(BuildContext context, ClinicScope scope) {
     const titles = [
-      'Low Vision Hub',
+      'Low Vision Care',
       'Front Desk',
-      'Scribe Studio',
+      'Exam Scribe',
       'Practice Insights',
       'Doctor Profile',
       'Clinic Directory',
       'Optical Dispensary',
       'Developer Console',
       'Patient Recall & CRM',
-      'EHR & Interoperability Hub',
+      'EHR & Practice Bridge',
     ];
 
     final currentTitle = (_index >= 0 && _index < titles.length) ? titles[_index] : 'Practice Suite';
@@ -210,7 +210,7 @@ class _ClinicShellState extends State<ClinicShell> {
             ],
           ),
           const Spacer(),
-          // Clinical Copilot RAG Guidelines Button
+          // Clinical Reference Button
           FilledButton.tonalIcon(
             style: FilledButton.styleFrom(
               backgroundColor: ClinicTheme.cardBackground,
@@ -221,7 +221,7 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
             icon: const Icon(Icons.auto_stories_outlined, size: 16),
             label: Text(
-              'Clinical Copilot RAG',
+              'Clinical Guidelines',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -398,7 +398,7 @@ class _ClinicShellState extends State<ClinicShell> {
               index: 0,
               icon: Icons.visibility_outlined,
               activeIcon: Icons.visibility,
-              label: 'Low Vision Hub',
+              label: 'Low Vision Care',
             ),
           ],
           _buildNavItem(
@@ -412,7 +412,7 @@ class _ClinicShellState extends State<ClinicShell> {
               index: 2,
               icon: Icons.edit_note_rounded,
               activeIcon: Icons.edit_note_rounded,
-              label: 'Scribe Studio',
+              label: 'Exam Scribe',
             ),
             _buildNavItem(
               index: 3,

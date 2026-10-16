@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
 
-/// Insights — Clinical Practice Analytics, Operational ROI, and Rehabilitation Telemetry.
+/// Insights — Clinical Practice Analytics, Operational ROI, and Rehabilitation Outcomes.
 ///
 /// Tracks the core continuum of care:
 /// 1. Low vision referral conversion and device adherence (preventing the 29% abandonment cliff).
@@ -224,7 +224,7 @@ class _InsightsPageState extends State<InsightsPage> {
                                 const Icon(Icons.verified, color: ClinicTheme.brandAccent, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'GozVision Telemetry vs. Industry Clinical Benchmarks',
+                                  'GozVision Adherence Data vs. Industry Clinical Benchmarks',
                                   style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700, color: ClinicTheme.textPrimary),
                                 ),
                               ],

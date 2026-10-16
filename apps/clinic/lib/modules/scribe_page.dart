@@ -10,12 +10,12 @@ import '../core/clinic_theme.dart';
 import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 
-/// Scribe Studio — Enterprise Ambient Clinical Documentation Cockpit (2026 Standards).
+/// Exam Scribe — Ambient Clinical Documentation & Charting.
 ///
 /// Tailored specifically for Eye Care & Optometry:
 /// - Real-time Ambient Audio Capture Controls (Mic selector, live recording timer, wave equalizer)
 /// - Preset Clinical Scenario Loaders (Glaucoma, Dry Eye, Low Vision AMD, Refraction)
-/// - Two-column Master-Detail workspace (Active Encounter Queue + Eye Care Clinical Cockpit)
+/// - Two-column Master-Detail workspace (Active Encounter Queue + Patient Chart Workspace)
 /// - 4 High-Density Clinical Views:
 ///   1. Structured SOAP Chart with Verbatim Quote Grounding
 ///   2. Speaker-Diarized Verbatim Audio Transcript with Playback Controls
@@ -266,7 +266,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
           _buildHeaderWithTelemetry(),
           const SizedBox(height: 20),
 
-          // ── Main Two-Column Cockpit Workspace ─────────────────────────
+          // ── Main Two-Column Chart Workspace ─────────────────────────
           Expanded(
             child: StreamBuilder<ClinicRows>(
               stream: encounters,
@@ -380,9 +380,9 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     ),
                     const SizedBox(width: 24),
 
-                    // Right Column: Master Optometric Scribe Cockpit (Expanded)
+                    // Right Column: Master Optometric Scribe Chart (Expanded)
                     Expanded(
-                      child: _MasterScribeCockpit(
+                      child: _MasterScribeChart(
                         scenario: activeScenario,
                         isLiveRecording: _isRecording,
                         onMarkReviewed: () => _markReviewed(selectedItem),
@@ -850,24 +850,24 @@ class _EncounterListItem extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Master Optometric Scribe Cockpit (Right Column)
+// Master Optometric Scribe Chart (Right Column)
 // ─────────────────────────────────────────────────────────────────────────────
-class _MasterScribeCockpit extends StatefulWidget {
+class _MasterScribeChart extends StatefulWidget {
   final _ClinicalScenario scenario;
   final bool isLiveRecording;
   final VoidCallback onMarkReviewed;
 
-  const _MasterScribeCockpit({
+  const _MasterScribeChart({
     required this.scenario,
     required this.isLiveRecording,
     required this.onMarkReviewed,
   });
 
   @override
-  State<_MasterScribeCockpit> createState() => _MasterScribeCockpitState();
+  State<_MasterScribeChart> createState() => _MasterScribeChartState();
 }
 
-class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleTickerProviderStateMixin {
+class _MasterScribeChartState extends State<_MasterScribeChart> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _selectedEhrBridge = 'Epic Systems';
   String? _selectedClinicFormTemplateOverride; // null = follow clinic scope; non-null = user manual selection
@@ -957,7 +957,7 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
   }
 
   @override
-  void didUpdateWidget(covariant _MasterScribeCockpit oldWidget) {
+  void didUpdateWidget(covariant _MasterScribeChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scenario != widget.scenario) {
       _disposeFormControllers();
@@ -1111,19 +1111,19 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
                 ),
                 Tab(
                   icon: Icon(Icons.history_edu_outlined, size: 15),
-                  text: 'Optometric Case History (OLD CARTS)',
+                  text: 'Patient Case History',
                 ),
                 Tab(
                   icon: Icon(Icons.note_alt_outlined, size: 15),
-                  text: 'Familiar Clinic Paper Sheet (Digital Twin)',
+                  text: 'Clinic Paper Form',
                 ),
                 Tab(
                   icon: Icon(Icons.remove_red_eye_outlined, size: 15),
-                  text: 'Optometric Exam Findings',
+                  text: 'Exam Findings & Refraction',
                 ),
                 Tab(
                   icon: Icon(Icons.sync_alt_outlined, size: 15),
-                  text: 'Multi-EHR Export Bridge',
+                  text: 'EHR Export',
                 ),
               ],
             ),
@@ -1745,7 +1745,7 @@ ${sc.currentCorrection}''';
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TAB 4: Familiar Clinic Paper Sheet (Digital Twin) & Universal Uploader
+  // TAB 4: Familiar Clinic Paper Form & Universal Uploader
   // ─────────────────────────────────────────────────────────────────────────
 
   /// Universal Clinical Document Uploader Dialog (Gemini Multimodal VLM)
@@ -2120,7 +2120,7 @@ ${sc.currentCorrection}''';
     );
   }
 
-  /// TAB 4: Familiar Clinic Paper Sheet (Digital Twin)
+  /// TAB 4: Familiar Clinic Paper Form
   Widget _buildFamiliarClinicPaperSheetTab(_ClinicalScenario sc) {
     final scope = Provider.of<ClinicScope>(context);
     final effectiveTemplate = _selectedClinicFormTemplateOverride ?? scope.defaultFormTemplate;
@@ -2165,7 +2165,7 @@ ${sc.currentCorrection}''';
                       Row(
                         children: [
                           Text(
-                            'Clinic Form Template Switcher (Digital Twin)',
+                            'Clinic Form Template',
                             style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(width: 8),
@@ -2175,7 +2175,7 @@ ${sc.currentCorrection}''';
                               color: const Color(0xFF10B981).withOpacity(0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text('Zero Retraining Friction', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: const Text('Standard Layout', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
@@ -2508,7 +2508,7 @@ ${sc.currentCorrection}''';
                           Text('Signed by Dr. Ada Optometrist (${scope.defaultLicenseText})', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
                         ],
                       ),
-                      Text('${scope.regulatoryBody} · GozVision Digital Twin', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
+                      Text('${scope.regulatoryBody} · GozVision Electronic Clinical Record', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
                     ],
                   ),
                 ),
@@ -2528,7 +2528,7 @@ ${sc.currentCorrection}''';
                         label: const Text('Save Form to Patient Encounter Chart', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('✓ Digital Twin Clinical Record saved and synced with SOAP note and EHR export!')),
+                            const SnackBar(content: Text('✓ Clinical Record saved and synced with note and EHR export!')),
                           );
                         },
                       ),
@@ -2712,7 +2712,7 @@ ${sc.currentCorrection}''';
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TAB 5: Discrete Optometric Findings (The Eye Care Cockpit)
+  // TAB 5: Discrete Optometric Findings & Refraction
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildOptometricFindingsTab(_ClinicalScenario sc) {
     return ListView(

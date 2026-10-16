@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
 
-/// Clinic CRM & Patient Lifecycle Engine
+/// Clinic CRM & Patient Recalls
 ///
 /// Designed based on cross-specialty clinical benchmarks (NexHealth, ModMed, Jane App):
 /// 1. Automated annual exam recalls (11-month cadence) to boost patient retention.
@@ -611,7 +611,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
               Text('TWO-WAY CLINIC COMMUNICATION STREAM', style: TextStyle(color: ClinicTheme.malachite, fontSize: 13, fontWeight: FontWeight.bold)),
-              Text('SMS · In-App Voice · Push Telemetry', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
+              Text('SMS · In-App Voice · Push Notifications', style: TextStyle(color: ClinicTheme.textSecondary, fontSize: 11)),
             ],
           ),
           const SizedBox(height: 14),

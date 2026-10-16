@@ -8,14 +8,14 @@ import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 import 'clinic_chat_dialog.dart';
 
-/// Low Vision & Visual Autonomy Hub — Enterprise Clinical Cockpit (October 2026 Standards).
+/// Low Vision & Rehabilitation Hub — Clinical Management & Patient Autonomy.
 ///
 /// Bridges the specialist care gap:
-/// 1. Closes the 64% low-vision referral leakage gap via automated conversion tracking.
-/// 2. Live assistive device telemetry (smart audio frames, electronic magnifiers, AR headsets).
-/// 3. Predictive AI Abandonment Radar: catches the 48-72h quiet signature before devices enter drawer purgatory.
-/// 4. CMS Remote Therapeutic Monitoring (RTM) Engine: CPT 98975 / 98980 / 98981 automated compliance tracking.
-/// 5. 1-Click Caregiver & Low Vision Rehabilitation Therapist (OT/CLVT) Tele-Bridge.
+/// 1. Closes the low-vision referral leakage gap via automated conversion tracking.
+/// 2. Live assistive device connectivity (smart audio frames, electronic magnifiers, AR headsets).
+/// 3. Device Adherence Alerts: identifies usage drops early so care teams can assist patients.
+/// 4. Remote Monitoring & Insurance Reimbursement (HMO / NHIA / CMS automated compliance tracking).
+/// 5. Caregiver & Rehabilitation Specialist (OT/CLVT) Coordination.
 class LowVisionHubPage extends StatefulWidget {
   const LowVisionHubPage({super.key});
 
@@ -235,7 +235,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'CONTINUOUS RTM & ADHERENCE TELEMETRY ACTIVE',
+                              'CONTINUOUS CARE & ADHERENCE MONITORING ACTIVE',
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
@@ -250,7 +250,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Assistive optical trials, predictive AI abandonment radar, CPT 98975 / 98980 RTM reimbursement, and OT tele-bridge.',
+                    'Assistive optical trials, usage tracking & alerts, HMO / insurance reimbursement, and care team coordination.',
                     style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 13),
                   ),
                 ],
@@ -264,11 +264,11 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     ),
                     icon: const Icon(Icons.sync_rounded, size: 16),
-                    label: const Text('Simulate Telemetry Ping', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    label: const Text('Sync Test Device', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('⚡ Ingested live BLE telemetry ping: Solos AirGo 3 (RSSI -56dBm, Battery 88%, Lux 480lx)'),
+                          content: Text('⚡ Device sync received: Solos AirGo 3 (Battery 88%, Signal Good, Ambient Lux 480lx)'),
                           backgroundColor: ClinicTheme.brandAccentDim,
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -296,7 +296,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
           _buildPerformanceRibbon(),
           const SizedBox(height: 18),
 
-          // ── Master Cockpit Tabs ─────────────────────────────────────────
+          // ── Management Tabs ─────────────────────────────────────────
           Container(
             decoration: BoxDecoration(
               color: ClinicTheme.cardBackground,
@@ -313,7 +313,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
               tabs: const [
                 Tab(
                   icon: Icon(Icons.devices_other_rounded, size: 16),
-                  text: 'Trials & Telemetry Stream',
+                  text: 'Device Trials & Adherence',
                 ),
                 Tab(
                   icon: Icon(Icons.receipt_long_outlined, size: 16),
@@ -392,18 +392,18 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             value: '18 Patients',
             trend: 'CPT 98975 / 98980',
             isPositiveTrend: true,
-            subtitle: 'Continuous BLE telemetry streaming',
+            subtitle: 'Active device monitoring',
           ),
         ),
         const SizedBox(width: 14),
         Expanded(
           child: _MetricCard(
             icon: Icons.warning_amber_rounded,
-            title: 'Abandonment Alert',
+            title: 'Adherence Alert',
             value: '1 Patient',
-            trend: '48h Quiet Signature',
+            trend: '48h Inactivity Detected',
             isPositiveTrend: false,
-            subtitle: 'Arthur Pendelton (Intervention Ready)',
+            subtitle: 'Arthur Pendelton (Follow-up Recommended)',
           ),
         ),
         const SizedBox(width: 14),
@@ -713,12 +713,18 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
 
     final q = _rtmSearchCtrl.text.trim().toLowerCase();
     final filtered = hmoRecords.where((r) {
+      final patient = (r['patient'] as String? ?? '').toLowerCase();
+      final mrn = (r['mrn'] as String? ?? '').toLowerCase();
+      final hmo = (r['hmo'] as String? ?? '').toLowerCase();
+      final authCode = (r['auth_code'] as String? ?? '').toLowerCase();
+      final status = (r['status'] as String? ?? '');
+      final isApproved = status.contains('Approved') || status.contains('Active');
+
       final matchesQuery = q.isEmpty ||
-          r['patient']!.toLowerCase().contains(q) ||
-          r['mrn']!.toLowerCase().contains(q) ||
-          r['hmo']!.toLowerCase().contains(q) ||
-          r['auth_code']!.toLowerCase().contains(q);
-      final isApproved = r['status']!.contains('Approved') || r['status']!.contains('Active');
+          patient.contains(q) ||
+          mrn.contains(q) ||
+          hmo.contains(q) ||
+          authCode.contains(q);
       final matchesCompliance = switch (_rtmComplianceFilter) {
         'compliant' => isApproved,
         'pending' => !isApproved,
@@ -753,7 +759,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
           ],
         ),
         ...filtered.map((r) {
-          final isApproved = r['status']!.contains('Approved') || r['status']!.contains('Active');
+          final status = r['status'] as String? ?? '';
+          final isApproved = status.contains('Approved') || status.contains('Active');
           final statusColor = r['status_color'] as Color;
 
           return TableRow(
@@ -972,9 +979,6 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
           );
         }),
       ],
-    );
-        ],
-      ),
     );
   }
 
@@ -1597,11 +1601,11 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Device Telemetry: ${fit['patient_id']}',
+                    'Device Status: ${fit['patient_id']}',
                     style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                   Text(
-                    'Hardware Diagnostic & CMS RTM Audit',
+                    'Hardware Diagnostics & Insurance Audit',
                     style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary),
                   ),
                 ],
@@ -2297,7 +2301,7 @@ class _DeviceFitPanelState extends State<_DeviceFitPanel> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Real-time telemetry feeds: catches abandonment signatures before devices enter drawer purgatory.',
+                      'Real-time adherence updates: identifies non-usage early so staff can reach out to support patients.',
                       style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
                     ),
                   ],
