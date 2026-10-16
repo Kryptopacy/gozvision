@@ -27,6 +27,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   late TabController _tabController;
   final TextEditingController _rtmSearchCtrl = TextEditingController();
   String _rtmComplianceFilter = 'all';
+  String _reimbursementRegion = 'nigeria_hmo'; // 'nigeria_hmo' or 'us_cms'
 
   // Fallback referral cohort data for resilient, high-fidelity clinical presentation
   final List<Map<String, dynamic>> _fallbackReferrals = [
@@ -315,8 +316,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                   text: 'Trials & Telemetry Stream',
                 ),
                 Tab(
-                  icon: Icon(Icons.monetization_on_outlined, size: 16),
-                  text: 'CMS RTM Billing Engine (CPT 98975 / 98980)',
+                  icon: Icon(Icons.receipt_long_outlined, size: 16),
+                  text: 'HMO / NHIA & CMS Care Ledger',
                 ),
                 Tab(
                   icon: Icon(Icons.analytics_outlined, size: 16),
@@ -458,6 +459,37 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Regional Jurisdiction Switcher
+          Row(
+            children: [
+              Text('REIMBURSEMENT FRAMEWORK:', style: GoogleFonts.jetBrainsMono(fontSize: 10.5, fontWeight: FontWeight.bold, color: ClinicTheme.textMuted)),
+              const SizedBox(width: 10),
+              ChoiceChip(
+                label: const Text('Nigerian Private HMO & Diaspora Plans (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                selected: _reimbursementRegion == 'nigeria_hmo',
+                selectedColor: ClinicTheme.brandAccent,
+                backgroundColor: ClinicTheme.surfaceDark,
+                labelStyle: TextStyle(color: _reimbursementRegion == 'nigeria_hmo' ? Colors.black : Colors.white),
+                onSelected: (v) {
+                  if (v) setState(() => _reimbursementRegion = 'nigeria_hmo');
+                },
+              ),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                label: const Text('Medicare CMS RTM (US / International Export)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                selected: _reimbursementRegion == 'us_cms',
+                selectedColor: ClinicTheme.brandAccent,
+                backgroundColor: ClinicTheme.surfaceDark,
+                labelStyle: TextStyle(color: _reimbursementRegion == 'us_cms' ? Colors.black : Colors.white),
+                onSelected: (v) {
+                  if (v) setState(() => _reimbursementRegion = 'us_cms');
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Header & Primary Action
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -465,12 +497,16 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'CMS Remote Therapeutic Monitoring (RTM) Billing Ledger',
+                    _reimbursementRegion == 'nigeria_hmo'
+                        ? 'Nigerian HMO Pre-Authorization & Diaspora Vision Care Ledger'
+                        : 'CMS Remote Therapeutic Monitoring (RTM) Billing Ledger',
                     style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Automated 30-day monitoring period audit: verifies the CMS 16-day telemetry threshold and 20-min clinical staff time.',
+                    _reimbursementRegion == 'nigeria_hmo'
+                        ? 'Automate HMO Pre-Auth codes (Reliance, AXA, Hygeia), NHIA optical benefits, and Diaspora family plan remittances via Bachs.'
+                        : 'Automated 30-day monitoring period audit: verifies the CMS 16-day telemetry threshold and 20-min clinical staff time.',
                     style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
                   ),
                 ],
@@ -481,12 +517,22 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
-                icon: const Icon(Icons.file_download_outlined, size: 16),
-                label: const Text('Export CPT Claims to EHR (FHIR R4)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                icon: Icon(
+                  _reimbursementRegion == 'nigeria_hmo' ? Icons.receipt_long_outlined : Icons.file_download_outlined,
+                  size: 16,
+                ),
+                label: Text(
+                  _reimbursementRegion == 'nigeria_hmo' ? '+ Generate HMO Pre-Auth' : 'Export CPT Claims to EHR (FHIR R4)',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✓ Exported 3 RTM claims (CPT 98975 / 98980 / 98981) to Epic & Eyefinity bridges!'),
+                    SnackBar(
+                      content: Text(
+                        _reimbursementRegion == 'nigeria_hmo'
+                            ? '✓ Generated Reliance HMO & AXA Mansard claim vouchers (₦63,500 reconciled)!'
+                            : '✓ Exported 3 RTM claims (CPT 98975 / 98980 / 98981) to Epic & Eyefinity bridges!',
+                      ),
                       backgroundColor: ClinicTheme.malachiteDim,
                     ),
                   );
@@ -495,7 +541,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             ],
           ),
           const SizedBox(height: 16),
-          // RTM Rule Summary Banner
+
+          // Summary Rule Banner
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -509,7 +556,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'CMS Guidelines: CPT 98975 (\$19.65 - initial device education), CPT 98980 (\$50.18 - first 20 min clinical staff monitoring requiring >=16 days telemetry), CPT 98981 (\$40.84 - each additional 20 min).',
+                    _reimbursementRegion == 'nigeria_hmo'
+                        ? 'Nigerian Private HMO & NHIA Guidelines: Reliance HMO, AXA Mansard, Hygeia, Leadway, and Lagos Ilera Eko. Standard optical allowances (₦15,000–₦45,000 frames/lenses), Glaucoma therapy Pre-Auth, and Diaspora Care Plan remittances via Bachs.'
+                        : 'CMS Guidelines: CPT 98975 (\$19.65 - initial device education), CPT 98980 (\$50.18 - first 20 min clinical staff monitoring requiring >=16 days telemetry), CPT 98981 (\$40.84 - each additional 20 min).',
                     style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textPrimary),
                   ),
                 ),
@@ -517,7 +566,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             ),
           ),
           const SizedBox(height: 16),
-          // Scalable RTM Search & Compliance Status Filter Bar
+
+          // Search & Filter Bar
           Row(
             children: [
               Expanded(
@@ -528,7 +578,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                     onChanged: (_) => setState(() {}),
                     style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search RTM ledger by patient, MRN, or device...',
+                      hintText: _reimbursementRegion == 'nigeria_hmo'
+                          ? 'Search HMO ledger by patient, Pre-Auth code, or HMO name...'
+                          : 'Search RTM ledger by patient, MRN, or device...',
                       hintStyle: const TextStyle(fontSize: 12, color: ClinicTheme.textMuted),
                       prefixIcon: const Icon(Icons.search, size: 16, color: ClinicTheme.textMuted),
                       suffixIcon: _rtmSearchCtrl.text.isNotEmpty
@@ -563,9 +615,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ('all', 'All Patients'),
-                  ('compliant', 'Compliant (>=16d)'),
-                  ('pending', 'Pending (<16d)'),
+                  ('all', 'All Records'),
+                  ('compliant', _reimbursementRegion == 'nigeria_hmo' ? 'Approved HMOs' : 'Compliant (>=16d)'),
+                  ('pending', _reimbursementRegion == 'nigeria_hmo' ? 'Pending Pre-Auth' : 'Pending (<16d)'),
                 ].map((item) {
                   final isSelected = _rtmComplianceFilter == item.$1;
                   return Padding(
@@ -592,160 +644,330 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             ],
           ),
           const SizedBox(height: 16),
+
           // Ledger Table
           Expanded(
             child: SingleChildScrollView(
-              child: Table(
-                columnWidths: const {
-                  0: FlexColumnWidth(2.0),
-                  1: FlexColumnWidth(2.2),
-                  2: FlexColumnWidth(1.6),
-                  3: FlexColumnWidth(1.6),
-                  4: FlexColumnWidth(2.2),
-                  5: FlexColumnWidth(1.4),
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: [
-                  TableRow(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.03),
-                      border: const Border(bottom: BorderSide(color: ClinicTheme.border)),
-                    ),
-                    children: [
-                      _buildHeaderCell('PATIENT / MRN'),
-                      _buildHeaderCell('DEVICE & PATHOLOGY'),
-                      _buildHeaderCell('30-DAY SIGNALS (>=16)'),
-                      _buildHeaderCell('STAFF REVIEW TIME'),
-                      _buildHeaderCell('REIMBURSEMENT STATUS'),
-                      _buildHeaderCell('ACTION'),
-                    ],
-                  ),
-                  ...(() {
-                    final q = _rtmSearchCtrl.text.trim().toLowerCase();
-                    final filteredFits = fits.where((f) {
-                      final patient = (f['patient_id'] as String? ?? '').toLowerCase();
-                      final mrn = (f['patient_mrn'] as String? ?? '').toLowerCase();
-                      final device = (f['device'] as Map<String, dynamic>?) ?? {};
-                      final model = (device['model'] as String? ?? '').toLowerCase();
-                      final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
-                      final isCompliant = rtmDays >= 16;
-                      
-                      final matchesQuery = q.isEmpty || patient.contains(q) || mrn.contains(q) || model.contains(q);
-                      final matchesCompliance = switch (_rtmComplianceFilter) {
-                        'compliant' => isCompliant,
-                        'pending' => !isCompliant,
-                        _ => true,
-                      };
-                      return matchesQuery && matchesCompliance;
-                    }).toList();
-
-                    return filteredFits.map((f) {
-                    final device = (f['device'] as Map<String, dynamic>?) ?? {};
-                    final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
-                    final staffMins = (device['staff_review_mins'] as num?)?.toInt() ?? 20;
-                    final isCompliant = rtmDays >= 16;
-
-                    return TableRow(
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.04))),
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(f['patient_id'] as String? ?? 'Unknown', style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700)),
-                              Text(f['patient_mrn'] as String? ?? 'MRN-84920', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted)),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(device['model'] as String? ?? 'Smart Assistive Device', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600)),
-                              Text(device['type'] as String? ?? 'Hardware', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textSecondary)),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isCompliant ? Icons.check_circle : Icons.warning_amber_rounded,
-                                size: 16,
-                                color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '$rtmDays / 30 Days',
-                                style: GoogleFonts.jetBrainsMono(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            '$staffMins min logged',
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: staffMins >= 20 ? ClinicTheme.brandAccent : ClinicTheme.textSecondary,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: (isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber).withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              device['cpt_status'] as String? ?? 'In Review',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: ClinicTheme.surfaceDark,
-                              foregroundColor: ClinicTheme.brandAccent,
-                              side: BorderSide(color: ClinicTheme.brandAccent.withOpacity(0.4)),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Logged +5 min clinical staff review for ${f['patient_id']}!')),
-                              );
-                            },
-                            child: const Text('+5 Min Log', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList();
-                })(),
-                ],
-              ),
+              child: _reimbursementRegion == 'nigeria_hmo'
+                  ? _buildNigerianHmoTable()
+                  : _buildCmsRtmTable(fits),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNigerianHmoTable() {
+    final hmoRecords = [
+      {
+        'patient': 'Eleanor Vance',
+        'mrn': 'OPT-8021',
+        'hmo': 'Reliance HMO (Gold Corporate)',
+        'auth_code': 'PA-REL-8921',
+        'benefit': 'Glaucoma Surveillance & Latanoprost Refills',
+        'amount': '₦35,000.00',
+        'status': 'Approved',
+        'status_color': ClinicTheme.malachite,
+        'action_label': 'Submit Claim',
+      },
+      {
+        'patient': 'Arthur Pendelton',
+        'mrn': 'OPT-9942',
+        'hmo': 'Diaspora Plan (UK Sponsor: Sarah Pendelton)',
+        'auth_code': 'DIA-UK-0842',
+        'benefit': 'Smart Vision Frame Autonomy Telemetry',
+        'amount': '₦120,000.00',
+        'status': 'Active (Bachs)',
+        'status_color': ClinicTheme.brandAccent,
+        'action_label': 'WhatsApp Report',
+      },
+      {
+        'patient': 'Martha Alvarez',
+        'mrn': 'OPT-6190',
+        'hmo': 'AXA Mansard HMO',
+        'auth_code': 'PA-AXA-4410',
+        'benefit': 'Diabetic Fundus Screen & FL-41 Blue Lenses',
+        'amount': '₦28,500.00',
+        'status': 'Approved',
+        'status_color': ClinicTheme.malachite,
+        'action_label': 'Print Voucher',
+      },
+      {
+        'patient': 'Marcus Sterling',
+        'mrn': 'OPT-7419',
+        'hmo': 'NHIA / Lagos State Health (Ilera Eko)',
+        'auth_code': 'ENR-LAS-90218',
+        'benefit': 'Primary Refraction & Dry Eye Protocol',
+        'amount': '₦18,000.00',
+        'status': 'Pending Pre-Auth',
+        'status_color': ClinicTheme.warningAmber,
+        'action_label': 'Verify Enrollee',
+      },
+    ];
+
+    final q = _rtmSearchCtrl.text.trim().toLowerCase();
+    final filtered = hmoRecords.where((r) {
+      final matchesQuery = q.isEmpty ||
+          r['patient']!.toLowerCase().contains(q) ||
+          r['mrn']!.toLowerCase().contains(q) ||
+          r['hmo']!.toLowerCase().contains(q) ||
+          r['auth_code']!.toLowerCase().contains(q);
+      final isApproved = r['status']!.contains('Approved') || r['status']!.contains('Active');
+      final matchesCompliance = switch (_rtmComplianceFilter) {
+        'compliant' => isApproved,
+        'pending' => !isApproved,
+        _ => true,
+      };
+      return matchesQuery && matchesCompliance;
+    }).toList();
+
+    return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(2.0),
+        1: FlexColumnWidth(2.5),
+        2: FlexColumnWidth(1.8),
+        3: FlexColumnWidth(2.4),
+        4: FlexColumnWidth(2.0),
+        5: FlexColumnWidth(1.5),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        TableRow(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.03),
+            border: const Border(bottom: BorderSide(color: ClinicTheme.border)),
+          ),
+          children: [
+            _buildHeaderCell('PATIENT / MRN'),
+            _buildHeaderCell('HMO / SPONSOR PLAN'),
+            _buildHeaderCell('PRE-AUTH / POLICY NO.'),
+            _buildHeaderCell('COVERED BENEFIT'),
+            _buildHeaderCell('STATUS & TARIFF (₦)'),
+            _buildHeaderCell('ACTION'),
+          ],
+        ),
+        ...filtered.map((r) {
+          final isApproved = r['status']!.contains('Approved') || r['status']!.contains('Active');
+          final statusColor = r['status_color'] as Color;
+
+          return TableRow(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.04))),
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r['patient'] as String, style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700)),
+                    Text(r['mrn'] as String, style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted)),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(r['hmo'] as String, style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(r['auth_code'] as String, style: GoogleFonts.jetBrainsMono(fontSize: 12, fontWeight: FontWeight.w700, color: ClinicTheme.brandAccent)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(r['benefit'] as String, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r['amount'] as String, style: GoogleFonts.jetBrainsMono(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(r['status'] as String, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: statusColor)),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: isApproved ? ClinicTheme.brandAccent : ClinicTheme.surfaceDark,
+                    foregroundColor: isApproved ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('✓ ${r['action_label']} executed for ${r['patient']}!')),
+                    );
+                  },
+                  child: Text(r['action_label'] as String, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildCmsRtmTable(List<Map<String, dynamic>> fits) {
+    final q = _rtmSearchCtrl.text.trim().toLowerCase();
+    final filteredFits = fits.where((f) {
+      final patient = (f['patient_id'] as String? ?? '').toLowerCase();
+      final mrn = (f['patient_mrn'] as String? ?? '').toLowerCase();
+      final device = (f['device'] as Map<String, dynamic>?) ?? {};
+      final model = (device['model'] as String? ?? '').toLowerCase();
+      final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
+      final isCompliant = rtmDays >= 16;
+
+      final matchesQuery = q.isEmpty || patient.contains(q) || mrn.contains(q) || model.contains(q);
+      final matchesCompliance = switch (_rtmComplianceFilter) {
+        'compliant' => isCompliant,
+        'pending' => !isCompliant,
+        _ => true,
+      };
+      return matchesQuery && matchesCompliance;
+    }).toList();
+
+    return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(2.0),
+        1: FlexColumnWidth(2.2),
+        2: FlexColumnWidth(1.6),
+        3: FlexColumnWidth(1.6),
+        4: FlexColumnWidth(2.2),
+        5: FlexColumnWidth(1.4),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        TableRow(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.03),
+            border: const Border(bottom: BorderSide(color: ClinicTheme.border)),
+          ),
+          children: [
+            _buildHeaderCell('PATIENT / MRN'),
+            _buildHeaderCell('DEVICE & PATHOLOGY'),
+            _buildHeaderCell('30-DAY SIGNALS (>=16)'),
+            _buildHeaderCell('STAFF REVIEW TIME'),
+            _buildHeaderCell('REIMBURSEMENT STATUS'),
+            _buildHeaderCell('ACTION'),
+          ],
+        ),
+        ...filteredFits.map((f) {
+          final device = (f['device'] as Map<String, dynamic>?) ?? {};
+          final rtmDays = (device['rtm_days'] as num?)?.toInt() ?? 16;
+          final staffMins = (device['staff_review_mins'] as num?)?.toInt() ?? 20;
+          final isCompliant = rtmDays >= 16;
+
+          return TableRow(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.04))),
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(f['patient_id'] as String? ?? 'Unknown', style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700)),
+                    Text(f['patient_mrn'] as String? ?? 'MRN-84920', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.textMuted)),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(device['model'] as String? ?? 'Smart Assistive Device', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                    Text(device['type'] as String? ?? 'Hardware', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: ClinicTheme.textSecondary)),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Row(
+                  children: [
+                    Icon(
+                      isCompliant ? Icons.check_circle : Icons.warning_amber_rounded,
+                      size: 16,
+                      color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '$rtmDays / 30 Days',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Text(
+                  '$staffMins min logged',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: staffMins >= 20 ? ClinicTheme.brandAccent : ClinicTheme.textSecondary,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: (isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    device['cpt_status'] as String? ?? 'In Review',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isCompliant ? ClinicTheme.malachite : ClinicTheme.warningAmber,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.surfaceDark,
+                    foregroundColor: ClinicTheme.brandAccent,
+                    side: BorderSide(color: ClinicTheme.brandAccent.withOpacity(0.4)),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Logged +5 min clinical staff review for ${f['patient_id']}!')),
+                    );
+                  },
+                  child: const Text('+5 Min Log', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
+    );
         ],
       ),
     );

@@ -870,7 +870,7 @@ class _MasterScribeCockpit extends StatefulWidget {
 class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _selectedEhrBridge = 'Epic Systems';
-  String _selectedClinicFormTemplate = 'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026';
+  String _selectedClinicFormTemplate = 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
 
   // Familiar Paper Sheet / Digital Twin Interactive State
   bool _formFluoresceinClear = true;
@@ -2123,6 +2123,8 @@ ${sc.currentCorrection}''';
   /// TAB 4: Familiar Clinic Paper Sheet (Digital Twin)
   Widget _buildFamiliarClinicPaperSheetTab(_ClinicalScenario sc) {
     final templates = [
+      'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)',
+      'Teaching Hospital Manila Folder Card (LUTH / UCH / UNTH)',
       'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026',
       'Metropolitan Eye Hospital · 4-Quadrant Clinical Folder Sheet',
       'Pediatric & Binocular Vision Specialist Exam Sheet',
