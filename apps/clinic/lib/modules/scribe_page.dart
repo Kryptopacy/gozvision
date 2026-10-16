@@ -870,7 +870,7 @@ class _MasterScribeCockpit extends StatefulWidget {
 class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _selectedEhrBridge = 'Epic Systems';
-  String _selectedClinicFormTemplate = 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
+  String? _selectedClinicFormTemplateOverride; // null = follow clinic scope; non-null = user manual selection
 
   // Familiar Paper Sheet / Digital Twin Interactive State
   bool _formFluoresceinClear = true;
@@ -2122,6 +2122,9 @@ ${sc.currentCorrection}''';
 
   /// TAB 4: Familiar Clinic Paper Sheet (Digital Twin)
   Widget _buildFamiliarClinicPaperSheetTab(_ClinicalScenario sc) {
+    final scope = Provider.of<ClinicScope>(context);
+    final effectiveTemplate = _selectedClinicFormTemplateOverride ?? scope.defaultFormTemplate;
+
     final templates = [
       'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)',
       'Teaching Hospital Manila Folder Card (LUTH / UCH / UNTH)',
@@ -2178,7 +2181,7 @@ ${sc.currentCorrection}''';
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Doctors work in their clinic\'s familiar physical folder layout. No workflow change required.',
+                        'Doctors work in their clinic\'s familiar physical folder layout. Automatically contextualized to ${scope.country}.',
                         style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary),
                       ),
                     ],
@@ -2195,7 +2198,7 @@ ${sc.currentCorrection}''';
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
-                      value: _selectedClinicFormTemplate,
+                      value: effectiveTemplate,
                       dropdownColor: ClinicTheme.surfaceDark,
                       icon: const Icon(Icons.arrow_drop_down, color: ClinicTheme.brandAccent),
                       style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
@@ -2206,7 +2209,7 @@ ${sc.currentCorrection}''';
                         );
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null) setState(() => _selectedClinicFormTemplate = val);
+                        if (val != null) setState(() => _selectedClinicFormTemplateOverride = val);
                       },
                     ),
                   ),
@@ -2248,11 +2251,11 @@ ${sc.currentCorrection}''';
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _selectedClinicFormTemplate.split('·').first.toUpperCase().trim(),
+                          effectiveTemplate.split('·').first.toUpperCase().trim(),
                           style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
                         ),
                         Text(
-                          'COMPREHENSIVE OPTOMETRIC CLINICAL RECORD · FOLDER ENCOUNTER FILE',
+                          '${scope.clinicName.toUpperCase()} · COMPREHENSIVE OPTOMETRIC CLINICAL RECORD',
                           style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.brandAccent, fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -2267,12 +2270,12 @@ ${sc.currentCorrection}''';
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'FORM CODE: ${_selectedClinicFormTemplate.contains('4-Quadrant') ? 'MEH-4Q-2026' : _selectedClinicFormTemplate.contains('Pediatric') ? 'PED-OPT-2026' : 'OD-REV-2026'}',
+                            'FORM CODE: ${effectiveTemplate.contains('4-Quadrant') ? 'MEH-4Q-2026' : effectiveTemplate.contains('Pediatric') ? 'PED-OPT-2026' : effectiveTemplate.contains('NOA') ? 'NOA-ODORBN-2026' : 'OD-REV-2026'}',
                             style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textSecondary, fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(height: 3),
-                        Text('Attending OD: Dr. Ada Optometrist · Lic #OPT-48201', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
+                        Text('Attending OD: Dr. Ada Optometrist · ${scope.defaultLicenseText}', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
                       ],
                     ),
                   ],
@@ -2502,10 +2505,10 @@ ${sc.currentCorrection}''';
                         children: [
                           const Icon(Icons.verified_user_rounded, color: ClinicTheme.brandAccent, size: 18),
                           const SizedBox(width: 8),
-                          Text('Signed by Dr. Ada Optometrist, Lic #OPT-48201', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
+                          Text('Signed by Dr. Ada Optometrist (${scope.defaultLicenseText})', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
                         ],
                       ),
-                      Text('Electronically Stamped & Synced via GozVision Digital Twin', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
+                      Text('${scope.regulatoryBody} · GozVision Digital Twin', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
                     ],
                   ),
                 ),

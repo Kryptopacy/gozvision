@@ -27,7 +27,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   late TabController _tabController;
   final TextEditingController _rtmSearchCtrl = TextEditingController();
   String _rtmComplianceFilter = 'all';
-  String _reimbursementRegion = 'nigeria_hmo'; // 'nigeria_hmo' or 'us_cms'
+  String? _reimbursementRegionOverride; // null = follow practice scope; non-null = manual override
 
   // Fallback referral cohort data for resilient, high-fidelity clinical presentation
   final List<Map<String, dynamic>> _fallbackReferrals = [
@@ -449,6 +449,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   // TAB 2: CMS RTM Billing Engine
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildRtmBillingTab(List<Map<String, dynamic>> fits) {
+    final scope = Provider.of<ClinicScope>(context);
+    final activeRegion = _reimbursementRegionOverride ?? scope.defaultReimbursementRegion;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -465,24 +468,26 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
               Text('REIMBURSEMENT FRAMEWORK:', style: GoogleFonts.jetBrainsMono(fontSize: 10.5, fontWeight: FontWeight.bold, color: ClinicTheme.textMuted)),
               const SizedBox(width: 10),
               ChoiceChip(
+                avatar: const Text('🇳🇬', style: TextStyle(fontSize: 12)),
                 label: const Text('Nigerian Private HMO & Diaspora Plans (₦)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                selected: _reimbursementRegion == 'nigeria_hmo',
+                selected: activeRegion == 'nigeria_hmo',
                 selectedColor: ClinicTheme.brandAccent,
                 backgroundColor: ClinicTheme.surfaceDark,
-                labelStyle: TextStyle(color: _reimbursementRegion == 'nigeria_hmo' ? Colors.black : Colors.white),
+                labelStyle: TextStyle(color: activeRegion == 'nigeria_hmo' ? Colors.black : Colors.white),
                 onSelected: (v) {
-                  if (v) setState(() => _reimbursementRegion = 'nigeria_hmo');
+                  if (v) setState(() => _reimbursementRegionOverride = 'nigeria_hmo');
                 },
               ),
               const SizedBox(width: 8),
               ChoiceChip(
+                avatar: const Text('🇺🇸', style: TextStyle(fontSize: 12)),
                 label: const Text('Medicare CMS RTM (US / International Export)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                selected: _reimbursementRegion == 'us_cms',
+                selected: activeRegion == 'us_cms',
                 selectedColor: ClinicTheme.brandAccent,
                 backgroundColor: ClinicTheme.surfaceDark,
-                labelStyle: TextStyle(color: _reimbursementRegion == 'us_cms' ? Colors.black : Colors.white),
+                labelStyle: TextStyle(color: activeRegion == 'us_cms' ? Colors.black : Colors.white),
                 onSelected: (v) {
-                  if (v) setState(() => _reimbursementRegion = 'us_cms');
+                  if (v) setState(() => _reimbursementRegionOverride = 'us_cms');
                 },
               ),
             ],
@@ -497,14 +502,14 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _reimbursementRegion == 'nigeria_hmo'
+                    activeRegion == 'nigeria_hmo'
                         ? 'Nigerian HMO Pre-Authorization & Diaspora Vision Care Ledger'
                         : 'CMS Remote Therapeutic Monitoring (RTM) Billing Ledger',
                     style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _reimbursementRegion == 'nigeria_hmo'
+                    activeRegion == 'nigeria_hmo'
                         ? 'Automate HMO Pre-Auth codes (Reliance, AXA, Hygeia), NHIA optical benefits, and Diaspora family plan remittances via Bachs.'
                         : 'Automated 30-day monitoring period audit: verifies the CMS 16-day telemetry threshold and 20-min clinical staff time.',
                     style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
@@ -518,18 +523,18 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 ),
                 icon: Icon(
-                  _reimbursementRegion == 'nigeria_hmo' ? Icons.receipt_long_outlined : Icons.file_download_outlined,
+                  activeRegion == 'nigeria_hmo' ? Icons.receipt_long_outlined : Icons.file_download_outlined,
                   size: 16,
                 ),
                 label: Text(
-                  _reimbursementRegion == 'nigeria_hmo' ? '+ Generate HMO Pre-Auth' : 'Export CPT Claims to EHR (FHIR R4)',
+                  activeRegion == 'nigeria_hmo' ? '+ Generate HMO Pre-Auth' : 'Export CPT Claims to EHR (FHIR R4)',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                 ),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        _reimbursementRegion == 'nigeria_hmo'
+                        activeRegion == 'nigeria_hmo'
                             ? '✓ Generated Reliance HMO & AXA Mansard claim vouchers (₦63,500 reconciled)!'
                             : '✓ Exported 3 RTM claims (CPT 98975 / 98980 / 98981) to Epic & Eyefinity bridges!',
                       ),
@@ -556,7 +561,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    _reimbursementRegion == 'nigeria_hmo'
+                    activeRegion == 'nigeria_hmo'
                         ? 'Nigerian Private HMO & NHIA Guidelines: Reliance HMO, AXA Mansard, Hygeia, Leadway, and Lagos Ilera Eko. Standard optical allowances (₦15,000–₦45,000 frames/lenses), Glaucoma therapy Pre-Auth, and Diaspora Care Plan remittances via Bachs.'
                         : 'CMS Guidelines: CPT 98975 (\$19.65 - initial device education), CPT 98980 (\$50.18 - first 20 min clinical staff monitoring requiring >=16 days telemetry), CPT 98981 (\$40.84 - each additional 20 min).',
                     style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textPrimary),
@@ -578,7 +583,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                     onChanged: (_) => setState(() {}),
                     style: const TextStyle(fontSize: 12, color: ClinicTheme.textPrimary),
                     decoration: InputDecoration(
-                      hintText: _reimbursementRegion == 'nigeria_hmo'
+                      hintText: activeRegion == 'nigeria_hmo'
                           ? 'Search HMO ledger by patient, Pre-Auth code, or HMO name...'
                           : 'Search RTM ledger by patient, MRN, or device...',
                       hintStyle: const TextStyle(fontSize: 12, color: ClinicTheme.textMuted),
@@ -616,8 +621,8 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ('all', 'All Records'),
-                  ('compliant', _reimbursementRegion == 'nigeria_hmo' ? 'Approved HMOs' : 'Compliant (>=16d)'),
-                  ('pending', _reimbursementRegion == 'nigeria_hmo' ? 'Pending Pre-Auth' : 'Pending (<16d)'),
+                  ('compliant', activeRegion == 'nigeria_hmo' ? 'Approved HMOs' : 'Compliant (>=16d)'),
+                  ('pending', activeRegion == 'nigeria_hmo' ? 'Pending Pre-Auth' : 'Pending (<16d)'),
                 ].map((item) {
                   final isSelected = _rtmComplianceFilter == item.$1;
                   return Padding(
@@ -648,7 +653,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
           // Ledger Table
           Expanded(
             child: SingleChildScrollView(
-              child: _reimbursementRegion == 'nigeria_hmo'
+              child: activeRegion == 'nigeria_hmo'
                   ? _buildNigerianHmoTable()
                   : _buildCmsRtmTable(fits),
             ),

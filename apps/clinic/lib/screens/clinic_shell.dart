@@ -292,53 +292,69 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
           ),
 
-          // Workspace Practice Card
-          Container(
-            margin: const EdgeInsets.only(bottom: 18),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: ClinicTheme.cardBackground,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: ClinicTheme.border),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 26,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: ClinicTheme.brandAccentFaint,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(Icons.domain_rounded, color: ClinicTheme.brandAccent, size: 14),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        scope.clinicName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          color: ClinicTheme.textPrimary,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                        ),
+          // Workspace Practice Card & Location Switcher
+          InkWell(
+            onTap: () => _showPracticeLocationModal(context, scope),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: ClinicTheme.cardBackground,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: ClinicTheme.border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: ClinicTheme.brandAccentFaint,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Center(
+                      child: Text(
+                        scope.countryFlag,
+                        style: const TextStyle(fontSize: 14),
                       ),
-                      Text(
-                        'Verified Clinic Branch',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: ClinicTheme.textMuted,
-                          fontSize: 9.5,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          scope.clinicName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: ClinicTheme.textPrimary,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${scope.stateOrCity}, ${scope.country}',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: ClinicTheme.brandAccent,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.edit, size: 9, color: ClinicTheme.textMuted),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -668,6 +684,224 @@ class _ClinicShellState extends State<ClinicShell> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showPracticeLocationModal(BuildContext context, ClinicScope scope) {
+    String selectedCountry = scope.country;
+    String selectedCity = scope.stateOrCity;
+    final nameCtrl = TextEditingController(text: scope.clinicName);
+
+    final presets = [
+      {
+        'country': 'Nigeria',
+        'city': 'Lagos',
+        'flag': '🇳🇬',
+        'subtitle': 'NOA / ODORBN Standard • Reliance & AXA HMO • NGN (₦)',
+      },
+      {
+        'country': 'Nigeria',
+        'city': 'Abuja',
+        'flag': '🇳🇬',
+        'subtitle': 'Teaching Hospital Manila Folder • NHIA Social Health • NGN (₦)',
+      },
+      {
+        'country': 'Ghana',
+        'city': 'Accra',
+        'flag': '🇬🇭',
+        'subtitle': 'Ghana Optometric Standard • NHIS Optical • GHS (GH₵)',
+      },
+      {
+        'country': 'Kenya',
+        'city': 'Nairobi',
+        'flag': '🇰🇪',
+        'subtitle': 'Ophthalmic Clinical Card • SHA / SHIF Tariffs • KES (KSh)',
+      },
+      {
+        'country': 'South Africa',
+        'city': 'Johannesburg',
+        'flag': '🇿🇦',
+        'subtitle': 'Council for Medical Schemes • Discovery Health PMB • ZAR (R)',
+      },
+      {
+        'country': 'United Kingdom',
+        'city': 'London',
+        'flag': '🇬🇧',
+        'subtitle': 'NHS GOS 18 Optical Voucher • Metropolitan 4-Quadrant • GBP (£)',
+      },
+      {
+        'country': 'United States',
+        'city': 'New York',
+        'flag': '🇺🇸',
+        'subtitle': 'Medicare CMS RTM (CPT 98975 / 98980) • HIPAA BAA • USD (\$)',
+      },
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return Dialog(
+              backgroundColor: ClinicTheme.obsidianElevated,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: ClinicTheme.border),
+              ),
+              child: Container(
+                width: 620,
+                padding: const EdgeInsets.all(24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: ClinicTheme.brandAccentFaint,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.public_rounded, color: ClinicTheme.brandAccent, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Practice Location & Automatic Regional Context',
+                                  style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'GozVision automatically context-switches paper forms, currencies, HMO tariffs, and regulatory compliance based on your practice location.',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: ClinicTheme.textMuted, size: 18),
+                            onPressed: () => Navigator.of(dialogCtx).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      Text('Practice / Hospital Name:', style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: nameCtrl,
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          filled: true,
+                          fillColor: ClinicTheme.surfaceDark,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: ClinicTheme.border)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: ClinicTheme.border)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: ClinicTheme.brandAccent)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      Text('Select Registered Practice Jurisdiction:', style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: ClinicTheme.textSecondary, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 10),
+                      Column(
+                        children: presets.map((p) {
+                          final isSelected = selectedCountry == p['country'] && selectedCity == p['city'];
+                          return InkWell(
+                            onTap: () {
+                              setDialogState(() {
+                                selectedCountry = p['country']!;
+                                selectedCity = p['city']!;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSelected ? ClinicTheme.brandAccentFaint : ClinicTheme.surfaceDark,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected ? ClinicTheme.brandAccent : ClinicTheme.border.withOpacity(0.4),
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(p['flag']!, style: const TextStyle(fontSize: 20)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${p['city']}, ${p['country']}',
+                                          style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white),
+                                        ),
+                                        Text(
+                                          p['subtitle']!,
+                                          style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Icon(Icons.check_circle_rounded, color: ClinicTheme.brandAccent, size: 18),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogCtx).pop(),
+                            child: const Text('Cancel', style: TextStyle(color: ClinicTheme.textSecondary)),
+                          ),
+                          const SizedBox(width: 10),
+                          FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: ClinicTheme.brandAccent,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                            icon: const Icon(Icons.check_circle, size: 16),
+                            label: const Text('Apply Location Context', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            onPressed: () {
+                              scope.updatePracticeLocation(
+                                newCountry: selectedCountry,
+                                newStateOrCity: selectedCity,
+                                newClinicName: nameCtrl.text.trim(),
+                              );
+                              Navigator.of(dialogCtx).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: const Color(0xFF10B981),
+                                  content: Text('✓ Practice context updated to $selectedCity, $selectedCountry (${scope.currencySymbol} ${scope.currency}). All clinical modules adapted!'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
