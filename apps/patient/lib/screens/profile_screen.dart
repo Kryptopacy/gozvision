@@ -141,7 +141,11 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           _buildPrescriptionsAndFits(context),
           const SizedBox(height: 24),
 
-          // 5. Accessible Preferences
+          // 5. Universal Patient Document & Prescription Uploader
+          _buildPatientDocumentUploaderCard(context),
+          const SizedBox(height: 24),
+
+          // 6. Accessible Preferences
           _buildPreferencesCard(context, profileService),
         ],
       ),
@@ -549,6 +553,209 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPatientDocumentUploaderCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: GozAITheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: GozAITheme.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.upload_file_rounded, color: GozAITheme.accentCyan, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'My Clinical Files & Prescriptions',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text('Gemini Vision OCR', style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Snap a photo or upload past doctor prescriptions, eye drop bottles, or clinic summaries. GozVision automatically verifies and links them to your active care regimen.',
+            style: TextStyle(fontSize: 12, color: Colors.white60, height: 1.35),
+          ),
+          const SizedBox(height: 14),
+
+          // Upload action buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: GozAITheme.accentCyan,
+                    side: const BorderSide(color: GozAITheme.accentCyan),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.camera_alt_outlined, size: 16),
+                  label: const Text('Snap Photo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  onPressed: () => _showPatientUploadSheet(context, isCamera: true),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: GozAITheme.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.attach_file_rounded, size: 16),
+                  label: const Text('Upload File / PDF', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  onPressed: () => _showPatientUploadSheet(context, isCamera: false),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Sample verified patient documents
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.verified_rounded, color: Colors.greenAccent, size: 14),
+                    SizedBox(width: 6),
+                    Text('Verified Active Records (2)', style: TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _buildUploadedFileTile(
+                  icon: Icons.picture_as_pdf_outlined,
+                  name: 'Dr_Davis_Glaucoma_Rx_2026.pdf',
+                  extractedDetail: 'Extracted: Latanoprost 0.005% QHS OU • Active Refill Sync',
+                  date: 'Oct 14, 2026',
+                ),
+                const Divider(height: 12, color: Colors.white10),
+                _buildUploadedFileTile(
+                  icon: Icons.photo_outlined,
+                  name: 'Systane_Complete_PF_Bottle.jpg',
+                  extractedDetail: 'Extracted: Lubricant Eye Drops Preservative-Free QID',
+                  date: 'Oct 10, 2026',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadedFileTile({
+    required IconData icon,
+    required String name,
+    required String extractedDetail,
+    required String date,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: GozAITheme.accentCyan),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(name, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 12)),
+              const SizedBox(height: 1),
+              Text(extractedDetail, style: const TextStyle(color: Colors.white70, fontSize: 10.5)),
+            ],
+          ),
+        ),
+        Text(date, style: const TextStyle(color: Colors.white38, fontSize: 10)),
+      ],
+    );
+  }
+
+  void _showPatientUploadSheet(BuildContext context, {required bool isCamera}) {
+    HapticService.tap();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: GozAITheme.surfaceElevated,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(isCamera ? Icons.camera_alt_outlined : Icons.upload_file_rounded, color: GozAITheme.accentCyan, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    isCamera ? 'Snap Prescription or Eye Drop Box' : 'Upload Medical Document',
+                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Take a clear, well-lit picture of your paper prescription, eye drop label, or clinic referral. Gemini Vision will verify the dosage and sync it directly to your Amazon Pharmacy refills and clinic record.',
+                style: TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.4),
+              ),
+              const SizedBox(height: 18),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: GozAITheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(46),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.check_circle_outline, size: 18),
+                label: Text(
+                  isCamera ? 'Simulate Camera Capture & Scan' : 'Select Document from Storage',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Colors.green,
+                      content: Text('✓ Gemini Vision: Prescription detected & verified! Latanoprost 0.005% QHS linked to Amazon Pharmacy.'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

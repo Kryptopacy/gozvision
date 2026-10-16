@@ -279,7 +279,7 @@ def log_patient_medication_adherence(
 
 @mcp.tool()
 def amazon_pharmacy_reorder_drops(
-    medication_name: str,
+    medication_name: Optional[str] = None,
     patient_id: str = "demo_patient_001",
     delivery_speed: str = "prime_same_day",
     quantity_bottles: int = 1,
@@ -287,14 +287,18 @@ def amazon_pharmacy_reorder_drops(
 ) -> dict[str, Any]:
     """Order or auto-refill ocular medications directly through Amazon Pharmacy Prime fulfillment.
 
-    Provides direct doorstep delivery for patients:
+    VOICE & STANDALONE ACCESS:
+    - Zero Drug Name Friction: If medication_name is omitted or generic ('my drops', 'eye drops', 'medicine'),
+      GozVision automatically looks up the patient's active prescribed drops (e.g. Latanoprost 0.005%)
+      and dosage schedule. Patients can simply say 'Alexa, refill my eye drops' without needing to recall
+      or pronounce complex chemical names.
     - Standalone Mode (clinic_id=None): Independent low-vision patients can order OTC ocular therapeutics
       (e.g., PreserVision AREDS 2, Systane Complete PF, Refresh Optive) or transfer active prescriptions
       with ZERO hospital or clinic affiliation required.
     - Clinic-Connected Mode: Automatically ties back to the optometrist's encounter prescription.
 
     Args:
-        medication_name: Name of eye drops or ocular supplement (e.g., 'Latanoprost 0.005%', 'Systane Complete PF').
+        medication_name: Optional name of eye drops. If omitted, auto-resolves active prescription.
         patient_id: Patient identifier.
         delivery_speed: 'prime_same_day', 'prime_one_day', or 'standard'.
         quantity_bottles: Number of units or bottles requested.

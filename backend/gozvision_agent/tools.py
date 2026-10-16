@@ -351,8 +351,57 @@ def log_adherence_event(
     }
 
 
+# Active patient ophthalmic medication profiles for zero-friction voice refills
+PATIENT_ACTIVE_MEDICATIONS: dict[str, list[dict[str, Any]]] = {
+    "demo_patient_001": [
+        {
+            "name": "Latanoprost 0.005% Ophthalmic Solution",
+            "common_name": "Latanoprost bedtime drops",
+            "indication": "Primary Open-Angle Glaucoma (IOP control)",
+            "dosage": "1 drop nightly in both eyes at bedtime (QHS OU)",
+            "bottle_volume_ml": 2.5,
+            "estimated_days_remaining": 5,
+            "prescriber": "Dr. Ada Optometrist, O.D.",
+            "is_refill_due": True,
+        },
+        {
+            "name": "Systane Complete Preservative-Free",
+            "common_name": "Systane artificial tears",
+            "indication": "Evaporative Dry Eye Relief",
+            "dosage": "1-2 drops as needed throughout day",
+            "bottle_volume_ml": 10.0,
+            "estimated_days_remaining": 14,
+            "prescriber": "Dr. Ada Optometrist, O.D.",
+            "is_refill_due": False,
+        },
+    ]
+}
+
+
+def resolve_patient_active_medication(
+    patient_id: str = "demo_patient_001",
+    query_hint: Optional[str] = None,
+) -> dict[str, Any]:
+    """Auto-resolves the patient's active prescribed eye drop so voice commands require zero drug name recall.
+    
+    A low-vision patient can simply say 'Alexa, refill my drops' or 'Alexa, I need more medicine'
+    without needing to pronounce complex pharmacological names like Latanoprost or Dorzolamide.
+    """
+    meds = PATIENT_ACTIVE_MEDICATIONS.get(patient_id, PATIENT_ACTIVE_MEDICATIONS["demo_patient_001"])
+    if not query_hint or query_hint.lower().strip() in ["", "drops", "my drops", "eye drops", "medicine", "refill", "auto"]:
+        # Pick the one that is currently due for refill or the primary glaucoma therapy
+        due = [m for m in meds if m.get("is_refill_due")]
+        return due[0] if due else meds[0]
+
+    hint = query_hint.lower()
+    for m in meds:
+        if hint in m["name"].lower() or hint in m["common_name"].lower() or hint in m["indication"].lower():
+            return m
+    return meds[0]
+
+
 def amazon_pharmacy_auto_refill(
-    medication_name: str,
+    medication_name: Optional[str] = None,
     patient_id: str = "demo_patient_001",
     delivery_speed: str = "prime_same_day",  # 'prime_same_day', 'prime_one_day', 'standard'
     is_prescription: bool = True,
@@ -363,14 +412,19 @@ def amazon_pharmacy_auto_refill(
 ) -> dict:
     """Order or auto-refill ocular medications directly via Amazon Pharmacy & PillPack.
 
-    CRITICAL ACCESS CAPABILITY:
-    Works seamlessly BOTH for clinic-connected patients AND standalone direct-to-consumer patients:
-    - If clinic_id is present: Links encounter prescription from optometrist's Scribe Studio.
-    - If clinic_id is None / 'standalone': Dispatches via Amazon Pharmacy consumer transfer or OTC ocular care
-      (e.g., PreserVision AREDS 2, Systane Complete PF, Refresh Optive Mega-3), requiring NO hospital affiliation!
+    VOICE & STANDALONE CONVENIENCE:
+    1. Zero Drug Name Friction: If medication_name is omitted or generic ('my drops', 'eye drops'),
+       GozVision automatically looks up the patient's active ophthalmic prescription (e.g. Latanoprost 0.005%)
+       and days remaining, freeing the patient from memorizing complex chemical drug names.
+    2. Zero Clinic Lock-in: Operates seamlessly in Standalone mode for independent patients
+       with zero clinic affiliation required.
     """
     now = datetime.now(timezone.utc)
     res_patient_id = _resolve_patient_id(tool_context) if tool_context else patient_id
+    
+    # Auto-resolve medication if user spoke generic phrase
+    resolved_med = resolve_patient_active_medication(patient_id=res_patient_id, query_hint=medication_name)
+    effective_med_name = resolved_med["name"]
     order_id = f"AMZN-RX-{int(now.timestamp()) % 1000000:06d}"
 
     est_delivery = (
@@ -384,7 +438,7 @@ def amazon_pharmacy_auto_refill(
 
     event_payload = {
         "order_id": order_id,
-        "medication": medication_name,
+        "medication": effective_med_name,
         "quantity": quantity_bottles,
         "delivery_speed": delivery_speed,
         "estimated_arrival": est_delivery,
@@ -408,17 +462,17 @@ def amazon_pharmacy_auto_refill(
             pass
 
     spoken_confirmation = (
-        f"I've placed your refill order for {medication_name} via Amazon Pharmacy Prime. "
+        f"I've placed your refill order for {effective_med_name} via Amazon Pharmacy Prime. "
         f"It is scheduled to arrive {est_delivery}. No clinic or hospital visit was required."
         if is_standalone
-        else f"Your prescription refill of {medication_name} has been routed through Amazon Pharmacy with Dr. Miller's clinic link. Estimated delivery: {est_delivery}."
+        else f"Your prescription refill of {effective_med_name} has been routed through Amazon Pharmacy with Dr. Miller's clinic link. Estimated delivery: {est_delivery}."
     )
 
     return {
         "status": "order_confirmed",
         "order_id": order_id,
         "patient_id": res_patient_id,
-        "medication": medication_name,
+        "medication": effective_med_name,
         "quantity_bottles": quantity_bottles,
         "delivery_speed": delivery_speed,
         "estimated_delivery": est_delivery,

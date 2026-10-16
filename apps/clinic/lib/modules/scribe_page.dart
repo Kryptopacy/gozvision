@@ -870,24 +870,105 @@ class _MasterScribeCockpit extends StatefulWidget {
 class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _selectedEhrBridge = 'Epic Systems';
+  String _selectedClinicFormTemplate = 'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026';
 
-  // Paper Form Digitizer Interactive State
+  // Familiar Paper Sheet / Digital Twin Interactive State
   bool _formFluoresceinClear = true;
   bool _formTearBreakupAbnormal = true;
   bool _formMeibomianCapped = true;
   bool _formMaculaFlat = true;
   bool _formVerticalNotch = true;
   bool _formDilatedOu = true;
+  bool _formRapdNegative = true;
+  bool _formMotilityFull = true;
+
+  // Live editable clinical controllers for Familiar Paper Sheet
+  late TextEditingController _retinoscopyOdController;
+  late TextEditingController _retinoscopyOsController;
+  late TextEditingController _vaDistanceOdController;
+  late TextEditingController _vaDistanceOsController;
+  late TextEditingController _vaNearController;
+  late TextEditingController _rxSphereOdController;
+  late TextEditingController _rxCylOdController;
+  late TextEditingController _rxAxisOdController;
+  late TextEditingController _rxSphereOsController;
+  late TextEditingController _rxCylOsController;
+  late TextEditingController _rxAxisOsController;
+  late TextEditingController _rxAddController;
+  late TextEditingController _iopOdController;
+  late TextEditingController _iopOsController;
+  late TextEditingController _slitLampController;
+  late TextEditingController _fundusCdController;
+  late TextEditingController _chiefComplaintController;
+  late TextEditingController _assessmentPlanController;
+
+  void _initFormControllers(_ClinicalScenario sc) {
+    _retinoscopyOdController = TextEditingController(text: '${sc.rxOd} (Neutral with +1.50 working dist)');
+    _retinoscopyOsController = TextEditingController(text: '${sc.rxOs} (Neutral with +1.50 working dist)');
+    _vaDistanceOdController = TextEditingController(text: sc.vaOd);
+    _vaDistanceOsController = TextEditingController(text: sc.vaOs);
+    _vaNearController = TextEditingController(text: 'N5 @ 40cm (${sc.add})');
+
+    final odParts = sc.rxOd.split(' ');
+    _rxSphereOdController = TextEditingController(text: odParts.isNotEmpty ? odParts[0] : '-1.75');
+    _rxCylOdController = TextEditingController(text: odParts.length > 1 ? odParts[1] : '-0.75');
+    _rxAxisOdController = TextEditingController(text: odParts.length > 3 ? odParts[3] : '090');
+
+    final osParts = sc.rxOs.split(' ');
+    _rxSphereOsController = TextEditingController(text: osParts.isNotEmpty ? osParts[0] : '-2.00');
+    _rxCylOsController = TextEditingController(text: osParts.length > 1 ? osParts[1] : '-1.25');
+    _rxAxisOsController = TextEditingController(text: osParts.length > 3 ? osParts[3] : '105');
+
+    _rxAddController = TextEditingController(text: sc.add);
+    _iopOdController = TextEditingController(text: sc.iopOd);
+    _iopOsController = TextEditingController(text: sc.iopOs);
+    _slitLampController = TextEditingController(text: 'Cornea: Clear OU · AC: Deep & Quiet · TBUT: ${sc.tbut} · Lens: OD ${sc.lensOd}, OS ${sc.lensOs}');
+    _fundusCdController = TextEditingController(text: 'OD C/D: ${sc.cdRatioOd} · OS C/D: ${sc.cdRatioOs} · Macula: Flat OU, intact foveal reflex');
+    _chiefComplaintController = TextEditingController(text: sc.chiefComplaint);
+    _assessmentPlanController = TextEditingController(text: '${sc.assessment}\n\nPLAN:\n${sc.plan}');
+  }
+
+  void _disposeFormControllers() {
+    _retinoscopyOdController.dispose();
+    _retinoscopyOsController.dispose();
+    _vaDistanceOdController.dispose();
+    _vaDistanceOsController.dispose();
+    _vaNearController.dispose();
+    _rxSphereOdController.dispose();
+    _rxCylOdController.dispose();
+    _rxAxisOdController.dispose();
+    _rxSphereOsController.dispose();
+    _rxCylOsController.dispose();
+    _rxAxisOsController.dispose();
+    _rxAddController.dispose();
+    _iopOdController.dispose();
+    _iopOsController.dispose();
+    _slitLampController.dispose();
+    _fundusCdController.dispose();
+    _chiefComplaintController.dispose();
+    _assessmentPlanController.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
+    _initFormControllers(widget.scenario);
+  }
+
+  @override
+  void didUpdateWidget(covariant _MasterScribeCockpit oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scenario != widget.scenario) {
+      _disposeFormControllers();
+      _initFormControllers(widget.scenario);
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _disposeFormControllers();
     super.dispose();
   }
 
@@ -959,6 +1040,28 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
                   ],
                 ),
                 const Spacer(),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: ClinicTheme.border),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  ),
+                  icon: const Icon(Icons.attach_file_rounded, size: 14, color: ClinicTheme.brandAccent),
+                  label: const Text('Upload / Scan File', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
+                  onPressed: () => _showUniversalDocumentUploaderDialog(context, sc),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ClinicTheme.brandAccent.withOpacity(0.15),
+                    foregroundColor: ClinicTheme.brandAccent,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  ),
+                  icon: const Icon(Icons.note_alt_outlined, size: 14),
+                  label: const Text('Familiar Paper View', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                  onPressed: () => _tabController.animateTo(3),
+                ),
+                const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
@@ -1011,8 +1114,8 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
                   text: 'Optometric Case History (OLD CARTS)',
                 ),
                 Tab(
-                  icon: Icon(Icons.document_scanner_outlined, size: 15),
-                  text: 'Paper Assessment Form Digitizer',
+                  icon: Icon(Icons.note_alt_outlined, size: 15),
+                  text: 'Familiar Clinic Paper Sheet (Digital Twin)',
                 ),
                 Tab(
                   icon: Icon(Icons.remove_red_eye_outlined, size: 15),
@@ -1034,7 +1137,7 @@ class _MasterScribeCockpitState extends State<_MasterScribeCockpit> with SingleT
                 _buildSoapTab(sc),
                 _buildTranscriptTab(sc),
                 _buildCaseHistoryTab(sc),
-                _buildAssessmentFormDigitizerTab(sc),
+                _buildFamiliarClinicPaperSheetTab(sc),
                 _buildOptometricFindingsTab(sc),
                 _buildEhrBridgeTab(sc),
               ],
@@ -1642,15 +1745,396 @@ ${sc.currentCorrection}''';
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TAB 4: Paper Assessment Form Digitizer (Custom Clinic Form OCR & Clone)
+  // TAB 4: Familiar Clinic Paper Sheet (Digital Twin) & Universal Uploader
   // ─────────────────────────────────────────────────────────────────────────
-  Widget _buildAssessmentFormDigitizerTab(_ClinicalScenario sc) {
+
+  /// Universal Clinical Document Uploader Dialog (Gemini Multimodal VLM)
+  void _showUniversalDocumentUploaderDialog(BuildContext context, _ClinicalScenario sc) {
+    String selectedCategory = 'Physical Paper Exam Sheet';
+    bool isProcessing = false;
+    bool hasExtracted = false;
+    String? loadedDocumentLabel;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: ClinicTheme.obsidianElevated,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: ClinicTheme.border),
+              ),
+              child: Container(
+                width: 760,
+                padding: const EdgeInsets.all(24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: ClinicTheme.brandAccentFaint,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.document_scanner_rounded, color: ClinicTheme.brandAccent, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Universal Clinical Document & File Uploader',
+                                      style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF10B981).withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text('Gemini Multimodal VLM', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'Upload physical clinical folder sheets, autorefractor slips, OCT scans, or visual field PDFs. Multimodal AI extracts all fields and populates your familiar clinic form.',
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: ClinicTheme.textMuted, size: 20),
+                            onPressed: () => Navigator.of(dialogCtx).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Document Category Selector
+                      Text('Select Document Type:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          'Physical Paper Exam Sheet',
+                          'Autorefractor / Keratometer Slip',
+                          'Humphrey Visual Field (HVF 24-2)',
+                          'OCT Macula / RNFL Scan',
+                          'External Doctor Referral / Rx',
+                        ].map((cat) {
+                          final isSelected = selectedCategory == cat;
+                          return ChoiceChip(
+                            label: Text(cat, style: TextStyle(fontSize: 11.5, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500)),
+                            selected: isSelected,
+                            selectedColor: ClinicTheme.brandAccent,
+                            backgroundColor: ClinicTheme.surfaceDark,
+                            labelStyle: TextStyle(color: isSelected ? Colors.black : Colors.white),
+                            onSelected: (val) {
+                              if (val) setDialogState(() => selectedCategory = cat);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Dropzone Box
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: ClinicTheme.surfaceDark,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: ClinicTheme.border, style: BorderStyle.solid),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.cloud_upload_outlined, size: 40, color: ClinicTheme.brandAccent.withOpacity(0.8)),
+                            const SizedBox(height: 10),
+                            Text(
+                              loadedDocumentLabel != null
+                                  ? 'Selected File: $loadedDocumentLabel'
+                                  : 'Drag and drop clinical scans / photos here, or browse files',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: loadedDocumentLabel != null ? ClinicTheme.brandAccent : Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Supports PDF, JPG, PNG, TIFF up to 25 MB • BIPA / HIPAA Privacy Guarded',
+                              style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textMuted, fontSize: 11),
+                            ),
+                            const SizedBox(height: 14),
+                            // Quick Load Sample Buttons
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    side: const BorderSide(color: ClinicTheme.border),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  ),
+                                  icon: const Icon(Icons.description_outlined, size: 14, color: ClinicTheme.brandAccent),
+                                  label: const Text('Load Scanned Paper Folder Form (Dr. Ada)', style: TextStyle(fontSize: 11)),
+                                  onPressed: () {
+                                    setDialogState(() {
+                                      loadedDocumentLabel = 'Dr_Ada_Exam_Sheet_${sc.mrn}.pdf (Scanned Paper Form)';
+                                      isProcessing = true;
+                                      hasExtracted = false;
+                                    });
+                                    Future.delayed(const Duration(milliseconds: 900), () {
+                                      if (dialogCtx.mounted) {
+                                        setDialogState(() {
+                                          isProcessing = false;
+                                          hasExtracted = true;
+                                        });
+                                      }
+                                    });
+                                  },
+                                ),
+                                OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    side: const BorderSide(color: ClinicTheme.border),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  ),
+                                  icon: const Icon(Icons.receipt_long_outlined, size: 14, color: Color(0xFF10B981)),
+                                  label: const Text('Load Autorefractor Slip (Canon RK-F2)', style: TextStyle(fontSize: 11)),
+                                  onPressed: () {
+                                    setDialogState(() {
+                                      loadedDocumentLabel = 'Canon_Autorefractor_Slip_${sc.mrn}.jpg';
+                                      isProcessing = true;
+                                      hasExtracted = false;
+                                    });
+                                    Future.delayed(const Duration(milliseconds: 900), () {
+                                      if (dialogCtx.mounted) {
+                                        setDialogState(() {
+                                          isProcessing = false;
+                                          hasExtracted = true;
+                                        });
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Processing Spinner or Extracted Preview
+                      if (isProcessing) ...[
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: ClinicTheme.surfaceDark,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: ClinicTheme.border),
+                          ),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2.5, color: ClinicTheme.brandAccent),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Gemini Multimodal VLM Processing...', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                                    Text('Parsing Case History, Retinoscopy, Slit Lamp, Tonometry IOP & Optic Nerve C/D Ratio...', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      if (hasExtracted) ...[
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF10B981).withOpacity(0.4)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '100% Geometry Matched · 28 Parameters Extracted Across All Form Sections',
+                                    style: GoogleFonts.plusJakartaSans(color: const Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  _buildExtractionPill('Demographics', '${sc.patientName} (${sc.ageGender})'),
+                                  _buildExtractionPill('Chief Complaint', sc.chiefComplaint),
+                                  _buildExtractionPill('Retinoscopy', 'OD ${sc.rxOd} · OS ${sc.rxOs}'),
+                                  _buildExtractionPill('Corrected VA', 'OD ${sc.vaOd} · OS ${sc.vaOs}'),
+                                  _buildExtractionPill('Goldmann IOP', 'OD ${sc.iopOd} · OS ${sc.iopOs}'),
+                                  _buildExtractionPill('Slit Lamp', 'TBUT: ${sc.tbut} · Cornea Clear OU'),
+                                  _buildExtractionPill('Optic Disc', 'OD C/D ${sc.cdRatioOd} · OS C/D ${sc.cdRatioOs}'),
+                                  _buildExtractionPill('Assessment', sc.assessment.split('\n').first),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Modal Action Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogCtx).pop(),
+                            child: const Text('Cancel', style: TextStyle(color: ClinicTheme.textSecondary)),
+                          ),
+                          const SizedBox(width: 10),
+                          FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: ClinicTheme.brandAccent,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                            icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
+                            label: const Text(
+                              'Auto-Populate Active Form & SOAP Chart',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            onPressed: () {
+                              // Auto-populate all familiar form fields from extracted data
+                              setState(() {
+                                _chiefComplaintController.text = sc.chiefComplaint;
+                                _vaDistanceOdController.text = sc.vaOd;
+                                _vaDistanceOsController.text = sc.vaOs;
+                                _vaNearController.text = 'N5 @ 40cm (${sc.add})';
+                                _retinoscopyOdController.text = '${sc.rxOd} (Neutral with +1.50 working dist)';
+                                _retinoscopyOsController.text = '${sc.rxOs} (Neutral with +1.50 working dist)';
+                                
+                                final odParts = sc.rxOd.split(' ');
+                                _rxSphereOdController.text = odParts.isNotEmpty ? odParts[0] : '-1.75';
+                                _rxCylOdController.text = odParts.length > 1 ? odParts[1] : '-0.75';
+                                _rxAxisOdController.text = odParts.length > 3 ? odParts[3] : '090';
+
+                                final osParts = sc.rxOs.split(' ');
+                                _rxSphereOsController.text = osParts.isNotEmpty ? osParts[0] : '-2.00';
+                                _rxCylOsController.text = osParts.length > 1 ? osParts[1] : '-1.25';
+                                _rxAxisOsController.text = osParts.length > 3 ? osParts[3] : '105';
+
+                                _rxAddController.text = sc.add;
+                                _iopOdController.text = sc.iopOd;
+                                _iopOsController.text = sc.iopOs;
+                                _slitLampController.text = 'Cornea: Clear OU · AC: Deep & Quiet · TBUT: ${sc.tbut} · Lens: OD ${sc.lensOd}, OS ${sc.lensOs}';
+                                _fundusCdController.text = 'OD C/D: ${sc.cdRatioOd} · OS C/D: ${sc.cdRatioOs} · Macula: Flat OU, intact foveal reflex';
+                                _assessmentPlanController.text = '${sc.assessment}\n\nPLAN:\n${sc.plan}';
+
+                                _formFluoresceinClear = true;
+                                _formTearBreakupAbnormal = sc.tbut.contains('Severe');
+                                _formMeibomianCapped = sc.name.contains('Dry Eye');
+                                _formMaculaFlat = true;
+                                _formVerticalNotch = sc.cdRatioOs.contains('Notch');
+                                _formDilatedOu = true;
+                              });
+
+                              Navigator.of(dialogCtx).pop();
+                              _tabController.animateTo(3);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Color(0xFF10B981),
+                                  content: Text('✓ Gemini Vision extracted 28 parameters: Active clinic form and SOAP chart auto-populated!'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildExtractionPill(String key, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: ClinicTheme.surfaceDark,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: ClinicTheme.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$key: ', style: const TextStyle(color: ClinicTheme.brandAccent, fontSize: 10.5, fontWeight: FontWeight.bold)),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 180),
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 10.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// TAB 4: Familiar Clinic Paper Sheet (Digital Twin)
+  Widget _buildFamiliarClinicPaperSheetTab(_ClinicalScenario sc) {
+    final templates = [
+      'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026',
+      'Metropolitan Eye Hospital · 4-Quadrant Clinical Folder Sheet',
+      'Pediatric & Binocular Vision Specialist Exam Sheet',
+      'Low Vision Rehabilitation & Functional Acuity Intake',
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner & Form Type Selector
+          // ── Template Switcher & Upload Bar ──────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -1666,7 +2150,7 @@ ${sc.currentCorrection}''';
                     color: ClinicTheme.brandAccentFaint,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.document_scanner_rounded, color: ClinicTheme.brandAccent, size: 24),
+                  child: const Icon(Icons.note_alt_outlined, color: ClinicTheme.brandAccent, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1676,302 +2160,530 @@ ${sc.currentCorrection}''';
                       Row(
                         children: [
                           Text(
-                            'Paper Assessment Form Digitizer (Zero-Loss Form Extraction)',
+                            'Clinic Form Template Switcher (Digital Twin)',
                             style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
                               color: const Color(0xFF10B981).withOpacity(0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text('AI Vision OCR 2026', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: const Text('Zero Retraining Friction', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Upload a phone photo or scan of your clinic\'s custom assessment form. GozVision parses all checkboxes, refraction matrices, and slit lamp diagrams into a live digital clone.',
+                        'Doctors work in their clinic\'s familiar physical folder layout. No workflow change required.',
                         style: GoogleFonts.plusJakartaSans(fontSize: 12, color: ClinicTheme.textSecondary),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
+                // Template Dropdown
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ClinicTheme.surfaceDark,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: ClinicTheme.border),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedClinicFormTemplate,
+                      dropdownColor: ClinicTheme.surfaceDark,
+                      icon: const Icon(Icons.arrow_drop_down, color: ClinicTheme.brandAccent),
+                      style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      items: templates.map((t) {
+                        return DropdownMenuItem<String>(
+                          value: t,
+                          child: Text(t),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _selectedClinicFormTemplate = val);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
                     backgroundColor: ClinicTheme.brandAccent,
                     foregroundColor: Colors.black,
                   ),
-                  icon: const Icon(Icons.add_a_photo_outlined, size: 16),
-                  label: const Text('Digitize New Paper Form', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('✓ Select form photo or PDF: GozVision AI Vision OCR ready.')),
-                    );
-                  },
+                  icon: const Icon(Icons.attach_file_rounded, size: 16),
+                  label: const Text('Upload Physical Form', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  onPressed: () => _showUniversalDocumentUploaderDialog(context, sc),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 18),
 
-          // Two-Column Workspace: Left = Scanned Paper Sheet Preview with Bounding Boxes; Right = Interactive Digital Form
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left Column: Physical Scanned Paper Form with AI Detected Bounding Boxes
-              Expanded(
-                flex: 5,
-                child: Container(
-                  padding: const EdgeInsets.all(18),
+          // ── The Familiar Optometric Paper Folder Sheet ────────────────────
+          Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: ClinicTheme.border),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Form Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _selectedClinicFormTemplate.split('·').first.toUpperCase().trim(),
+                          style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
+                        ),
+                        Text(
+                          'COMPREHENSIVE OPTOMETRIC CLINICAL RECORD · FOLDER ENCOUNTER FILE',
+                          style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.brandAccent, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'FORM CODE: ${_selectedClinicFormTemplate.contains('4-Quadrant') ? 'MEH-4Q-2026' : _selectedClinicFormTemplate.contains('Pediatric') ? 'PED-OPT-2026' : 'OD-REV-2026'}',
+                            style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textSecondary, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text('Attending OD: Dr. Ada Optometrist · Lic #OPT-48201', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
+                      ],
+                    ),
+                  ],
+                ),
+                const Divider(color: Color(0xFF334155), height: 24),
+
+                // Patient Demographics Block
+                Container(
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: ClinicTheme.border),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF475569)),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.image_outlined, size: 18, color: ClinicTheme.brandAccent),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Physical Paper Form Source (Detected Geometry)',
-                            style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Paper visual
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFCBD5E1)),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 3)),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('DR. ADA OPTOMETRY CARE · CLINICAL EXAM SHEET', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF0F172A), fontSize: 11, fontWeight: FontWeight.w800)),
-                                Text('FORM #OD-REV-2026', style: GoogleFonts.jetBrainsMono(color: const Color(0xFF64748B), fontSize: 10)),
-                              ],
-                            ),
-                            const Divider(color: Color(0xFFCBD5E1), height: 16),
-                            _buildOcrDetectedBox('PATIENT DEMOGRAPHICS BLOCK', 'Name: ${sc.patientName} · Age: ${sc.ageGender} · MRN: ${sc.mrn}', const Color(0xFF0284C7)),
-                            const SizedBox(height: 8),
-                            _buildOcrDetectedBox('REFRACTION MATRIX (OD/OS)', 'OD: ${sc.rxOd} (VA ${sc.vaOd}) · OS: ${sc.rxOs} (VA ${sc.vaOs}) · Add: ${sc.add}', const Color(0xFF10B981)),
-                            const SizedBox(height: 8),
-                            _buildOcrDetectedBox('GOLDMANN IOP TONOMETRY', 'Time: 10:42 AM · OD: ${sc.iopOd} · OS: ${sc.iopOs} (Elevated Dial Marker)', const Color(0xFFEF4444)),
-                            const SizedBox(height: 8),
-                            _buildOcrDetectedBox('ANTERIOR SLIT LAMP & CORNEA', 'Cornea: Clear OU · AC: Deep & Quiet · TBUT: ${sc.tbut}', const Color(0xFF8B5CF6)),
-                            const SizedBox(height: 8),
-                            _buildOcrDetectedBox('DILATED RETINA & OPTIC NERVE', 'OD C/D: ${sc.cdRatioOd} · OS C/D: ${sc.cdRatioOs} Vertical Notch · Macula: Flat OU', const Color(0xFFF59E0B)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF10B981)),
-                          const SizedBox(width: 6),
-                          Text('100% Geometry Matched · 24 Structured Data Fields Extracted', style: GoogleFonts.plusJakartaSans(color: const Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
+                      _buildHeaderBlockCell('PATIENT NAME', sc.patientName),
+                      _buildHeaderBlockCell('DOB / AGE / GENDER', '${sc.ageGender} · DOB: 1958-04-12'),
+                      _buildHeaderBlockCell('CHART / MRN', sc.mrn),
+                      _buildHeaderBlockCell('EXAM DATE', '2026-10-16'),
+                      _buildHeaderBlockCell('LANE / CLINIC', sc.examLane),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 18),
+                const SizedBox(height: 16),
 
-              // Right Column: Interactive Digital Form Replica
-              Expanded(
-                flex: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(18),
+                // Section 1: Chief Complaint & Case History
+                _buildPaperSectionHeader('1. CHIEF COMPLAINT & OPTOMETRIC CASE HISTORY'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _chiefComplaintController,
+                  maxLines: 2,
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF475569))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF475569))),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: ClinicTheme.brandAccent)),
+                    hintText: 'Enter patient chief complaint, onset, and duration...',
+                    hintStyle: const TextStyle(color: ClinicTheme.textMuted, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Section 2: Unaided & Habitual Visual Acuities
+                _buildPaperSectionHeader('2. VISUAL ACUITIES (UNAIDED & HABITUAL SPECTACLES)'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildPaperTextField('Distance VA OD (Right)', _vaDistanceOdController),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildPaperTextField('Distance VA OS (Left)', _vaDistanceOsController),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildPaperTextField('Near VA OU @ 40cm', _vaNearController),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Section 3: Preliminary & Binocular Vision
+                _buildPaperSectionHeader('3. PRELIMINARY & BINOCULAR TESTS'),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    _buildInteractiveCheckbox('PERRLA / RAPD Negative', _formRapdNegative, (v) => setState(() => _formRapdNegative = v!)),
+                    _buildInteractiveCheckbox('Motility SAFE (Full & Smooth)', _formMotilityFull, (v) => setState(() => _formMotilityFull = v!)),
+                    _buildInteractiveCheckbox('Cover Test: Orthophoria Dist & Near', true, (v) {}),
+                    _buildInteractiveCheckbox('Near Point of Convergence (NPC) 6cm', true, (v) {}),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Section 4: Objective Refraction (Retinoscopy & Autorefractor)
+                _buildPaperSectionHeader('4. OBJECTIVE REFRACTION (RETINOSCOPY & AUTOREFRACTOR)'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildPaperTextField('Retinoscopy OD (Gross / Net with working distance)', _retinoscopyOdController),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildPaperTextField('Retinoscopy OS (Gross / Net with working distance)', _retinoscopyOsController),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Section 5: Subjective Refraction & Best Corrected Acuity
+                _buildPaperSectionHeader('5. SUBJECTIVE MANIFEST REFRACTION GRID'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: ClinicTheme.cardBackground,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.4)),
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF475569)),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.touch_app_outlined, size: 18, color: ClinicTheme.brandAccent),
-                              const SizedBox(width: 8),
-                              Text('Interactive Digital Form Replica', style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: ClinicTheme.brandAccentFaint,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text('Live Editable', style: TextStyle(color: ClinicTheme.brandAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                          ),
+                          const SizedBox(width: 45, child: Text('EYE', style: TextStyle(color: ClinicTheme.textMuted, fontSize: 10.5, fontWeight: FontWeight.bold))),
+                          Expanded(child: Text('SPHERE', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.textMuted))),
+                          Expanded(child: Text('CYLINDER', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.textMuted))),
+                          Expanded(child: Text('AXIS', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.textMuted))),
+                          Expanded(child: Text('ADD', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.textMuted))),
+                          Expanded(child: Text('BCVA', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10.5, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold))),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const Divider(height: 12, color: Color(0xFF334155)),
+                      _buildRefractionEditableRow('OD', _rxSphereOdController, _rxCylOdController, _rxAxisOdController, _rxAddController, sc.vaOd),
+                      const SizedBox(height: 8),
+                      _buildRefractionEditableRow('OS', _rxSphereOsController, _rxCylOsController, _rxAxisOsController, _rxAddController, sc.vaOs),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
 
-                      // Interactive Checkbox Group Extracted from Form
-                      Text('Anterior & Posterior Segment Checklist:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 6,
-                        children: [
-                          _buildInteractiveCheckbox('Cornea Clear OU', _formFluoresceinClear, (v) => setState(() => _formFluoresceinClear = v!)),
-                          _buildInteractiveCheckbox('Abnormal TBUT (<10s)', _formTearBreakupAbnormal, (v) => setState(() => _formTearBreakupAbnormal = v!)),
-                          _buildInteractiveCheckbox('Meibomian Capping', _formMeibomianCapped, (v) => setState(() => _formMeibomianCapped = v!)),
-                          _buildInteractiveCheckbox('Macula Flat OU', _formMaculaFlat, (v) => setState(() => _formMaculaFlat = v!)),
-                          _buildInteractiveCheckbox('C/D Vertical Notch OS', _formVerticalNotch, (v) => setState(() => _formVerticalNotch = v!)),
-                          _buildInteractiveCheckbox('Dilated Exam Performed', _formDilatedOu, (v) => setState(() => _formDilatedOu = v!)),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
+                // Section 6: Slit Lamp Biomicroscopy (Anterior Segment)
+                _buildPaperSectionHeader('6. SLIT LAMP BIOMICROSCOPY (ANTERIOR SEGMENT)'),
+                const SizedBox(height: 8),
+                _buildPaperTextField('Anterior Segment Findings (Lids, Cornea, AC, Iris, Lens)', _slitLampController),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 6,
+                  children: [
+                    _buildInteractiveCheckbox('Cornea Clear OU', _formFluoresceinClear, (v) => setState(() => _formFluoresceinClear = v!)),
+                    _buildInteractiveCheckbox('Abnormal TBUT (<10s)', _formTearBreakupAbnormal, (v) => setState(() => _formTearBreakupAbnormal = v!)),
+                    _buildInteractiveCheckbox('Meibomian Gland Capping', _formMeibomianCapped, (v) => setState(() => _formMeibomianCapped = v!)),
+                    _buildInteractiveCheckbox('AC Deep & Quiet (Van Herick Gr 4)', true, (v) {}),
+                  ],
+                ),
+                const SizedBox(height: 14),
 
-                      // Interactive Refraction Table
-                      Text('Subjective Refraction Grid:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.all(10),
+                // Section 7: Tonometry / Intraocular Pressure (IOP)
+                _buildPaperSectionHeader('7. TONOMETRY (GOLDMANN APPLANATION)'),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildPaperTextField('IOP OD (mmHg @ 10:42 AM)', _iopOdController),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildPaperTextField('IOP OS (mmHg @ 10:42 AM)', _iopOsController),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: ClinicTheme.surfaceDark,
+                          color: const Color(0xFF1E293B),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: ClinicTheme.border),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const SizedBox(width: 40, child: Text('EYE', style: TextStyle(color: ClinicTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold))),
-                                Expanded(child: Text('SPHERE', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
-                                Expanded(child: Text('CYLINDER', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
-                                Expanded(child: Text('AXIS', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
-                                Expanded(child: Text('ADD', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
-                                Expanded(child: Text('DVA', textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.textMuted))),
-                              ],
-                            ),
-                            const Divider(height: 10, color: ClinicTheme.border),
-                            _buildRefractionTableRow('OD', '-1.75', '-0.75', '090', '+2.25', sc.vaOd),
-                            const SizedBox(height: 4),
-                            _buildRefractionTableRow('OS', '-2.00', '-1.25', '105', '+2.25', sc.vaOs),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Doctor Signature & Assessment Plan Block
-                      Text('Clinical Impression & Signature:', style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: ClinicTheme.surfaceDark,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: ClinicTheme.border),
+                          border: Border.all(color: const Color(0xFF475569)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(sc.assessment, style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: Colors.white, height: 1.35)),
-                            const Divider(height: 12, color: ClinicTheme.border),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Attending OD: Dr. Ada Optometrist, Lic #OPT-48201', style: GoogleFonts.jetBrainsMono(fontSize: 10, color: ClinicTheme.brandAccent)),
-                                Text('Electronically Verified via GozVision', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
-                              ],
-                            ),
+                            Text('PACHYMETRY CCT', style: GoogleFonts.jetBrainsMono(fontSize: 9.5, color: ClinicTheme.textMuted, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 3),
+                            Text('OD: ${sc.cctOd} · OS: ${sc.cctOs}', style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
 
-                      // Actions
+                // Section 8: Posterior Segment & Ophthalmoscopy
+                _buildPaperSectionHeader('8. DILATED POSTERIOR SEGMENT & OPHTHALMOSCOPY'),
+                const SizedBox(height: 8),
+                _buildPaperTextField('Optic Nerve C/D Ratio, Neuroretinal Rim & Retinal Vasculature', _fundusCdController),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 6,
+                  children: [
+                    _buildInteractiveCheckbox('Dilated Exam Performed OU', _formDilatedOu, (v) => setState(() => _formDilatedOu = v!)),
+                    _buildInteractiveCheckbox('Macula Flat OU (Intact Reflex)', _formMaculaFlat, (v) => setState(() => _formMaculaFlat = v!)),
+                    _buildInteractiveCheckbox('Vertical Notch OS', _formVerticalNotch, (v) => setState(() => _formVerticalNotch = v!)),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Section 9: Diagnostic Assessment & Management Plan
+                _buildPaperSectionHeader('9. DIAGNOSTIC ASSESSMENT & CLINICAL MANAGEMENT PLAN'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _assessmentPlanController,
+                  maxLines: 4,
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF475569))),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF475569))),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: ClinicTheme.brandAccent)),
+                    hintText: 'Enter clinical diagnoses, prescribed drops, and recall interval...',
+                    hintStyle: const TextStyle(color: ClinicTheme.textMuted, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Doctor Signature Line & Chart Verification
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF475569)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: ClinicTheme.brandAccent,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                              icon: const Icon(Icons.save_rounded, size: 16),
-                              label: const Text('Save Form to Chart', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('✓ Digital Assessment Form saved and linked to patient encounter chart!')),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: ClinicTheme.border),
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                            ),
-                            icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-                            label: const Text('Export PDF', style: TextStyle(fontSize: 12)),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('✓ Generating filled optical examination PDF...')),
-                              );
-                            },
-                          ),
+                          const Icon(Icons.verified_user_rounded, color: ClinicTheme.brandAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text('Signed by Dr. Ada Optometrist, Lic #OPT-48201', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
                         ],
                       ),
+                      Text('Electronically Stamped & Synced via GozVision Digital Twin', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
                     ],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 18),
+
+                // Bottom Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: ClinicTheme.brandAccent,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        icon: const Icon(Icons.save_rounded, size: 16),
+                        label: const Text('Save Form to Patient Encounter Chart', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('✓ Digital Twin Clinical Record saved and synced with SOAP note and EHR export!')),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: ClinicTheme.border),
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                      icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                      label: const Text('Export PDF Sheet', style: TextStyle(fontSize: 12)),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('✓ Exporting filled optometric clinical record sheet PDF...')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOcrDetectedBox(String category, String detectedText, Color color) {
+  Widget _buildPaperSectionHeader(String title) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.4)),
+        color: ClinicTheme.brandAccent.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(4),
+        border: Border(left: BorderSide(color: ClinicTheme.brandAccent, width: 3)),
       ),
+      child: Text(
+        title,
+        style: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.bold, color: ClinicTheme.brandAccent, letterSpacing: 0.5),
+      ),
+    );
+  }
+
+  Widget _buildHeaderBlockCell(String label, String value) {
+    return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-              const SizedBox(width: 6),
-              Text(category, style: TextStyle(color: color, fontSize: 9.5, fontWeight: FontWeight.bold)),
-            ],
-          ),
+          Text(label, style: GoogleFonts.jetBrainsMono(fontSize: 9, color: ClinicTheme.textMuted, fontWeight: FontWeight.bold)),
           const SizedBox(height: 2),
-          Text(detectedText, style: GoogleFonts.jetBrainsMono(color: const Color(0xFF1E293B), fontSize: 10.5, fontWeight: FontWeight.w600)),
+          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
+    );
+  }
+
+  Widget _buildPaperTextField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textSecondary, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 4),
+        TextField(
+          controller: controller,
+          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: const Color(0xFF1E293B),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF475569))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Color(0xFF475569))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: ClinicTheme.brandAccent)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRefractionEditableRow(String eye, TextEditingController sph, TextEditingController cyl, TextEditingController axis, TextEditingController add, String bcva) {
+    return Row(
+      children: [
+        SizedBox(width: 45, child: Text(eye, style: GoogleFonts.sora(color: ClinicTheme.brandAccent, fontSize: 13, fontWeight: FontWeight.bold))),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextField(
+              controller: sph,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF334155))),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextField(
+              controller: cyl,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF334155))),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextField(
+              controller: axis,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF334155))),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: TextField(
+              controller: add,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF334155))),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            bcva,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.jetBrainsMono(fontSize: 12, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1991,19 +2703,6 @@ ${sc.currentCorrection}''';
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 11.5)),
         ],
       ),
-    );
-  }
-
-  Widget _buildRefractionTableRow(String eye, String sph, String cyl, String axis, String add, String dva) {
-    return Row(
-      children: [
-        SizedBox(width: 40, child: Text(eye, style: GoogleFonts.sora(color: ClinicTheme.brandAccent, fontSize: 12, fontWeight: FontWeight.bold))),
-        Expanded(child: Text(sph, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
-        Expanded(child: Text(cyl, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
-        Expanded(child: Text(axis, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
-        Expanded(child: Text(add, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600))),
-        Expanded(child: Text(dva, textAlign: TextAlign.center, style: GoogleFonts.jetBrainsMono(fontSize: 11.5, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold))),
-      ],
     );
   }
 
