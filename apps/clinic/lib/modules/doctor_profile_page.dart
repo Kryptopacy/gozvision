@@ -28,7 +28,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   @override
   Widget build(BuildContext context) {
     final scope = context.watch<ClinicScope>();
-    final doctorName = scope.displayName.isNotEmpty ? scope.displayName : 'Dr. Ada Optometrist, O.D.';
+    final doctorName = scope.displayName.isNotEmpty ? scope.displayName : 'Dr. O.D. Adegoke, O.D.';
     final role = scope.role.isNotEmpty ? scope.role : 'Practitioner';
 
     return Scaffold(

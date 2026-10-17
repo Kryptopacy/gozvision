@@ -12,7 +12,7 @@ class ClinicScope extends ChangeNotifier {
   String clinicName = 'GozVision Demo Eye Clinic';
   String role = 'Practitioner';
   String email = 'practitioner@gozvision.demo';
-  String displayName = 'Dr. Ada Optometrist';
+  String displayName = 'Dr. O.D. Adegoke';
   bool resolved = true;
   String? error;
 
@@ -33,7 +33,7 @@ class ClinicScope extends ChangeNotifier {
   String get defaultFormTemplate {
     if (isNigeria) return 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
     if (isUK) return 'Metropolitan Eye Hospital · 4-Quadrant Clinical Folder Sheet';
-    if (isUS) return 'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026';
+    if (isUS) return 'Dr. O.D. Adegoke Optometry Care · Standard Clinical Form #OD-REV-2026';
     return 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
   }
 

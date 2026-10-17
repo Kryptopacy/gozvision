@@ -33,7 +33,7 @@ PASSWORD = "gozvision-demo"
 NOW = datetime.now(timezone.utc)
 
 USERS = {
-    "practitioner@gozvision.demo": ("Dr. Ada Optometrist", "Practitioner"),
+    "practitioner@gozvision.demo": ("Dr. O.D. Adegoke", "Practitioner"),
     "staff@gozvision.demo": ("Sam Front Desk", "Staff"),
     "caregiver@gozvision.demo": ("Nina Caregiver", "Caregiver"),
     "demo-patient@gozvision.demo": ("Maria Santos", "Patient"),

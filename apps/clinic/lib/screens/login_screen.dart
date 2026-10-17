@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       FilledButton.icon(
                         onPressed: _busy ? null : _demoLogin,
                         icon: const Icon(Icons.flash_on_rounded, size: 16),
-                        label: const Text('⚡ Instant Demo Access (Dr. Ada Optometrist)'),
+                        label: const Text('⚡ Instant Demo Access (Dr. O.D. Adegoke)'),
                         style: FilledButton.styleFrom(
                           backgroundColor: ClinicTheme.brandAccent,
                           foregroundColor: ClinicTheme.obsidian,
