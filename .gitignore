@@ -45,3 +45,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Test & Build Outputs
+dist/
+playwright_reports/

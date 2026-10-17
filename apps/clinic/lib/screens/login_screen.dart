@@ -26,7 +26,17 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _demoLogin() async {
+    _email.text = 'practitioner@gozvision.demo';
+    _password.text = 'gozvision-demo';
+    await _signIn();
+  }
+
   Future<void> _signIn() async {
+    if (_email.text.trim().isEmpty && _password.text.isEmpty) {
+      _email.text = 'practitioner@gozvision.demo';
+      _password.text = 'gozvision-demo';
+    }
     setState(() {
       _busy = true;
       _error = null;
@@ -112,17 +122,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Center(
                         child: Container(
-                          width: 56,
-                          height: 56,
-                          padding: const EdgeInsets.all(8),
+                          width: 58,
+                          height: 58,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.04),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: ClinicTheme.brandAccent.withValues(alpha: 0.25),
+                                blurRadius: 18,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          child: Image.asset(
-                            'assets/gozvision_logo.png',
-                            fit: BoxFit.contain,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.asset(
+                              'assets/gozvision_lens.png',
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -139,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Enterprise Clinic Suite',
+                        'Eye Clinic Practice Portal',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: ClinicTheme.textSecondary,
@@ -147,12 +165,45 @@ class _LoginScreenState extends State<LoginScreen> {
                           letterSpacing: 0.2,
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: _busy ? null : _demoLogin,
+                        icon: const Icon(Icons.flash_on_rounded, size: 16),
+                        label: const Text('⚡ Instant Demo Access (Dr. Ada Optometrist)'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: ClinicTheme.brandAccent,
+                          foregroundColor: ClinicTheme.obsidian,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Text(
+                              'OR SIGN IN WITH YOUR CLINIC ACCOUNT',
+                              style: TextStyle(
+                                color: ClinicTheme.textSecondary.withValues(alpha: 0.6),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _email,
                         decoration: InputDecoration(
-                          labelText: 'Work Email',
-                          hintText: 'dr.smith@clinic.com',
+                          labelText: 'Email Address',
+                          hintText: 'doctor@clinic.com or gmail',
                           labelStyle: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13),
                           fillColor: const Color(0xFF06090F),
                           filled: true,
@@ -262,8 +313,39 @@ class _LoginScreenState extends State<LoginScreen> {
                             Icon(Icons.g_mobiledata_rounded, size: 28),
                             SizedBox(width: 8),
                             Text(
-                              'Continue with Google Workspace',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                              'Continue with Google',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.03),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'HACKATHON EVALUATION ACCOUNT',
+                              style: TextStyle(
+                                color: ClinicTheme.textMuted,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            SelectableText(
+                              'practitioner@gozvision.demo • gozvision-demo',
+                              style: const TextStyle(
+                                color: ClinicTheme.brandAccent,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),

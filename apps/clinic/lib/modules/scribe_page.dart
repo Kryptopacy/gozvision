@@ -10,10 +10,10 @@ import '../core/clinic_theme.dart';
 import '../core/patient_utils.dart';
 import '../data/clinic_scope.dart';
 
-/// Exam Scribe — Ambient Clinical Documentation & Charting.
+/// Exam Scribe — Clinical Documentation & Charting.
 ///
 /// Tailored specifically for Eye Care & Optometry:
-/// - Real-time Ambient Audio Capture Controls (Mic selector, live recording timer, wave equalizer)
+/// - Real-time Exam Audio Capture Controls (Mic selector, live recording timer, wave equalizer)
 /// - Preset Clinical Scenario Loaders (Glaucoma, Dry Eye, Low Vision AMD, Refraction)
 /// - Two-column Master-Detail workspace (Active Encounter Queue + Patient Chart Workspace)
 /// - 4 High-Density Clinical Views:
@@ -212,7 +212,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     if (_isRecording) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('● Ambient Exam Room Capture Started via $_selectedMic'),
+          content: Text('● Exam Room Recording Started via $_selectedMic'),
           backgroundColor: const Color(0xFFEF4444),
           behavior: SnackBarBehavior.floating,
         ),
@@ -220,7 +220,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✓ Ambient Capture Complete — Scribe SOAP & Optometric Findings Generated.'),
+          content: Text('✓ Exam Recording Complete — Clinical Chart & Findings Generated.'),
           backgroundColor: ClinicTheme.brandAccentDim,
           behavior: SnackBarBehavior.floating,
         ),
@@ -262,7 +262,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header & Ambient Scribe Telemetry Control Bar ─────────────
+          // ── Header & Exam Scribe Control Bar ─────────────
           _buildHeaderWithTelemetry(),
           const SizedBox(height: 20),
 
@@ -335,7 +335,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                                   border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
                                 ),
                                 child: Text(
-                                  'Ambient Active',
+                                  'Recording Ready',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
@@ -461,7 +461,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            _isRecording ? 'LIVE AMBIENT CAPTURE (04:18)' : 'AMBIENT AUDIO BRIDGE READY',
+                            _isRecording ? 'LIVE EXAM RECORDING (04:18)' : 'EXAM AUDIO READY',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
@@ -647,7 +647,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                   },
                 ),
                 const SizedBox(width: 12),
-                // Live Ambient Record Button
+                // Live Exam Record Button
                 FilledButton.icon(
                   style: FilledButton.styleFrom(
                     backgroundColor: _isRecording ? const Color(0xFFEF4444) : ClinicTheme.brandAccent,
@@ -1511,7 +1511,7 @@ class _MasterScribeChartState extends State<_MasterScribeChart> with SingleTicke
                       Row(
                         children: [
                           Text(
-                            'Optometric Ambient Case History Engine',
+                            'Optometric Case History',
                             style: GoogleFonts.sora(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
@@ -1527,7 +1527,7 @@ class _MasterScribeChartState extends State<_MasterScribeChart> with SingleTicke
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Automatically parsed from ambient exam dialogue into standardized optometric complaint, history of present illness, and ocular risk categories.',
+                        'Automatically parsed from doctor-patient consultation into standardized optometric complaint, history of present illness, and ocular risk categories.',
                         style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 12),
                       ),
                     ],
@@ -2995,7 +2995,7 @@ FUNDUS: OD C/D ${sc.cdRatioOd} | OS C/D ${sc.cdRatioOs}. Macula flat OU.
 ${sc.assessment}
 ${sc.plan}
 
-ELECTRONIC SIGNATURE: Signed by Dr. Ada Optometrist, OD via GozVision Ambient Bridge.''';
+ELECTRONIC SIGNATURE: Signed by Dr. Ada Optometrist, OD via GozVision Scribe Bridge.''';
         break;
 
       case 'Eyefinity EHR':
@@ -3058,7 +3058,7 @@ ${sc.plan}
         "subject": { "display": "${sc.patientName}", "reference": "Patient/${sc.mrn}" },
         "author": [{ "display": "Dr. Ada Optometrist, OD" }],
         "date": "${DateTime.now().toUtc().toIso8601String()}",
-        "description": "GozVision Verified Ambient Scribe Chart"
+        "description": "GozVision Verified Clinical Scribe Chart"
       }
     },
     {
@@ -3174,7 +3174,7 @@ ${sc.assessment}
 [PLAN]
 ${sc.plan}
 
-Electronically verified via GozVision Ambient Scribe Studio.''';
+Electronically verified via GozVision Clinical Scribe.''';
 
     Clipboard.setData(ClipboardData(text: note));
     ScaffoldMessenger.of(context).showSnackBar(

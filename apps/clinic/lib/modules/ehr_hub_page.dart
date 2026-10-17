@@ -384,7 +384,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
           protocol: 'FHIR R4 & HL7 v2.5.1 (SMART on FHIR)',
           endpoint: 'https://fhir.epic.myclinic.org/api/FHIR/R4',
           description:
-              'Bi-directional encounter sync. Pulls patient schedule and past refractions; pushes ambient Scribe SOAP notes and discrete tonometry observations.',
+              'Bi-directional encounter sync. Pulls patient schedule and past refractions; pushes Clinical Scribe notes and discrete tonometry observations.',
           lastSync: '12 seconds ago',
           latency: '34 ms',
           features: const ['SmartText Auto-Insertion', 'Discrete IOP (LOINC 55284-4)', 'Cosmos Clinical Analytics'],
@@ -869,7 +869,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       "attachment": {
         "contentType": "text/plain",
         "language": "en-US",
-        "title": "GozVision Verified Ambient Scribe SOAP Note",
+        "title": "GozVision Verified Clinical Scribe Note",
         "data": "=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===\\nPatient: Eleanor Vance\\nAssessment: Primary Open-Angle Glaucoma Suspect (OS), Dry Eye Syndrome\\nPlan: Latanoprost 0.005% QHS OS, Systane Complete PF QID OU..."
       }
     }

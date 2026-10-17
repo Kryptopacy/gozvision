@@ -370,7 +370,7 @@ class _DeveloperConsolePageState extends State<DeveloperConsolePage> with Single
               // Setting 4: Gemini Multimodal Model Tier
               _buildConfigRow(
                 title: 'Gemini Multimodal Vision Engine',
-                description: 'Active Gemini model tier driving clinical ambient scribe and zero-UI vision copilot.',
+                description: 'Active model tier driving clinical scribe charting and patient vision companion.',
                 control: DropdownButton<String>(
                   value: geminiModel,
                   dropdownColor: ClinicTheme.cardBackground,
@@ -595,7 +595,7 @@ class _DeveloperConsolePageState extends State<DeveloperConsolePage> with Single
               const SizedBox(height: 20),
               const Text('TOP AGENT TOOL INVOCATIONS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
               const SizedBox(height: 8),
-              _buildToolInvocationRow('draft_chart (Ambient Clinical Scribe)', 64, 0.98),
+              _buildToolInvocationRow('draft_chart (Clinical Exam Scribe)', 64, 0.98),
               _buildToolInvocationRow('search_optometry_guidelines (Verified RAG)', 128, 0.95),
               _buildToolInvocationRow('create_product_checkout (Bachs Session)', 32, 1.0),
               _buildToolInvocationRow('send_sos_alert (Emergency Telemetry)', 3, 1.0),

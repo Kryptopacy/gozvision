@@ -268,7 +268,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('⚡ Device sync received: Solos AirGo 3 (Battery 88%, Signal Good, Ambient Lux 480lx)'),
+                          content: Text('⚡ Device sync received: Solos AirGo 3 (Battery 88%, Signal Good, Room Lux 480lx)'),
                           backgroundColor: ClinicTheme.brandAccentDim,
                           behavior: SnackBarBehavior.floating,
                         ),

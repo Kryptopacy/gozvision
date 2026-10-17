@@ -8,12 +8,12 @@ typedef ClinicRows = List<Map<String, dynamic>>;
 /// The signed-in clinic member's tenancy: which clinic they belong to and
 /// what role they hold. Everything in the suite queries through this scope.
 class ClinicScope extends ChangeNotifier {
-  String? clinicId;
+  String? clinicId = 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
   String clinicName = 'GozVision Demo Eye Clinic';
-  String role = '';
-  String email = '';
-  String displayName = '';
-  bool resolved = false;
+  String role = 'Practitioner';
+  String email = 'practitioner@gozvision.demo';
+  String displayName = 'Dr. Ada Optometrist';
+  bool resolved = true;
   String? error;
 
   String country = 'Nigeria'; // Default: Nigeria (can be set to Ghana, Kenya, South Africa, UK, USA, etc.)

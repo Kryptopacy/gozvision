@@ -9,7 +9,7 @@ import '../data/clinic_scope.dart';
 ///
 /// Tracks the core continuum of care:
 /// 1. Low vision referral conversion and device adherence (preventing the 29% abandonment cliff).
-/// 2. Clinical productivity gains (ambient scribe documentation time saved).
+/// 2. Clinical productivity gains (clinical scribe documentation time saved).
 /// 3. Practice scheduling efficiency (no-show recovery via automated conversational recall).
 class InsightsPage extends StatefulWidget {
   const InsightsPage({super.key});
@@ -67,7 +67,7 @@ class _InsightsPageState extends State<InsightsPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Clinical adherence signals, operational ROI, ambient scribe savings, and low-vision rehabilitation outcomes.',
+                      'Clinical adherence signals, operational ROI, clinical scribe savings, and low-vision rehabilitation outcomes.',
                       style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textSecondary, fontSize: 13),
                     ),
                   ],

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>GozVision — Eyecare Practice Platform & Assistive Vision Companion</title>
-<meta name="description" content="Ambient clinical scribe charting, automated recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients. Built for modern eye clinics." />
+<meta name="description" content="Clinical exam scribe, automated patient recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients. Built for modern eye clinics." />
 <meta name="theme-color" content="#08090C" />
 
 <!-- Favicons & App Icons (Official GozVision Navbar Squircle) -->
@@ -21,7 +21,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://gozvision.app/" />
 <meta property="og:title" content="GozVision — Practice Management & Assistive Vision Platform" />
-<meta property="og:description" content="Ambient clinical scribe charting, automated recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients." />
+<meta property="og:description" content="Clinical exam scribe, automated patient recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients." />
 <meta property="og:image" content="/assets/og_image.png" />
 <meta property="og:image:secure_url" content="/assets/og_image.png" />
 <meta property="og:image:type" content="image/png" />
@@ -34,7 +34,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content="https://gozvision.app/" />
 <meta name="twitter:title" content="GozVision — Practice Management & Assistive Vision Platform" />
-<meta name="twitter:description" content="Ambient clinical scribe charting, automated recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients." />
+<meta name="twitter:description" content="Clinical exam scribe, automated patient recall, low-vision adherence tracking, and Goz — the voice-guided visual companion for patients." />
 <meta name="twitter:image" content="/assets/og_image.png" />
 <meta name="twitter:image:alt" content="GozVision — Practice Management & Assistive Vision Platform" />
 
@@ -83,7 +83,7 @@
     overflow-x: hidden;
   }
 
-  /* Architectural Grid & Ambient Vignette */
+  /* Architectural Grid & Atmospheric Vignette */
   .bg-grid {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -243,7 +243,7 @@
     50% { transform: scale(1.05) translateY(-6px); }
     100% { transform: scale(1) translateY(0); }
   }
-  .hero-ambient-glow {
+  .hero-backdrop-glow {
     position: absolute;
     top: 25%;
     left: 50%;
@@ -882,6 +882,394 @@
     display: flex; align-items: center; justify-content: space-between;
   }
 
+  /* Editorial Showcase - Modules Architecture */
+  .platform-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+  .pillar-block {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .pillar-header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 16px;
+  }
+  .pillar-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    background: var(--accent-faint);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+  }
+  .pillar-title {
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin: 0;
+  }
+  .pillar-desc {
+    color: var(--ink-secondary);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* Scribe Flagship Stage (Split Consultation-to-Chart) */
+  .scribe-flagship {
+    background: var(--panel-glass);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px var(--accent-glow);
+    overflow: hidden;
+  }
+  @media (max-width: 980px) {
+    .scribe-flagship { grid-template-columns: 1fr; }
+  }
+
+  /* Consultation Stream (Left) */
+  .consultation-pane {
+    padding: 30px;
+    background: rgba(10, 12, 16, 0.7);
+    border-right: 1px solid var(--panel-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  @media (max-width: 980px) {
+    .consultation-pane { border-right: none; border-bottom: 1px solid var(--panel-border); padding: 22px; }
+  }
+  .consultation-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .live-rec-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .rec-pulse-dot {
+    width: 7px;
+    height: 7px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: recPulseAnim 1.2s infinite ease-in-out;
+  }
+  @keyframes recPulseAnim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .transcript-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .transcript-bubble {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+  }
+  .transcript-bubble.doctor {
+    border-left: 3px solid var(--accent);
+  }
+  .transcript-bubble.patient {
+    border-left: 3px solid #10b981;
+  }
+  .speaker-line {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .transcript-bubble.doctor .speaker-line { color: var(--accent); }
+  .transcript-bubble.patient .speaker-line { color: #34d399; }
+  .timestamp-tag {
+    font-size: 10px;
+    color: var(--ink-muted);
+  }
+  .speaker-quote {
+    font-size: 13.5px;
+    color: #e2e8f0;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .consultation-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    flex-wrap: wrap;
+  }
+
+  /* Clinical Chart Pane (Right) */
+  .chart-pane {
+    padding: 30px;
+    background: var(--obsidian-elevated);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  @media (max-width: 980px) {
+    .chart-pane { padding: 22px; }
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .chart-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .chart-category-tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .chart-headline {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+  }
+  .chart-body-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chart-block {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .chart-block-title {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-data-pair-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (max-width: 580px) {
+    .chart-data-pair-grid { grid-template-columns: 1fr; }
+  }
+  .chart-data-cell {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .cell-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+  }
+  .cell-value {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 2px;
+  }
+  .chart-snippet-text {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    line-height: 1.45;
+    margin: 0;
+  }
+  .chart-export-strip {
+    padding-top: 14px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .export-pills {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .export-pill {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  /* Editorial Triad Cards */
+  .editorial-triad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 960px) {
+    .editorial-triad { grid-template-columns: 1fr; }
+  }
+  .editorial-card {
+    background: var(--panel-glass);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: 26px;
+    backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .editorial-card:hover {
+    border-color: var(--panel-border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow);
+  }
+  .editorial-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .editorial-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent-faint);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+  }
+  .editorial-card h3 {
+    font-size: 18.5px;
+    font-weight: 800;
+    margin: 12px 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .editorial-card p {
+    color: var(--ink-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .editorial-footer {
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Hardware Ribbon */
+  .hardware-ribbon {
+    background: rgba(14, 17, 23, 0.85);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .hardware-label {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hardware-pills {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hw-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+  }
+
   /* Interactive ROI Calculator */
   .roi-calculator-box {
     background: var(--panel-glass);
@@ -1086,7 +1474,7 @@
   <header class="hero" id="heroSection">
     <div class="hero-bg-backdrop">
       <div class="hero-bg-image"></div>
-      <div class="hero-ambient-glow"></div>
+      <div class="hero-backdrop-glow"></div>
       <canvas id="heroCanvas" class="hero-canvas"></canvas>
       <div class="hero-bg-gradient"></div>
     </div>
@@ -1104,7 +1492,7 @@
         </h1>
       </div>
       <p class="hero-desc">
-        Built by eye care clinicians. Ambient clinical scribe charting, automated recall, and Goz — the voice-guided visual companion patients use at home on smart glasses and mobile.
+        Built by eye care clinicians. Clinical exam scribe charting, automated patient recall, and Goz — the voice-guided visual companion patients use at home on smart glasses and mobile.
       </p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="/clinic">
@@ -1291,202 +1679,321 @@
     </div>
   </section>
 
-  <!-- Platform Modules (Bento Grid) -->
+  <!-- Platform Modules (Modern Two-Pillar Editorial Showcase) -->
   <section id="modules">
     <div class="wrap">
       <div class="section-intro">
         <span class="section-tag">Clinical Suite & Patient Platform</span>
-        <h2 class="section-title">Built for Real Clinical Care</h2>
+        <h2 class="section-title">Engineered for High-Volume Eye Clinics</h2>
         <p class="section-sub">
-          Everything your practice needs to examine patients, document findings, and keep low-vision patients safe at home.
+          Documentation that finishes before the patient stands up, automated recall that stops churn, and wearable visual guidance that works anywhere.
         </p>
       </div>
 
-      <div class="bento-grid">
-        <!-- Card 1: Ambient Scribe -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">Practice Wide · Exam Documentation</span>
-          <div class="card-icon">✎</div>
-          <div>
-            <h3>Ambient Exam Scribe</h3>
-            <p>
-              Listens during the patient consultation and automatically writes up a complete, structured clinical SOAP note in real time. Doctors spend their time looking at the patient's eyes instead of typing into a computer screen.
+      <div class="platform-showcase">
+        <!-- Pillar 1: Practice Suite (For Eye Care Providers) -->
+        <div class="pillar-block">
+          <div class="pillar-header-row">
+            <div>
+              <span class="pillar-badge">Practice Suite</span>
+              <h3 class="pillar-title">Clinical Exam Scribe & Lane Efficiency</h3>
+            </div>
+            <p class="pillar-desc">
+              Listens during the patient consultation. Generates verified optometric SOAP notes in real time.
             </p>
           </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">✓ 1-Click Copy to Any EHR</span>
-            <a href="/clinic" class="btn btn-ghost btn-sm">Try Scribe Demo →</a>
+
+          <!-- Flagship Split Consultation-to-Chart Stage -->
+          <div class="scribe-flagship">
+            <!-- Left Pane: Live Optometric Consultation Feed -->
+            <div class="consultation-pane">
+              <div>
+                <div class="consultation-top">
+                  <div class="live-rec-badge">
+                    <span class="rec-pulse-dot"></span>
+                    Live Exam Audio Stream
+                  </div>
+                  <div class="audio-waveform-bars playing" style="margin-bottom:0;">
+                    <div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div>
+                  </div>
+                  <span style="font-family:var(--font-mono);font-size:11px;color:var(--ink-secondary);">Lane 02 · Dr. Ada, OD</span>
+                </div>
+
+                <div class="transcript-stream" style="margin-top:16px;">
+                  <!-- Doctor -->
+                  <div class="transcript-bubble doctor">
+                    <div class="speaker-line">
+                      <span>Dr. Ada, OD</span>
+                      <span class="timestamp-tag">10:14 AM</span>
+                    </div>
+                    <p class="speaker-quote">
+                      "Eleanor, welcome back. How have your eyes felt with the latanoprost drops over the last two months?"
+                    </p>
+                  </div>
+
+                  <!-- Patient -->
+                  <div class="transcript-bubble patient">
+                    <div class="speaker-line">
+                      <span>Eleanor Vance (68)</span>
+                      <span class="timestamp-tag">10:14 AM</span>
+                    </div>
+                    <p class="speaker-quote">
+                      "The morning burning is gone, doctor. But when I step outside into the Lagos sun around midday, the glare is still blinding."
+                    </p>
+                  </div>
+
+                  <!-- Doctor -->
+                  <div class="transcript-bubble doctor">
+                    <div class="speaker-line">
+                      <span>Dr. Ada, OD</span>
+                      <span class="timestamp-tag">10:15 AM</span>
+                    </div>
+                    <p class="speaker-quote">
+                      "Let's check your acuities. Reading chart shows 20/25 right, 20/20 left. Tonometry measures 16 mmHg right, 17 mmHg left—pressure is very well controlled. I'll maintain your drops, and prescribe amber contrast lenses for outdoor glare."
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="consultation-footer">
+                <span>Transcription Engine: On-Device · Latency: 180ms</span>
+                <a href="/clinic" class="btn btn-ghost btn-sm">Try Live Scribe in Clinic Suite →</a>
+              </div>
+            </div>
+
+            <!-- Right Pane: Structured Optometric SOAP Chart -->
+            <div class="chart-pane">
+              <div>
+                <div class="chart-header">
+                  <div class="chart-header-left">
+                    <span class="chart-category-tag">Verified Optometric Chart</span>
+                    <h4 class="chart-headline">Automated SOAP & Findings</h4>
+                  </div>
+                  <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText('OPTOMETRIC EXAM NOTE\nPatient: Eleanor Vance (68)\nVisual Acuity: OD 20/25 | OS 20/20\nIOP: OD 16 mmHg | OS 17 mmHg\nPlan: Continue Latanoprost 0.005%, Dispense amber UV400 lenses.');alert('Optometric SOAP note copied to clipboard!');">
+                    Copy Chart Note
+                  </button>
+                </div>
+
+                <div class="chart-body-flow" style="margin-top:14px;">
+                  <!-- Subjective -->
+                  <div class="chart-block">
+                    <div class="chart-block-title">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                      Subjective History
+                    </div>
+                    <p class="chart-snippet-text">
+                      68yo female follow-up for POAG. Adherent to latanoprost 0.005% QHS. Morning discomfort resolved. Persistent outdoor glare/photophobia under midday sunlight.
+                    </p>
+                  </div>
+
+                  <!-- Objective -->
+                  <div class="chart-block">
+                    <div class="chart-block-title">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path></svg>
+                      Optometric Lane Measurements
+                    </div>
+                    <div class="chart-data-pair-grid">
+                      <div class="chart-data-cell">
+                        <div class="cell-label">Visual Acuity (Corrected)</div>
+                        <div class="cell-value">OD 20/25 · OS 20/20</div>
+                      </div>
+                      <div class="chart-data-cell">
+                        <div class="cell-label">Goldmann Tonometry (IOP)</div>
+                        <div class="cell-value">OD 16 · OS 17 mmHg</div>
+                      </div>
+                      <div class="chart-data-cell">
+                        <div class="cell-label">Anterior Segment</div>
+                        <div class="cell-value">Deep & Quiet OU</div>
+                      </div>
+                      <div class="chart-data-cell">
+                        <div class="cell-label">Cup-to-Disc Ratio</div>
+                        <div class="cell-value">OD 0.65 · OS 0.60</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Assessment & Plan -->
+                  <div class="chart-block">
+                    <div class="chart-block-title">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                      Assessment & Plan
+                    </div>
+                    <p class="chart-snippet-text">
+                      <strong>1. POAG (ICD-10 H40.1112):</strong> Pressure controlled. Continue Latanoprost 0.005% 1 gtt OU QHS.<br>
+                      <strong>2. Photophobia (ICD-10 H53.149):</strong> Dispense UV400 amber contrast lenses. 3-month IOP review booked with WhatsApp reminder.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-export-strip">
+                <span style="font-family:var(--font-mono);font-size:11px;color:var(--ink-secondary);">1-Click Direct Sync:</span>
+                <div class="export-pills">
+                  <span class="export-pill">Epic Systems</span>
+                  <span class="export-pill">Eyefinity EHR</span>
+                  <span class="export-pill">RevolutionEHR</span>
+                  <span class="export-pill">ModMed EMA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Practice Operational Pillar Cards -->
+          <div class="editorial-triad">
+            <!-- Card 1: Paper Form Digitizer -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                  </div>
+                  <span class="card-tag">Zero Retraining</span>
+                </div>
+                <h3>Paper Form Digitizer</h3>
+                <p>
+                  Snap a photo of your clinic's familiar paper case sheet, refraction slip, or NOA / ODORBN intake card. Goz converts it into structured digital records matching your existing layout instantly.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>NOA / ODORBN Layout Support</span>
+                <a href="/clinic" class="btn btn-ghost btn-sm">Upload Form →</a>
+              </div>
+            </div>
+
+            <!-- Card 2: Automated Patient Recalls & Scheduling -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  </div>
+                  <span class="card-tag">Practice Retention</span>
+                </div>
+                <h3>Automated Patient Recall</h3>
+                <p>
+                  Stops patient drop-off after cataract surgery, glaucoma pressure reviews, or annual diabetic retinopathy checks. Delivers direct WhatsApp and SMS reminders with 1-tap booking confirmations.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>84% Follow-Up Compliance</span>
+                <a href="/clinic" class="btn btn-ghost btn-sm">Configure Recalls →</a>
+              </div>
+            </div>
+
+            <!-- Card 3: Optical Storefront & POS -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  </div>
+                  <span class="card-tag">Dispensary Revenue</span>
+                </div>
+                <h3>Dispensary & Reception POS</h3>
+                <p>
+                  Sell frames, prescription lenses, and low-vision aids with instant card tap, cash entry, and direct bank payouts via Bachs. Includes printable waiting-room QR stands for quick checkout.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>Direct Bank Payouts · Instant Receipts</span>
+                <a href="/clinic" class="btn btn-ghost btn-sm">View Storefront →</a>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Card 2: Paper Assessment Form Digitizer -->
-        <div class="bento-card">
-          <span class="card-tag">Paper to Digital</span>
-          <div class="card-icon">📄</div>
-          <div>
-            <h3>Paper Form Digitizer</h3>
-            <p>
-              Snap a photo or scan your clinic's familiar paper intake forms. Goz automatically turns them into interactive digital records matching your existing layout with zero re-typing.
+        <!-- Pillar 2: Everyday Visual Autonomy (For Low-Vision Patients & Families) -->
+        <div class="pillar-block">
+          <div class="pillar-header-row">
+            <div>
+              <span class="pillar-badge">Patient Autonomy</span>
+              <h3 class="pillar-title">Wearable Guidance for Everyday Living</h3>
+            </div>
+            <p class="pillar-desc">
+              Runs directly on smart glasses and smartphones to keep patients confident and independent.
             </p>
           </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Zero Retraining Required</span>
-          </div>
-        </div>
 
-        <!-- Card 3: Dedicated EHR Bridge -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">Certified Interoperability</span>
-          <div class="card-icon">🔗</div>
-          <div>
-            <h3>EHR & Practice Bridge</h3>
-            <p>
-              Connects directly with major eye care EHR platforms (Epic Systems, Eyefinity EHR, RevolutionEHR, ModMed EMA). Export exam notes, visual acuities, and eye pressure readings with one click.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Epic · Eyefinity · RevolutionEHR · ModMed</span>
-            <a href="/clinic" class="btn btn-ghost btn-sm">Explore EHR Hub →</a>
-          </div>
-        </div>
+          <!-- 3 Autonomy Cards -->
+          <div class="editorial-triad">
+            <!-- Card 1: Floor Elevation & Steps -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"></polygon><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  </div>
+                  <span class="card-tag">Fall Prevention</span>
+                </div>
+                <h3>Elevation Drops & Thresholds</h3>
+                <p>
+                  Detects unpainted floor threshold steps, curb drops, and floor level changes in 40ms, alerting macular degeneration and glaucoma patients through bone-conduction frames before a stumble.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>40ms On-Device Edge Detection</span>
+                <a href="#simulator" class="btn btn-ghost btn-sm">Test in Simulator ↑</a>
+              </div>
+            </div>
 
-        <!-- Card 4: Insurance & Reimbursement -->
-        <div class="bento-card">
-          <span class="card-tag">Revenue & Reimbursement</span>
-          <div class="card-icon">📊</div>
-          <div>
-            <h3>HMO & Insurance Claims</h3>
-            <p>
-              Streamlines Nigerian HMO pre-authorizations (Reliance, AXA Mansard, Hygeia, Ilera Eko), diaspora family remittances via Bachs, and international remote monitoring claims without paperwork headaches.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Automated Pre-Auth & Claims</span>
-          </div>
-        </div>
+            <!-- Card 2: Eye Drop Verification -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                  </div>
+                  <span class="card-tag">Medication Safety</span>
+                </div>
+                <h3>Eye Drop Bottle Verification</h3>
+                <p>
+                  Patients hold their medication bottle up to the frame or phone camera. Goz instantly announces the drug name, dosage eye, and schedule out loud to prevent wrong-bottle medication mix-ups.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>Spoken Guidance in Dialect & English</span>
+                <a href="/patient" class="btn btn-ghost btn-sm">Open Patient App →</a>
+              </div>
+            </div>
 
-        <!-- Card 5: Optical Storefront, Walk-In POS & QR Signage -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">Optical Retail & Dispensary</span>
-          <div class="card-icon">🛍</div>
-          <div>
-            <h3>Optical Dispensary & Reception POS</h3>
-            <p>
-              Sell frames, prescription lenses, and low-vision aids with instant card tap, cash entry, and direct bank payouts right from reception. Includes printable QR stand templates for waiting room checkout.
-            </p>
+            <!-- Card 3: Care Circle & Emergency SOS -->
+            <div class="editorial-card">
+              <div>
+                <div class="editorial-card-top">
+                  <div class="editorial-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  </div>
+                  <span class="card-tag">Family Peace of Mind</span>
+                </div>
+                <h3>Care Circle & Instant SOS</h3>
+                <p>
+                  Keeps children, caregivers, and eye clinics informed. If a patient feels disoriented or needs help, a single long-press sends immediate GPS coordinates and live audio to designated contacts.
+                </p>
+              </div>
+              <div class="editorial-footer">
+                <span>SMS, WhatsApp & Clinic Dispatch</span>
+                <a href="/patient" class="btn btn-ghost btn-sm">Setup Care Circle →</a>
+              </div>
+            </div>
           </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Direct Bank Payouts · Reception POS</span>
-            <a href="/clinic" class="btn btn-ghost btn-sm">Launch Storefront →</a>
-          </div>
-        </div>
 
-        <!-- Card 6: Patient Privacy -->
-        <div class="bento-card">
-          <span class="card-tag">100% Patient Privacy</span>
-          <div class="card-icon">🔒</div>
-          <div>
-            <h3>Complete Offline Privacy Mode</h3>
-            <p>
-              Audio transcription and vision processing can run completely offline on your clinic computer. Zero patient voice recordings or camera feeds ever leave the exam room.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Zero Network Egress Option</span>
-          </div>
-        </div>
-
-        <!-- Card 7: Low Vision Care -->
-        <div class="bento-card">
-          <span class="card-tag">Specialty Care & Follow-Up</span>
-          <div class="card-icon">◎</div>
-          <div>
-            <h3>Low Vision Care & Adherence</h3>
-            <p>
-              Prescribe smart glasses, electronic magnifiers, and assistive aids. Automatically alerts your team if a patient stops using their prescribed device so you can follow up and help.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Automated Patient Follow-up</span>
-            <a href="/clinic" class="btn btn-ghost btn-sm">Access Clinic Hub →</a>
-          </div>
-        </div>
-
-        <!-- Card 8: Vision & Contrast Guidance (Large, Col 2) -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">On-Device Visual Accessibility</span>
-          <div class="card-icon">⚡</div>
-          <div>
-            <h3>Real-Time Vision & Contrast Guidance</h3>
-            <p>
-              Processes live video on the patient's device without cloud delays: highlights floor steps and elevation drops for macular degeneration patients, reduces blinding glare for cataract and photophobia cases, and instantly locks onto medication labels to read them aloud.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Instant On-Device Processing</span>
-            <a href="#simulator" class="btn btn-ghost btn-sm">Test Simulator Above ↑</a>
-          </div>
-        </div>
-
-        <!-- Card 9: Smart Glasses Bridge -->
-        <div class="bento-card">
-          <span class="card-tag">Wearables & Peripherals</span>
-          <div class="card-icon">👓</div>
-          <div>
-            <h3>Smart Glasses & Audio Frames Bridge</h3>
-            <p>
-              Pre-integrated with leading smart glasses including Solos AirGo 3, Even Realities G1, Ray-Ban Meta, and Rokid—monitoring battery life, frame stability, and clear audio guidance in real time.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Bluetooth LE & Audio Live Streaming</span>
-          </div>
-        </div>
-
-        <!-- Card 10: Patient Companion & Caregiver Alerts (Large, Col 2) -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">Patient Independence & Care Circle</span>
-          <div class="card-icon">💬</div>
-          <div>
-            <h3>Patient Companion & Caregiver Alerts</h3>
-            <p>
-              Connects patients directly with their clinic: switches between Clinic Mode (view appointments, daily drop reminders, doctor summaries) and Daily Living Mode (spoken scene descriptions, high-contrast controls). Caregivers and clinic staff stay connected with one-tap emergency SOS alerts.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Works Offline · Secure & Private</span>
-            <a href="/patient" class="btn btn-ghost btn-sm">Open Patient App →</a>
-          </div>
-        </div>
-
-        <!-- Card 11: Front Desk & Automated Recall -->
-        <div class="bento-card">
-          <span class="card-tag">Practice Growth · Retention</span>
-          <div class="card-icon">🗓</div>
-          <div>
-            <h3>Front Desk & Automated Recall</h3>
-            <p>
-              Reduces clinic no-shows and brings patients back for routine care. Automatically messages patients due for annual eye exams, diabetic retinopathy checks, and glaucoma pressure checks with easy WhatsApp and SMS booking.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-secondary)">Automated Recall & Scheduling</span>
-          </div>
-        </div>
-
-        <!-- Card 12: Point-of-Care Clinical Guidelines (Large, Col 2) -->
-        <div class="bento-card bento-col-2">
-          <span class="card-tag">Evidence-Based Medicine</span>
-          <div class="card-icon">⚕</div>
-          <div>
-            <h3>Point-of-Care Clinical Guidelines</h3>
-            <p>
-              Instant, at-the-lane clinical reference grounded in American Academy of Ophthalmology (AAO) Preferred Practice Patterns, AOA Guidelines, and TFOS DEWS II dry eye protocols. Quickly verify medication dosing, treatment ladders, and diagnostic criteria during consultations.
-            </p>
-          </div>
-          <div class="bento-card-footer">
-            <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">Verified Clinical Guidelines</span>
-            <button class="btn btn-ghost btn-sm" onclick="openLeadModal()">View Guidelines →</button>
+          <!-- Hardware Compatibility Ribbon -->
+          <div class="hardware-ribbon">
+            <div class="hardware-label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="15" r="4"></circle><circle cx="18" cy="15" r="4"></circle><line x1="10" y1="15" x2="14" y2="15"></line><path d="M2 15l2-6 2-1"></path><path d="M22 15l-2-6-2-1"></path></svg>
+              Standard Hardware Compatibility:
+            </div>
+            <div class="hardware-pills">
+              <span class="hw-pill">Solos AirGo 3</span>
+              <span class="hw-pill">Even Realities G1</span>
+              <span class="hw-pill">Ray-Ban Meta</span>
+              <span class="hw-pill">Rokid Eyewear</span>
+              <span class="hw-pill">Apple iOS & Android PWA</span>
+              <span class="hw-pill">Standard Bone-Conduction Frames</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1500,7 +2007,7 @@
         <span class="section-tag">Practice Economics</span>
         <h2 class="section-title">Calculate Your Clinic's Revenue & Time Recovered</h2>
         <p class="section-sub">
-          Reclaim clinical charting hours across all comprehensive eye exams via Ambient Scribe, while recovering lost referrals and unlocking Remote Therapeutic Monitoring (RTM) billing for your low-vision patients.
+          Reclaim clinical charting hours across all comprehensive eye exams via the Clinical Exam Scribe, while recovering lost referrals and unlocking Remote Therapeutic Monitoring (RTM) billing for your low-vision patients.
         </p>
       </div>
 
@@ -1572,7 +2079,7 @@
         <span class="section-tag">Clinical Grounding</span>
         <h2 class="section-title">Peer-Reviewed Evidence in Practice</h2>
         <p class="section-sub">
-          Every GozVision feature answers a documented clinical failure mode in published literature—grounding clinic-wide ambient charting as well as specialized low-vision rehabilitation.
+          Every GozVision feature answers a documented clinical failure mode in published literature—grounding clinic-wide exam documentation as well as specialized low-vision rehabilitation.
         </p>
       </div>
 
@@ -1583,7 +2090,7 @@
             <h4 style="font-family:var(--font-mono);font-size:26px;color:var(--accent);margin-bottom:8px;">10.8 min</h4>
             <h3>EHR Documentation Burden</h3>
             <p>
-              Eye care clinicians spend an average of 10.8 minutes per encounter on EHR tasks—consuming over 3.7 hours daily and driving >50% optometric burnout. Ambient Scribe drafts compliant charts in real time across routine exams, anterior/posterior segments, and refractions.
+              Eye care clinicians spend an average of 10.8 minutes per encounter on EHR tasks—consuming over 3.7 hours daily and driving >50% optometric burnout. The Clinical Exam Scribe drafts compliant charts in real time across routine exams, anterior/posterior segments, and refractions.
             </p>
           </div>
           <span style="display:block;margin-top:16px;font-size:12px;color:var(--ink-muted);">EHR Time in Eye Care Practices, Ophthalmology, PMC6219894</span>
@@ -1635,10 +2142,12 @@
         <div class="portal-tile">
           <div>
             <span class="card-tag">Doctor & Staff Portal</span>
-            <div class="card-icon">🏛</div>
+            <div class="card-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 10h1"></path><path d="M9 14h1"></path><path d="M9 18h1"></path><path d="M14 10h1"></path><path d="M14 14h1"></path><path d="M14 18h1"></path></svg>
+            </div>
             <h3>Goz Clinic Suite</h3>
             <p>
-              Multi-tenant B2B practice management for optometrists. Ambient Scribe workspace, Optical Dispensary & Storefront with Bachs instant payouts, Low Vision Hub, and Recall CRM.
+              Multi-tenant B2B practice management for optometrists. Clinical Exam Scribe workspace, Optical Dispensary & Storefront with Bachs instant payouts, Low Vision Hub, and Recall CRM.
             </p>
           </div>
           <a class="btn btn-primary" href="/clinic">Access Clinic Suite →</a>
@@ -1647,7 +2156,9 @@
         <div class="portal-tile">
           <div>
             <span class="card-tag">Patient Companion</span>
-            <div class="card-icon">👁</div>
+            <div class="card-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path></svg>
+            </div>
             <h3>Goz Patient App</h3>
             <p>
               The accessible mobile app for patients and caregivers. High-contrast tactile design, spoken scene narration, doctor prescriptions, and direct optical checkout.
@@ -1685,12 +2196,12 @@
       </div>
 
       <div class="footer-col">
-        <h4>Clinical Seams</h4>
+        <h4>Clinical Features</h4>
         <ul>
-          <li><a href="#modules">Ambient Scribe & OLD CARTS</a></li>
+          <li><a href="#modules">Clinical Exam Scribe</a></li>
           <li><a href="#modules">EHR & FHIR R4 Interop Hub</a></li>
           <li><a href="#modules">Walk-In POS & QR Stands</a></li>
-          <li><a href="#modules">Low Vision Hub & RTM</a></li>
+          <li><a href="#modules">Low Vision Care</a></li>
           <li><a href="#evidence">Peer-Reviewed Papers</a></li>
         </ul>
       </div>
