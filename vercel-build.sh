@@ -15,6 +15,11 @@ if ! command -v flutter &> /dev/null; then
     export PATH="$PATH:$HOME/flutter/bin"
 fi
 
+# Ensure git safe directory and suppress interactive analytics prompts
+git config --global --add safe.directory '*' 2>/dev/null || true
+export FLUTTER_SUPPRESS_ANALYTICS=true
+flutter config --no-analytics > /dev/null 2>&1 || true
+
 echo "Flutter version:"
 flutter --version
 
@@ -58,16 +63,21 @@ flutter pub get
 # 5. Build Flutter Web applications
 echo "[5/5] Compiling Flutter Web portals..."
 
+# Configure Dart VM memory limits to prevent container OOM on Vercel Hobby
+export DART_VM_OPTIONS="--old_gen_heap_size=2048"
+
 echo "  -> Compiling Clinic Suite (B2B) for /clinic ..."
 cd apps/clinic
-flutter build web --release --base-href "/clinic/"
+flutter build web --release --base-href "/clinic/" -O 2 --no-tree-shake-icons --no-source-maps --no-wasm-dry-run
 cp -r build/web/* ../../dist/clinic/
+rm -rf build .dart_tool/flutter_build
 cd ../..
 
 echo "  -> Compiling Patient Copilot (PWA) for /patient ..."
 cd apps/patient
-flutter build web --release --base-href "/patient/"
+flutter build web --release --base-href "/patient/" -O 2 --no-tree-shake-icons --no-source-maps --no-wasm-dry-run
 cp -r build/web/* ../../dist/patient/
+rm -rf build .dart_tool/flutter_build
 cd ../..
 
 echo "=================================================="
