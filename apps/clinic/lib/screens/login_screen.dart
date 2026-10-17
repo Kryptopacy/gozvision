@@ -165,40 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           letterSpacing: 0.2,
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      FilledButton.icon(
-                        onPressed: _busy ? null : _demoLogin,
-                        icon: const Icon(Icons.flash_on_rounded, size: 16),
-                        label: const Text('⚡ Instant Demo Access (Dr. O.D. Adegoke)'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: ClinicTheme.brandAccent,
-                          foregroundColor: ClinicTheme.obsidian,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              'OR SIGN IN WITH YOUR CLINIC ACCOUNT',
-                              style: TextStyle(
-                                color: ClinicTheme.textSecondary.withValues(alpha: 0.6),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.1,
-                              ),
-                            ),
-                          ),
-                          Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 28),
                       TextField(
                         controller: _email,
                         decoration: InputDecoration(
@@ -319,35 +286,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.03),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'HACKATHON EVALUATION ACCOUNT',
-                              style: TextStyle(
-                                color: ClinicTheme.textMuted,
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.1,
-                              ),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            context.read<ClinicScope>().enterDemoMode(DemoPersona.doctor);
+                          },
+                          icon: const Icon(Icons.science_outlined, size: 15, color: ClinicTheme.brandAccent),
+                          label: const Text(
+                            'Explore Interactive Clinical Sandbox →',
+                            style: TextStyle(
+                              color: ClinicTheme.brandAccent,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
                             ),
-                            const SizedBox(height: 5),
-                            SelectableText(
-                              'practitioner@gozvision.demo • gozvision-demo',
-                              style: const TextStyle(
-                                color: ClinicTheme.brandAccent,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                          ),
+                          style: TextButton.styleFrom(
+                            foregroundColor: ClinicTheme.brandAccent,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          ),
                         ),
                       ),
                     ],

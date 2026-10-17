@@ -5,16 +5,27 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// arrives directly (no snapshot unwrapping).
 typedef ClinicRows = List<Map<String, dynamic>>;
 
+/// Selectable roles in the interactive demo sandbox.
+enum DemoPersona {
+  doctor,
+  frontDesk,
+  caregiver,
+  patient,
+}
+
 /// The signed-in clinic member's tenancy: which clinic they belong to and
 /// what role they hold. Everything in the suite queries through this scope.
 class ClinicScope extends ChangeNotifier {
-  String? clinicId = 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
-  String clinicName = 'GozVision Demo Eye Clinic';
-  String role = 'Practitioner';
-  String email = 'practitioner@gozvision.demo';
-  String displayName = 'Dr. O.D. Adegoke';
-  bool resolved = true;
+  String? clinicId;
+  String clinicName = 'Eye Clinic';
+  String role = '';
+  String email = '';
+  String displayName = '';
+  bool resolved = false;
   String? error;
+
+  bool isDemoMode = false;
+  DemoPersona currentDemoPersona = DemoPersona.doctor;
 
   String country = 'Nigeria'; // Default: Nigeria (can be set to Ghana, Kenya, South Africa, UK, USA, etc.)
   String stateOrCity = 'Lagos';
@@ -33,7 +44,7 @@ class ClinicScope extends ChangeNotifier {
   String get defaultFormTemplate {
     if (isNigeria) return 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
     if (isUK) return 'Metropolitan Eye Hospital · 4-Quadrant Clinical Folder Sheet';
-    if (isUS) return 'Dr. O.D. Adegoke Optometry Care · Standard Clinical Form #OD-REV-2026';
+    if (isUS) return 'Optometry Care · Standard Clinical Form #OD-REV-2026';
     return 'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)';
   }
 
@@ -60,6 +71,59 @@ class ClinicScope extends ChangeNotifier {
     return 'Lic #OPT-48201';
   }
 
+  /// Launch dedicated interactive demo sandbox with selectable personas.
+  void enterDemoMode([DemoPersona persona = DemoPersona.doctor]) {
+    isDemoMode = true;
+    clinicId = 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
+    clinicName = 'GozVision Demo Eye Clinic (Lagos)';
+    country = 'Nigeria';
+    stateOrCity = 'Lagos';
+    resolved = true;
+    error = null;
+    switchDemoPersona(persona);
+  }
+
+  /// Instant role switching between doctor, staff, caregiver, and patient in sandbox mode.
+  void switchDemoPersona(DemoPersona persona) {
+    currentDemoPersona = persona;
+    switch (persona) {
+      case DemoPersona.doctor:
+        role = 'Practitioner';
+        displayName = 'Dr. O.D. Adegoke';
+        email = 'practitioner@gozvision.demo';
+        break;
+      case DemoPersona.frontDesk:
+        role = 'Staff';
+        displayName = 'Amina Bello';
+        email = 'staff@gozvision.demo';
+        break;
+      case DemoPersona.caregiver:
+        role = 'Caregiver';
+        displayName = 'Ngozi Balogun';
+        email = 'caregiver@gozvision.demo';
+        break;
+      case DemoPersona.patient:
+        role = 'Patient';
+        displayName = 'Chioma Adeyemi';
+        email = 'demo-patient@gozvision.demo';
+        break;
+    }
+    notifyListeners();
+  }
+
+  /// Exit the sandbox mode and return to pristine production auth.
+  void exitDemoMode() {
+    isDemoMode = false;
+    clinicId = null;
+    clinicName = 'Eye Clinic';
+    role = '';
+    email = '';
+    displayName = '';
+    resolved = false;
+    error = null;
+    notifyListeners();
+  }
+
   void updatePracticeLocation({
     required String newCountry,
     required String newStateOrCity,
@@ -80,6 +144,7 @@ class ClinicScope extends ChangeNotifier {
 
   /// Resolves the profiles row (id = uid) into the tenancy scope.
   Future<void> resolve(String uid) async {
+    isDemoMode = false;
     try {
       final rows = await Supabase.instance.client
           .from('profiles')
@@ -114,11 +179,6 @@ class ClinicScope extends ChangeNotifier {
   }
 
   /// Streams a clinic-scoped table. Null clinicId → no query yet.
-  ///
-  /// RLS scopes every row to the caller's clinic; the explicit
-  /// `eq('clinic_id', ...)` keeps the filter visible at the call site.
-  /// Tables whose primary key is not `id` (e.g. sos_alerts on
-  /// ['patient_id']) pass a different [primaryKey].
   Stream<ClinicRows>? stream(
     String collection, {
     List<String> primaryKey = const ['id'],

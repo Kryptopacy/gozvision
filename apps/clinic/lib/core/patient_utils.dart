@@ -8,17 +8,17 @@ class PatientUtils {
     if (str.isEmpty) return 'Patient';
 
     final lower = str.toLowerCase();
-    if (lower.contains('1cb317f9') || lower.contains('demo_patient_001') || lower.contains('demo-patient')) {
-      return 'Maria Santos';
+    if (lower.contains('1cb317f9') || lower.contains('demo_patient_001') || lower.contains('demo-patient') || lower.contains('santos')) {
+      return 'Chioma Adeyemi';
     }
-    if (lower.contains('demo_patient_002') || lower.contains('chen')) {
-      return 'Robert Chen';
+    if (lower.contains('demo_patient_002') || lower.contains('chen') || lower.contains('okafor')) {
+      return 'Babajide Okafor';
     }
-    if (lower.contains('demo_patient_003') || lower.contains('vance')) {
-      return 'Eleanor Vance';
+    if (lower.contains('demo_patient_003') || lower.contains('vance') || lower.contains('adeleke')) {
+      return 'Folashade Adeleke';
     }
-    if (lower.contains('demo_patient_004') || lower.contains('pendelton')) {
-      return 'Arthur Pendelton';
+    if (lower.contains('demo_patient_004') || lower.contains('pendelton') || lower.contains('danladi')) {
+      return 'Babatunde Danladi';
     }
 
     // If already looks like a real name

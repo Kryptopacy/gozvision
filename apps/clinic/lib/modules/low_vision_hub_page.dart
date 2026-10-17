@@ -33,9 +33,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   final List<Map<String, dynamic>> _fallbackReferrals = [
     {
       'id': 'ref_001',
-      'patient_id': 'Eleanor Vance',
+      'patient_id': 'Folashade Adeleke',
       'condition': 'Dry AMD (Geographic Atrophy)',
-      'specialist': 'Dr. Ada Optometrist, O.D., FAAO',
+      'specialist': 'Dr. O.D. Adegoke, O.D., FAAO',
       'status': 'attended',
       'va_better_eye': '20/200',
       'fit_recommended': 'Solos AirGo 3 Smart Audio Glasses',
@@ -43,7 +43,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
     },
     {
       'id': 'ref_002',
-      'patient_id': 'Arthur Pendelton',
+      'patient_id': 'Babatunde Danladi',
       'condition': 'Advanced Open-Angle Glaucoma',
       'specialist': 'Pacific Low Vision Rehabilitation',
       'status': 'made',
@@ -55,7 +55,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       'id': 'ref_003',
       'patient_id': 'Martha Alvarez',
       'condition': 'Diabetic Retinopathy & Maculopathy',
-      'specialist': 'Dr. Marcus Vance, O.D.',
+      'specialist': 'Dr. Tunde Alabi, O.D.',
       'status': 'attended',
       'va_better_eye': '20/120',
       'fit_recommended': 'IrisVision Inspire Headset',
@@ -63,7 +63,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
     },
     {
       'id': 'ref_004',
-      'patient_id': 'Robert Chen',
+      'patient_id': 'Babajide Okafor',
       'condition': 'Stargardt Disease (Juvenile Macular)',
       'specialist': 'Bay Area Low Vision Pavilion',
       'status': 'attended',
@@ -75,7 +75,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       'id': 'ref_005',
       'patient_id': 'Clara Oswald',
       'condition': 'Ocular Albinism with Photophobia',
-      'specialist': 'Dr. Ada Optometrist, O.D.',
+      'specialist': 'Dr. O.D. Adegoke, O.D.',
       'status': 'lost_to_followup',
       'va_better_eye': '20/100',
       'fit_recommended': 'FL-41 Glare Relief Clips & Audio Glasses',
@@ -87,7 +87,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   final List<Map<String, dynamic>> _fallbackFits = [
     {
       'id': 'fit_001',
-      'patient_id': 'Eleanor Vance',
+      'patient_id': 'Folashade Adeleke',
       'patient_mrn': 'MRN-84920',
       'status': 'prescribed',
       'device': {
@@ -105,12 +105,12 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       },
       'recent_signal_count': 14,
       'last_sync': '12 mins ago',
-      'caregiver_name': 'Marcus Vance (Son)',
+      'caregiver_name': 'Dapo Adeleke (Son)',
       'caregiver_phone': '+1 (555) 349-8821',
     },
     {
       'id': 'fit_002',
-      'patient_id': 'Arthur Pendelton',
+      'patient_id': 'Babatunde Danladi',
       'patient_mrn': 'MRN-71029',
       'status': 'trialing',
       'device': {
@@ -128,7 +128,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       },
       'recent_signal_count': 0,
       'last_sync': '48h ago (Usage going quiet)',
-      'caregiver_name': 'Sarah Pendelton (Daughter)',
+      'caregiver_name': 'Zainab Danladi (Daughter)',
       'caregiver_phone': '+1 (555) 782-9904',
     },
     {
@@ -156,7 +156,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
     },
     {
       'id': 'fit_004',
-      'patient_id': 'Robert Chen',
+      'patient_id': 'Babajide Okafor',
       'patient_mrn': 'MRN-92841',
       'status': 'sustained',
       'device': {
@@ -174,7 +174,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
       },
       'recent_signal_count': 9,
       'last_sync': '28 mins ago',
-      'caregiver_name': 'Jennifer Chen (Sister)',
+      'caregiver_name': 'Ngozi Okafor (Sister)',
       'caregiver_phone': '+1 (555) 902-1144',
     },
   ];
@@ -403,7 +403,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
             value: '1 Patient',
             trend: '48h Inactivity Detected',
             isPositiveTrend: false,
-            subtitle: 'Arthur Pendelton (Follow-up Recommended)',
+            subtitle: 'Babatunde Danladi (Follow-up Recommended)',
           ),
         ),
         const SizedBox(width: 14),
@@ -666,7 +666,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   Widget _buildNigerianHmoTable() {
     final hmoRecords = [
       {
-        'patient': 'Eleanor Vance',
+        'patient': 'Folashade Adeleke',
         'mrn': 'OPT-8021',
         'hmo': 'Reliance HMO (Gold Corporate)',
         'auth_code': 'PA-REL-8921',
@@ -677,9 +677,9 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
         'action_label': 'Submit Claim',
       },
       {
-        'patient': 'Arthur Pendelton',
+        'patient': 'Babatunde Danladi',
         'mrn': 'OPT-9942',
-        'hmo': 'Diaspora Plan (UK Sponsor: Sarah Pendelton)',
+        'hmo': 'Diaspora Plan (UK Sponsor: Zainab Danladi)',
         'auth_code': 'DIA-UK-0842',
         'benefit': 'Smart Vision Frame Autonomy Telemetry',
         'amount': '₦120,000.00',
@@ -699,7 +699,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
         'action_label': 'Print Voucher',
       },
       {
-        'patient': 'Marcus Sterling',
+        'patient': 'Chioma Adeyemi',
         'mrn': 'OPT-7419',
         'hmo': 'NHIA / Lagos State Health (Ilera Eko)',
         'auth_code': 'ENR-LAS-90218',
@@ -1205,7 +1205,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
                 final caregiver = fit['caregiver_name'] as String? ?? 'Designated Family Aide';
                 final phone = fit['caregiver_phone'] as String? ?? '+1 (555) 000-0000';
                 final patientName = fit['patient_id'] as String? ?? 'Patient';
-                final isArthur = patientName == 'Arthur Pendelton';
+                final isArthur = patientName == 'Babatunde Danladi';
 
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -1367,7 +1367,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
     final patientName = fit['patient_id'] as String? ?? 'Patient';
     final caregiver = fit['caregiver_name'] as String? ?? 'Family Aide';
     final phone = fit['caregiver_phone'] as String? ?? '+1 (555) 349-8821';
-    final isArthur = patientName == 'Arthur Pendelton';
+    final isArthur = patientName == 'Babatunde Danladi';
 
     showDialog(
       context: context,
@@ -1728,7 +1728,7 @@ class _LowVisionHubPageState extends State<LowVisionHubPage> with SingleTickerPr
   }
 
   void _showNewFittingDialog(BuildContext context) {
-    final patientCtrl = TextEditingController(text: 'Eleanor Vance');
+    final patientCtrl = TextEditingController(text: 'Folashade Adeleke');
     String selectedDevice = 'Solos AirGo 3 Smart Audio Glasses';
 
     showDialog(
@@ -2628,7 +2628,7 @@ class _FitCard extends StatelessWidget {
         'kind': 'recovery',
         'channel': 'sms',
         'message':
-            'Hi! Dr. Ada checking in from GozVision Clinic. We noticed you haven\'t used your ${fit.deviceType} recently. Is everything comfortable, or would you like us to adjust it?',
+            'Hi! Dr. O.D. Adegoke checking in from GozVision Clinic. We noticed you haven\'t used your ${fit.deviceType} recently. Is everything comfortable, or would you like us to adjust it?',
         'status': 'queued',
       });
       if (context.mounted) {

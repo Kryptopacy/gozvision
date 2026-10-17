@@ -262,6 +262,15 @@ class AudioService extends ChangeNotifier implements CopilotAudioIO {
     }
   }
 
+  /// Synthesizes local audio guidance for low-vision safety when the network drops.
+  void speakOfflineGuidance(String prompt) {
+    if (kIsWeb) {
+      try {
+        web_audio.WebAudioBridge.speakOfflinePrompt(prompt);
+      } catch (_) {}
+    }
+  }
+
   @override
   void dispose() {
     stopRecording();

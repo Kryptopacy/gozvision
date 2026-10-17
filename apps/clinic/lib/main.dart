@@ -20,31 +20,54 @@ void main() async {
 }
 
 /// GozVision Clinic Suite (B2B) — the Low Vision Hub, Front Desk, Scribe,
-/// and Insights for optometry practices. Multi-tenant by clinic_id
-/// (docs/DATA_MODEL.md).
-class ClinicApp extends StatelessWidget {
+/// and Insights for optometry practices. Multi-tenant by clinic_id.
+class ClinicApp extends StatefulWidget {
   const ClinicApp({super.key});
 
   @override
+  State<ClinicApp> createState() => _ClinicAppState();
+}
+
+class _ClinicAppState extends State<ClinicApp> {
+  final _scope = ClinicScope();
+
+  @override
+  void dispose() {
+    _scope.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'GozVision Clinic',
-      debugShowCheckedModeBanner: false,
-      theme: ClinicTheme.theme,
-      home: StreamBuilder<AuthState>(
-        stream: Supabase.instance.client.auth.onAuthStateChange,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const _Booting();
-          }
-          final user = snapshot.data?.session?.user;
-          if (user == null) return const LoginScreen();
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider(create: (_) => ClinicScope()..resolve(user.id)),
-              ChangeNotifierProvider(create: (_) => BachsPaymentService()),
-            ],
-            child: const ClinicShell(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ClinicScope>.value(value: _scope),
+        ChangeNotifierProvider(create: (_) => BachsPaymentService()),
+      ],
+      child: Consumer<ClinicScope>(
+        builder: (context, scope, _) {
+          return MaterialApp(
+            title: 'GozVision Clinic',
+            debugShowCheckedModeBanner: false,
+            theme: ClinicTheme.theme,
+            home: scope.isDemoMode
+                ? const ClinicShell()
+                : StreamBuilder<AuthState>(
+                    stream: Supabase.instance.client.auth.onAuthStateChange,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const _Booting();
+                      }
+                      final user = snapshot.data?.session?.user;
+                      if (user == null) {
+                        return const LoginScreen();
+                      }
+                      if (!scope.resolved) {
+                        scope.resolve(user.id);
+                      }
+                      return const ClinicShell();
+                    },
+                  ),
           );
         },
       ),

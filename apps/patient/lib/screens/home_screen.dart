@@ -917,10 +917,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _showDoorstepModal(BuildContext context) {
     HapticService.tap();
-    String spokenText = 'Your daughter Sarah Vance is at the front door.';
+    String spokenText = 'Your daughter Zainab Adeyemi is at the front door.';
     String guidance = 'Safe to unlock and open the door.';
-    String entityName = 'Sarah Vance (Daughter)';
+    String entityName = 'Zainab Adeyemi (Daughter)';
     bool isTrusted = true;
+
+    // Auditory feedback for low-vision safety
+    try {
+      context.read<AudioService>().speakOfflineGuidance('$spokenText $guidance');
+    } catch (_) {}
 
     showModalBottomSheet(
       context: context,

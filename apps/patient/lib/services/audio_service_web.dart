@@ -203,4 +203,16 @@ class WebAudioBridge {
       oscillator.stop(ctx.currentTime + 0.3);
     } catch (_) {}
   }
+
+  /// Synthesizes local offline speech for low-vision navigation when connection drops.
+  static void speakOfflinePrompt(String prompt) {
+    try {
+      final synth = web.window.speechSynthesis;
+      synth.cancel(); // Cancel any ongoing local speech
+      final utterance = web.SpeechSynthesisUtterance(prompt);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      synth.speak(utterance);
+    } catch (_) {}
+  }
 }

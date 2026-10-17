@@ -144,7 +144,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
   final List<Map<String, dynamic>> _orders = [
     {
       'order_no': 'ORD-2026-84920',
-      'patient_name': 'Eleanor Vance',
+      'patient_name': 'Folashade Adeleke',
       'patient_id': 'demo_patient_001',
       'items': 'Goz Titanium Vista Frame + FL-41 Tint Coating',
       'total': 250.00,
@@ -156,7 +156,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     },
     {
       'order_no': 'ORD-2026-84918',
-      'patient_name': 'Robert Chen',
+      'patient_name': 'Babajide Okafor',
       'patient_id': 'patient_chen_02',
       'items': 'Solos AirGo 3 Smart Audio Glasses',
       'total': 299.00,
@@ -887,7 +887,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
       price: product['price'] as double,
       currency: 'USD',
       customerEmail: 'patient@example.com',
-      customerName: 'Eleanor Vance',
+      customerName: 'Folashade Adeleke',
     );
 
     final launched = await paymentService.launchOverlayCheckout(checkoutUrl);
@@ -1581,7 +1581,7 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
     } else {
       currentQrUrl = 'https://gozvision.com/app?clinic=$clinicId';
       currentQrTitle = 'Download GozVision Patient Copilot';
-      currentQrSubtitle = 'Patients scan to install the GozVision vision copilot app pre-linked to Dr. Ada & this clinic.';
+      currentQrSubtitle = 'Patients scan to install the GozVision vision copilot app pre-linked to Dr. O.D. Adegoke & this clinic.';
       currentQrBadge = 'EXAM LANE COUNTER STAND';
     }
 
@@ -1700,8 +1700,8 @@ class _OpticalStorefrontPageState extends State<OpticalStorefrontPage>
                       style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                       items: const [
                         DropdownMenuItem(value: 'Walk-In Patient / Guest', child: Text('Walk-In Patient / Guest (No Goz Profile)')),
-                        DropdownMenuItem(value: 'Eleanor Vance', child: Text('Eleanor Vance (Active Rx #OPT-8021)')),
-                        DropdownMenuItem(value: 'Robert Chen', child: Text('Robert Chen (Active Rx #OPT-7419)')),
+                        DropdownMenuItem(value: 'Folashade Adeleke', child: Text('Folashade Adeleke (Active Rx #OPT-8021)')),
+                        DropdownMenuItem(value: 'Babajide Okafor', child: Text('Babajide Okafor (Active Rx #OPT-7419)')),
                         DropdownMenuItem(value: 'Martha Alvarez', child: Text('Martha Alvarez (Refraction Due)')),
                       ],
                       onChanged: (val) => setState(() => _posPatientName = val ?? 'Walk-In Patient / Guest'),

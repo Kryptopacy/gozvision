@@ -28,7 +28,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
   final List<Map<String, dynamic>> _recalls = [
     {
       'id': 'rec_001',
-      'patient_name': 'Eleanor Vance',
+      'patient_name': 'Folashade Adeleke',
       'patient_id': 'demo_patient_001',
       'pipeline': 'Annual Exam Recall',
       'type_code': 'annual_exam',
@@ -41,7 +41,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
     },
     {
       'id': 'rec_002',
-      'patient_name': 'Arthur Pendelton',
+      'patient_name': 'Babatunde Danladi',
       'patient_id': 'patient_pendelton_02',
       'pipeline': 'Glaucoma IOP Check',
       'type_code': 'glaucoma_check',
@@ -83,7 +83,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
   // Optical order pickup and refill items
   final List<Map<String, dynamic>> _opticalEvents = [
     {
-      'patient_name': 'Eleanor Vance',
+      'patient_name': 'Folashade Adeleke',
       'type': 'Drop Refill Due (Day 25)',
       'item': 'Latanoprost 0.005% Ophthalmic Solution',
       'streak': '14-Day Perfect Streak',
@@ -92,7 +92,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
       'target': 'Caregiver & Patient',
     },
     {
-      'patient_name': 'Marcus Vance',
+      'patient_name': 'Dapo Adeleke',
       'type': 'Lab Lenses Ready for In-Clinic Pickup',
       'item': 'Goz Frame Pro S4 (Prescription Anti-Reflective)',
       'streak': 'Order #ORD-2026-9941',
@@ -625,7 +625,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
                   isClinic: true,
                 ),
                 _ChatBubble(
-                  sender: 'Eleanor Vance (via Goz Voice Copilot)',
+                  sender: 'Folashade Adeleke (via Goz Voice Copilot)',
                   message: 'Thank you! My daughter and I will be there on Friday. My Systane bottle is almost empty though.',
                   time: '10:18 AM',
                   isClinic: false,
@@ -740,7 +740,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
 
               // Review 1: 5-Star Published
               _buildReviewFeedItem(
-                author: 'Eleanor Vance (Patient) • Low-Vision Assist',
+                author: 'Folashade Adeleke (Patient) • Low-Vision Assist',
                 stars: 5,
                 doctor: 'Dr. Miller, OD',
                 date: '2 hours ago',
@@ -754,7 +754,7 @@ class _ClinicCrmPageState extends State<ClinicCrmPage> with SingleTickerProvider
 
               // Review 2: 5-Star Caregiver
               _buildReviewFeedItem(
-                author: 'Sarah Vance (Caregiver / Daughter)',
+                author: 'Zainab Adeleke (Caregiver / Daughter)',
                 stars: 5,
                 doctor: 'Front Desk & Optical Team',
                 date: 'Yesterday',

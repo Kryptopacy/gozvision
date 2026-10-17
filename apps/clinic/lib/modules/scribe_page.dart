@@ -41,7 +41,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
   final Map<String, _ClinicalScenario> _scenarios = {
     'glaucoma': _ClinicalScenario(
       name: 'Glaucoma POAG & IOP Pressure Spike',
-      patientName: 'Eleanor Vance',
+      patientName: 'Folashade Adeleke',
       mrn: 'OPT-8021',
       ageGender: '68F',
       examLane: 'Exam Suite 1 (Glaucoma Suite)',
@@ -57,16 +57,16 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       plan:
           '1. Escalate medical therapy OS: Add Dorzolamide/Timolol (Cosopt) 1 gtt BID OS. Continue Latanoprost 0.005% 1 gtt QHS OU (separate by 10 mins).\n2. Order Humphrey Visual Field (HVF 24-2) and Cirrus OCT RNFL/Ganglion Cell Analysis today.\n3. Discussed SLT (Selective Laser Trabeculoplasty) as next-line option if IOP remains >18 mmHg.\n4. Return to clinic in 4 weeks for IOP re-check and visual field review.',
       transcript:
-          '''[00:04] Dr. Vance: "Good morning, Eleanor. Let's see how those eye pressures are doing today. How have you been feeling since we last checked three months ago?"
-[00:15] Eleanor Vance: "Good morning, Doctor. For the most part okay, but I've noticed a dull aching pressure behind my left eye in the evenings, especially when I read in dimmer light."
-[00:28] Dr. Vance: "Are you still taking your Latanoprost drops every night before bed in both eyes?"
-[00:34] Eleanor Vance: "Yes, every night without missing. I keep it right next to my bedside table."
-[00:42] Dr. Vance: "Excellent consistency. Let's check your vision and take your intraocular pressures with Goldmann applanation. Look straight ahead for me... Blink, blink, good. Right eye pressure is 16 millimeters of mercury, very stable. Left eye pressure is 24 millimeters of mercury."
-[01:05] Eleanor Vance: "24? That sounds higher than last time when it was 17."
-[01:10] Dr. Vance: "Yes, it is above our target threshold of 16 for your left eye. When I look closely at your optic nerve on the left, I see a cup-to-disc ratio of 0.65 with a subtle vertical notch at the inferior rim. We need to lower that pressure to protect your optic nerve fibers."
-[01:32] Eleanor Vance: "What should we do, Doctor? Do I need surgery?"
-[01:36] Dr. Vance: "Not surgery today. We will add a second drop called Dorzolamide/Timolol twice a day to your left eye, which decreases fluid production. We'll also run a Humphrey Visual Field test and an OCT scan of your nerve fibers today, and re-check your pressures in four weeks."
-[02:01] Eleanor Vance: "Understood, Doctor. I'll pick up the prescription today and get the visual field done."''',
+          '''[00:04] Dr. Adegoke: "Good morning, Eleanor. Let's see how those eye pressures are doing today. How have you been feeling since we last checked three months ago?"
+[00:15] Folashade Adeleke: "Good morning, Doctor. For the most part okay, but I've noticed a dull aching pressure behind my left eye in the evenings, especially when I read in dimmer light."
+[00:28] Dr. Adegoke: "Are you still taking your Latanoprost drops every night before bed in both eyes?"
+[00:34] Folashade Adeleke: "Yes, every night without missing. I keep it right next to my bedside table."
+[00:42] Dr. Adegoke: "Excellent consistency. Let's check your vision and take your intraocular pressures with Goldmann applanation. Look straight ahead for me... Blink, blink, good. Right eye pressure is 16 millimeters of mercury, very stable. Left eye pressure is 24 millimeters of mercury."
+[01:05] Folashade Adeleke: "24? That sounds higher than last time when it was 17."
+[01:10] Dr. Adegoke: "Yes, it is above our target threshold of 16 for your left eye. When I look closely at your optic nerve on the left, I see a cup-to-disc ratio of 0.65 with a subtle vertical notch at the inferior rim. We need to lower that pressure to protect your optic nerve fibers."
+[01:32] Folashade Adeleke: "What should we do, Doctor? Do I need surgery?"
+[01:36] Dr. Adegoke: "Not surgery today. We will add a second drop called Dorzolamide/Timolol twice a day to your left eye, which decreases fluid production. We'll also run a Humphrey Visual Field test and an OCT scan of your nerve fibers today, and re-check your pressures in four weeks."
+[02:01] Folashade Adeleke: "Understood, Doctor. I'll pick up the prescription today and get the visual field done."''',
       vaOd: '20/20',
       vaOs: '20/25-2',
       rxOd: '-1.75 -0.75 x 090',
@@ -87,7 +87,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     ),
     'dry_eye': _ClinicalScenario(
       name: 'Severe Ocular Surface Disease & Keratitis',
-      patientName: 'Marcus Sterling',
+      patientName: 'Babajide Okafor',
       mrn: 'OPT-7419',
       ageGender: '54M',
       examLane: 'Exam Suite 2 (Cornea & Anterior)',
@@ -103,14 +103,14 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       plan:
           '1. Discontinue vasoconstrictor drops (Visine) immediately.\n2. Initiate preservative-free artificial tears (Systane Complete PF) QID OU.\n3. Prescribe Loteprednol etabonate 0.5% ophthalmic suspension BID OU for 2 weeks to calm ocular surface inflammation.\n4. Recommend warm compress eye mask (Bruder mask) 10 min QHS followed by lid margin massage.\n5. Discussed in-office thermal pulsation therapy (LipiFlow / TearCare) if symptoms persist.\n6. Follow-up in 3 weeks for corneal staining re-evaluation.',
       transcript:
-          '''[00:03] Dr. Vance: "Hello Marcus, what brings you into the clinic today?"
-[00:10] Marcus Sterling: "Dr. Vance, my eyes feel like they have sand in them by 2 PM every single day. I'm staring at code on multiple monitors all day and my vision gets blurry until I blink hard."
-[00:24] Dr. Vance: "Are you using any over-the-counter drops currently?"
-[00:28] Marcus Sterling: "I was using red-eye relief drops three or four times a day, but my eyes seem even redder now when they wear off."
-[00:36] Dr. Vance: "That is classic rebound vasodilation from the decongestant in those drops. Let's look at your ocular surface under the slit lamp with yellow fluorescein dye."
-[00:50] Dr. Vance: "I see your tear film is evaporating in just 3 seconds—normal is over 10 seconds. You also have significant punctate corneal staining on the lower half of both corneas, meaning the surface cells are irritated and shedding."
-[01:12] Marcus Sterling: "Is that why the computer screen glares so badly?"
-[01:16] Dr. Vance: "Exactly. The tear film is the first refracting optical surface of the eye. When it breaks apart, your vision scatters. We are going to stop the redness drops, start preservative-free lubricating drops four times daily, and use a gentle steroid drop for two weeks to heal the cornea."''',
+          '''[00:03] Dr. Adegoke: "Hello Marcus, what brings you into the clinic today?"
+[00:10] Babajide Okafor: "Dr. Adegoke, my eyes feel like they have sand in them by 2 PM every single day. I'm staring at code on multiple monitors all day and my vision gets blurry until I blink hard."
+[00:24] Dr. Adegoke: "Are you using any over-the-counter drops currently?"
+[00:28] Babajide Okafor: "I was using red-eye relief drops three or four times a day, but my eyes seem even redder now when they wear off."
+[00:36] Dr. Adegoke: "That is classic rebound vasodilation from the decongestant in those drops. Let's look at your ocular surface under the slit lamp with yellow fluorescein dye."
+[00:50] Dr. Adegoke: "I see your tear film is evaporating in just 3 seconds—normal is over 10 seconds. You also have significant punctate corneal staining on the lower half of both corneas, meaning the surface cells are irritated and shedding."
+[01:12] Babajide Okafor: "Is that why the computer screen glares so badly?"
+[01:16] Dr. Adegoke: "Exactly. The tear film is the first refracting optical surface of the eye. When it breaks apart, your vision scatters. We are going to stop the redness drops, start preservative-free lubricating drops four times daily, and use a gentle steroid drop for two weeks to heal the cornea."''',
       vaOd: '20/25',
       vaOs: '20/25',
       rxOd: '-0.75 -0.50 x 180',
@@ -131,7 +131,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
     ),
     'low_vision': _ClinicalScenario(
       name: 'Dry AMD & Smart Vision Glasses Trial',
-      patientName: 'Arthur Pendelton',
+      patientName: 'Babatunde Danladi',
       mrn: 'OPT-9942',
       ageGender: '76M',
       examLane: 'Exam Suite 3 (Low Vision Rehabilitation)',
@@ -147,13 +147,13 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       plan:
           '1. Conducted 45-minute clinical trial with GozVision Smart Vision Frames (AR Tele-magnification + Edge Contrast Enhancement).\n2. Trial Results: Patient achieved 20/40 near visual acuity on 1M newsprint using 4x optical enhancement and OCR text-to-speech audio feedback.\n3. Prescribed GozVision Low-Vision Clinical Trial Protocol (30-day home autonomy trial).\n4. Continued AREDS 2 nutritional supplementation formula daily.\n5. Scheduled home orientation session with certified Low Vision Rehabilitation Therapist.',
       transcript:
-          '''[00:05] Dr. Vance: "Arthur, welcome to the Low Vision suite. Today our main focus is not just checking eye health, but helping you read and navigate again with modern optical technology."
-[00:18] Arthur Pendelton: "Thank you, Doctor. Right now I can't even tell which pill is which without asking my daughter, and I miss reading my morning paper so much."
-[00:29] Dr. Vance: "Let's first test your vision with this special Low Vision chart... Okay, 20/200 in your right eye, and 20/400 in your left. Now, let's place the GozVision Smart Frames on."
-[00:46] Arthur Pendelton: "Oh wow! The edges of the desk and your coat just popped into sharp contrast!"
-[00:54] Dr. Vance: "That is our real-time Edge Contrast enhancement. Now look at this standard newsprint paragraph through the center prism... Tap the right temple to zoom 3x."
-[01:08] Arthur Pendelton: "I can read the headline... 'City Council Approves New Downtown Transit Plan'. Doctor, I haven't been able to read that size in three years!"
-[01:22] Dr. Vance: "That brings your functional reading acuity from 20/200 down to 20/40. We will set you up with the 30-day clinical loaner kit and connect your device to our clinic dashboard."''',
+          '''[00:05] Dr. Adegoke: "Arthur, welcome to the Low Vision suite. Today our main focus is not just checking eye health, but helping you read and navigate again with modern optical technology."
+[00:18] Babatunde Danladi: "Thank you, Doctor. Right now I can't even tell which pill is which without asking my daughter, and I miss reading my morning paper so much."
+[00:29] Dr. Adegoke: "Let's first test your vision with this special Low Vision chart... Okay, 20/200 in your right eye, and 20/400 in your left. Now, let's place the GozVision Smart Frames on."
+[00:46] Babatunde Danladi: "Oh wow! The edges of the desk and your coat just popped into sharp contrast!"
+[00:54] Dr. Adegoke: "That is our real-time Edge Contrast enhancement. Now look at this standard newsprint paragraph through the center prism... Tap the right temple to zoom 3x."
+[01:08] Babatunde Danladi: "I can read the headline... 'City Council Approves New Downtown Transit Plan'. Doctor, I haven't been able to read that size in three years!"
+[01:22] Dr. Adegoke: "That brings your functional reading acuity from 20/200 down to 20/40. We will set you up with the 30-day clinical loaner kit and connect your device to our clinic dashboard."''',
       vaOd: '20/200 (20/40 with Copilot)',
       vaOs: '20/400',
       rxOd: '+1.50 -1.00 x 080',
@@ -278,7 +278,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                     ? dbRows
                     : [
                         {
-                          'patient_id': 'Eleanor Vance',
+                          'patient_id': 'Folashade Adeleke',
                           'status': 'in_progress',
                           'lane': 'Exam Suite 1',
                           'chief': 'POAG Glaucoma Follow-up & IOP Check',
@@ -286,7 +286,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                           'scenario_key': 'glaucoma',
                         },
                         {
-                          'patient_id': 'Marcus Sterling',
+                          'patient_id': 'Babajide Okafor',
                           'status': 'completed',
                           'lane': 'Exam Suite 2',
                           'chief': 'Severe Dry Eye & Computer Vision Syndrome',
@@ -294,7 +294,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
                           'scenario_key': 'dry_eye',
                         },
                         {
-                          'patient_id': 'Arthur Pendelton',
+                          'patient_id': 'Babatunde Danladi',
                           'status': 'completed',
                           'lane': 'Exam Suite 3',
                           'chief': 'Dry AMD & Smart Vision Glasses Evaluation',
@@ -1031,7 +1031,7 @@ class _MasterScribeChartState extends State<_MasterScribeChart> with SingleTicke
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Attending: Dr. Ada Optometrist, OD • ${sc.examLane}',
+                      'Attending: Dr. O.D. Adegoke, OD • ${sc.examLane}',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: ClinicTheme.textMuted,
@@ -1435,7 +1435,7 @@ class _MasterScribeChartState extends State<_MasterScribeChart> with SingleTicke
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, i) {
                 final line = lines[i];
-                final isDoctor = line.contains('Dr. Vance:');
+                final isDoctor = line.contains('Dr. Adegoke:');
 
                 return Container(
                   padding: const EdgeInsets.all(12),
@@ -1893,10 +1893,10 @@ ${sc.currentCorrection}''';
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   ),
                                   icon: const Icon(Icons.description_outlined, size: 14, color: ClinicTheme.brandAccent),
-                                  label: const Text('Load Scanned Paper Folder Form (Dr. Ada)', style: TextStyle(fontSize: 11)),
+                                  label: const Text('Load Scanned Paper Folder Form (Dr. O.D. Adegoke)', style: TextStyle(fontSize: 11)),
                                   onPressed: () {
                                     setDialogState(() {
-                                      loadedDocumentLabel = 'Dr_Ada_Exam_Sheet_${sc.mrn}.pdf (Scanned Paper Form)';
+                                      loadedDocumentLabel = 'Dr_Adegoke_Exam_Sheet_${sc.mrn}.pdf (Scanned Paper Form)';
                                       isProcessing = true;
                                       hasExtracted = false;
                                     });
@@ -2128,7 +2128,7 @@ ${sc.currentCorrection}''';
     final templates = [
       'Nigerian Optometric Clinical Record (NOA / ODORBN Standard)',
       'Teaching Hospital Manila Folder Card (LUTH / UCH / UNTH)',
-      'Dr. Ada Optometry Care · Standard Clinical Form #OD-REV-2026',
+      'Dr. O.D. Adegoke Optometry Care · Standard Clinical Form #OD-REV-2026',
       'Metropolitan Eye Hospital · 4-Quadrant Clinical Folder Sheet',
       'Pediatric & Binocular Vision Specialist Exam Sheet',
       'Low Vision Rehabilitation & Functional Acuity Intake',
@@ -2275,7 +2275,7 @@ ${sc.currentCorrection}''';
                           ),
                         ),
                         const SizedBox(height: 3),
-                        Text('Attending OD: Dr. Ada Optometrist · ${scope.defaultLicenseText}', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
+                        Text('Attending OD: Dr. O.D. Adegoke · ${scope.defaultLicenseText}', style: GoogleFonts.plusJakartaSans(fontSize: 10, color: ClinicTheme.textMuted)),
                       ],
                     ),
                   ],
@@ -2505,7 +2505,7 @@ ${sc.currentCorrection}''';
                         children: [
                           const Icon(Icons.verified_user_rounded, color: ClinicTheme.brandAccent, size: 18),
                           const SizedBox(width: 8),
-                          Text('Signed by Dr. Ada Optometrist (${scope.defaultLicenseText})', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
+                          Text('Signed by Dr. O.D. Adegoke (${scope.defaultLicenseText})', style: GoogleFonts.jetBrainsMono(fontSize: 11, color: ClinicTheme.brandAccent, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       Text('${scope.regulatoryBody} · GozVision Electronic Clinical Record', style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: ClinicTheme.textMuted)),
@@ -2977,7 +2977,7 @@ ${sc.currentCorrection}''';
         formattedNote = '''=== EPICCARE AMBULATORY OPHTHALMIC ENCOUNTER ===
 PATIENT: ${sc.patientName} (MRN: ${sc.mrn})
 DATE: ${DateTime.now().toLocal().toString().split('.')[0]}
-ATTENDING: Dr. Ada Optometrist, OD
+ATTENDING: Dr. O.D. Adegoke, OD
 
 .BRIEFOPHTH
 CHIEF COMPLAINT: ${sc.chiefComplaint}
@@ -2995,14 +2995,14 @@ FUNDUS: OD C/D ${sc.cdRatioOd} | OS C/D ${sc.cdRatioOs}. Macula flat OU.
 ${sc.assessment}
 ${sc.plan}
 
-ELECTRONIC SIGNATURE: Signed by Dr. Ada Optometrist, OD via GozVision Scribe Bridge.''';
+ELECTRONIC SIGNATURE: Signed by Dr. O.D. Adegoke, OD via GozVision Scribe Bridge.''';
         break;
 
       case 'Eyefinity EHR':
         formattedNote = '''=== EYEFINITY EHR / OFFICEMATE CLOUD EXAM NOTE ===
 Patient: ${sc.patientName}
 Exam Date: ${DateTime.now().toLocal().toString().split('.')[0]}
-Doctor: Dr. Ada Optometrist, OD
+Doctor: Dr. O.D. Adegoke, OD
 
 [CHIEF COMPLAINT]
 ${sc.chiefComplaint}
@@ -3056,7 +3056,7 @@ ${sc.plan}
       "resource": {
         "resourceType": "DocumentReference",
         "subject": { "display": "${sc.patientName}", "reference": "Patient/${sc.mrn}" },
-        "author": [{ "display": "Dr. Ada Optometrist, OD" }],
+        "author": [{ "display": "Dr. O.D. Adegoke, OD" }],
         "date": "${DateTime.now().toUtc().toIso8601String()}",
         "description": "GozVision Verified Clinical Scribe Chart"
       }
@@ -3160,7 +3160,7 @@ ${sc.plan}
     final note = '''=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===
 Patient: ${sc.patientName} (MRN: ${sc.mrn})
 Date: ${DateTime.now().toLocal().toString().split('.')[0]}
-Provider: Dr. Ada Optometrist, OD
+Provider: Dr. O.D. Adegoke, OD
 
 [SUBJECTIVE]
 ${sc.subjective}

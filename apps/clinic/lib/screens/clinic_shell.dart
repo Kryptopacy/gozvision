@@ -33,6 +33,7 @@ class ClinicShell extends StatefulWidget {
 class _ClinicShellState extends State<ClinicShell> {
   int _index = 0;
   bool _initializedIndex = false;
+  bool _showTelemetryAlert = true;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +136,7 @@ class _ClinicShellState extends State<ClinicShell> {
               child: Column(
                 children: [
                   _buildContentHeader(context, scope),
+                  _buildTelemetryBanner(context, scope),
                   const Divider(height: 1, thickness: 1, color: ClinicTheme.border),
                   Expanded(
                     child: AnimatedSwitcher(
@@ -210,6 +212,79 @@ class _ClinicShellState extends State<ClinicShell> {
             ],
           ),
           const Spacer(),
+          if (scope.isDemoMode) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: ClinicTheme.brandAccentFaint,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: ClinicTheme.brandAccent.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.science_rounded, size: 14, color: ClinicTheme.brandAccent),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Sandbox Persona:',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: ClinicTheme.textMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<DemoPersona>(
+                      value: scope.currentDemoPersona,
+                      dropdownColor: const Color(0xFF0F1520),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: ClinicTheme.brandAccent),
+                      style: GoogleFonts.sora(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: ClinicTheme.brandAccent,
+                      ),
+                      onChanged: (persona) {
+                        if (persona != null) {
+                          scope.switchDemoPersona(persona);
+                          if (persona == DemoPersona.frontDesk) {
+                            setState(() => _index = 1);
+                          } else if (persona == DemoPersona.doctor) {
+                            setState(() => _index = 0);
+                          }
+                        }
+                      },
+                      items: const [
+                        DropdownMenuItem(
+                          value: DemoPersona.doctor,
+                          child: Text('👨‍⚕️ Dr. O.D. Adegoke (Doctor / Scribe)'),
+                        ),
+                        DropdownMenuItem(
+                          value: DemoPersona.frontDesk,
+                          child: Text('📋 Amina Bello (Front Desk & Recall)'),
+                        ),
+                        DropdownMenuItem(
+                          value: DemoPersona.caregiver,
+                          child: Text('🛡️ Ngozi Balogun (Caregiver Remote)'),
+                        ),
+                        DropdownMenuItem(
+                          value: DemoPersona.patient,
+                          child: Text('👁️ Chioma Adeyemi (Low-Vision Patient)'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: 'Exit Demo Sandbox',
+              icon: const Icon(Icons.logout_rounded, size: 18, color: ClinicTheme.textMuted),
+              onPressed: () => scope.exitDemoMode(),
+            ),
+            const SizedBox(width: 12),
+          ],
           // Clinical Reference Button
           FilledButton.tonalIcon(
             style: FilledButton.styleFrom(
@@ -247,9 +322,93 @@ class _ClinicShellState extends State<ClinicShell> {
               ClinicChatDialog.show(
                 context,
                 patientId: 'demo_patient_001',
-                patientName: 'Eleanor Vance (AMD Trial)',
+                patientName: 'Chioma Adeyemi (AMD Trial)',
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTelemetryBanner(BuildContext context, ClinicScope scope) {
+    if (!_showTelemetryAlert) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1711),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: ClinicTheme.warningAmber.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: ClinicTheme.warningAmber.withOpacity(0.18),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.notifications_active_rounded, color: ClinicTheme.warningAmber, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: Colors.white),
+                children: [
+                  TextSpan(
+                    text: 'LIVE SAFETY TELEMETRY: ',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontWeight: FontWeight.w800,
+                      color: ClinicTheme.warningAmber,
+                      fontSize: 11.5,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: 'Chioma Adeyemi triggered Front Doorstep Assistance (Stair / Obstacle detected) · Caregiver Ngozi Balogun alerted via WhatsApp & Voice',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(
+              backgroundColor: ClinicTheme.warningAmber.withOpacity(0.2),
+              foregroundColor: ClinicTheme.warningAmber,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              textStyle: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700),
+            ),
+            onPressed: () {
+              setState(() {
+                _index = 0; // Jump to Low Vision Care Hub
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Viewing live Low Vision Telemetry for Chioma Adeyemi.'),
+                  backgroundColor: ClinicTheme.cardBackground,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            child: const Text('View Telemetry'),
+          ),
+          const SizedBox(width: 6),
+          IconButton(
+            icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white54),
+            tooltip: 'Acknowledge & Dismiss',
+            onPressed: () => setState(() => _showTelemetryAlert = false),
           ),
         ],
       ),

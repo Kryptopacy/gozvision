@@ -159,36 +159,36 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                   ? dbRows
                                   : [
                                       {
-                                        'patient_id': 'Eleanor Vance',
+                                        'patient_id': 'Folashade Adeleke',
                                         'type': 'Glaucoma Follow-Up & IOP Check',
                                         'status': 'in_lane',
                                         'lane': 'Exam Suite 1 (Glaucoma)',
                                         'start_at': '2026-10-10T10:30:00Z',
-                                        'doctor': 'Dr. Ada Optometrist, OD',
+                                        'doctor': 'Dr. O.D. Adegoke, OD',
                                       },
                                       {
-                                        'patient_id': 'Marcus Sterling',
+                                        'patient_id': 'Babajide Okafor',
                                         'type': 'Comprehensive Refraction & Dry Eye',
                                         'status': 'checked_in',
                                         'lane': 'Exam Suite 2 (Cornea)',
                                         'start_at': '2026-10-10T11:15:00Z',
-                                        'doctor': 'Dr. Ada Optometrist, OD',
+                                        'doctor': 'Dr. O.D. Adegoke, OD',
                                       },
                                       {
-                                        'patient_id': 'Arthur Pendelton',
+                                        'patient_id': 'Babatunde Danladi',
                                         'type': 'Low Vision AMD & Smart Glasses Fitting',
                                         'status': 'confirmed',
                                         'lane': 'Exam Suite 3 (Rehab Hub)',
                                         'start_at': '2026-10-10T11:45:00Z',
-                                        'doctor': 'Dr. Ada Optometrist, OD',
+                                        'doctor': 'Dr. O.D. Adegoke, OD',
                                       },
                                       {
-                                        'patient_id': 'Sarah Jenkins',
+                                        'patient_id': 'Chioma Adeyemi',
                                         'type': 'Diabetic Retinopathy Screening',
                                         'status': 'completed',
                                         'lane': 'Exam Suite 1 (Glaucoma)',
                                         'start_at': '2026-10-10T09:15:00Z',
-                                        'doctor': 'Dr. Ada Optometrist, OD',
+                                        'doctor': 'Dr. O.D. Adegoke, OD',
                                       },
                                     ];
 
@@ -248,16 +248,16 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                             : [
                                 {
                                   'kind': 'reminder',
-                                  'patient_name': 'Eleanor Vance',
+                                  'patient_name': 'Folashade Adeleke',
                                   'status': 'delivered',
                                   'channel': 'Two-Way SMS',
                                   'time': '10:00 AM',
                                   'message':
-                                      'GozVision Clinic: Hi Eleanor, your Glaucoma Follow-up appointment is today at 10:30 AM in Suite 1.',
+                                      'GozVision Clinic: Hello Folashade, your Glaucoma Follow-up appointment is today at 10:30 AM in Suite 1.',
                                 },
                                 {
                                   'kind': 'recall',
-                                  'patient_name': 'David Chen',
+                                  'patient_name': 'Chidi Obi',
                                   'status': 'queued',
                                   'channel': 'WhatsApp Business',
                                   'time': 'Scheduled 11:00 AM',
@@ -266,12 +266,12 @@ class _FrontDeskPageState extends State<FrontDeskPage> {
                                 },
                                 {
                                   'kind': 'recovery',
-                                  'patient_name': 'Maria Gonzalez',
+                                  'patient_name': 'Zainab Bello',
                                   'status': 'sent',
                                   'channel': 'Two-Way SMS',
                                   'time': 'Yesterday',
                                   'message':
-                                      'We missed you yesterday for your contact lens check! Tap here to reschedule with one click.',
+                                      'We missed you yesterday for your glaucoma pressure check with Dr. O.D. Adegoke! Tap here to reschedule with one click.',
                                 },
                               ];
 

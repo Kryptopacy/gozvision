@@ -599,7 +599,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       {
         'dir': 'OUTBOUND',
         'type': 'FHIR R4 DocumentReference',
-        'desc': 'SOAP Chart Push — Eleanor Vance (MRN #OPT-8021) to EpicCare Ambulatory',
+        'desc': 'SOAP Chart Push — Folashade Adeleke (MRN #OPT-8021) to EpicCare Ambulatory',
         'status': 'ACK 200 OK',
         'time': '10:44:12 AM',
         'color': const Color(0xFF10B981),
@@ -615,7 +615,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       {
         'dir': 'INBOUND',
         'type': 'HL7 ADT^A08 Patient Update',
-        'desc': 'Demographic Reconciliation — Arthur Pendelton (MRN #OPT-9942) from Eyefinity',
+        'desc': 'Demographic Reconciliation — Babatunde Danladi (MRN #OPT-9942) from Eyefinity',
         'status': 'PROCESSED',
         'time': '10:41:05 AM',
         'color': ClinicTheme.brandAccent,
@@ -623,7 +623,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       {
         'dir': 'OUTBOUND',
         'type': 'Optical Lab Direct Order (Rx Sync)',
-        'desc': 'Spectacle Rx Dispatched — Eleanor Vance (OD -1.75/-0.75, OS -2.00/-1.25) to Lab Direct',
+        'desc': 'Spectacle Rx Dispatched — Folashade Adeleke (OD -1.75/-0.75, OS -2.00/-1.25) to Lab Direct',
         'status': 'DISPATCHED',
         'time': '10:38:22 AM',
         'color': ClinicTheme.brandAccent,
@@ -855,13 +855,13 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   },
   "subject": {
     "reference": "Patient/OPT-8021",
-    "display": "Eleanor Vance"
+    "display": "Folashade Adeleke"
   },
   "date": "${DateTime.now().toUtc().toIso8601String()}",
   "author": [
     {
-      "reference": "Practitioner/DR-VANCE-01",
-      "display": "Dr. Ada Optometrist, OD"
+      "reference": "Practitioner/DR-ADEGOKE-01",
+      "display": "Dr. O.D. Adegoke, OD"
     }
   ],
   "content": [
@@ -870,7 +870,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
         "contentType": "text/plain",
         "language": "en-US",
         "title": "GozVision Verified Clinical Scribe Note",
-        "data": "=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===\\nPatient: Eleanor Vance\\nAssessment: Primary Open-Angle Glaucoma Suspect (OS), Dry Eye Syndrome\\nPlan: Latanoprost 0.005% QHS OS, Systane Complete PF QID OU..."
+        "data": "=== OPHTHALMIC CLINICAL ENCOUNTER NOTE ===\\nPatient: Folashade Adeleke\\nAssessment: Primary Open-Angle Glaucoma Suspect (OS), Dry Eye Syndrome\\nPlan: Latanoprost 0.005% QHS OS, Systane Complete PF QID OU..."
       }
     }
   ],
@@ -907,7 +907,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   },
   "subject": {
     "reference": "Patient/OPT-8021",
-    "display": "Eleanor Vance"
+    "display": "Folashade Adeleke"
   },
   "effectiveDateTime": "${DateTime.now().toUtc().toIso8601String()}",
   "component": [
@@ -939,7 +939,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   },
   "subject": {
     "reference": "Patient/OPT-8021",
-    "display": "Eleanor Vance"
+    "display": "Folashade Adeleke"
   },
   "component": [
     {
@@ -972,7 +972,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
   },
   "subject": {
     "reference": "Patient/OPT-8021",
-    "display": "Eleanor Vance"
+    "display": "Folashade Adeleke"
   },
   "recordedDate": "${DateTime.now().toUtc().toIso8601String()}"
 }''',

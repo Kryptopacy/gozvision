@@ -34,9 +34,9 @@ NOW = datetime.now(timezone.utc)
 
 USERS = {
     "practitioner@gozvision.demo": ("Dr. O.D. Adegoke", "Practitioner"),
-    "staff@gozvision.demo": ("Sam Front Desk", "Staff"),
-    "caregiver@gozvision.demo": ("Nina Caregiver", "Caregiver"),
-    "demo-patient@gozvision.demo": ("Maria Santos", "Patient"),
+    "staff@gozvision.demo": ("Amina Bello", "Staff"),
+    "caregiver@gozvision.demo": ("Ngozi Balogun", "Caregiver"),
+    "demo-patient@gozvision.demo": ("Chioma Adeyemi", "Patient"),
 }
 
 
@@ -100,18 +100,18 @@ def main() -> None:
     # ---- Profiles -----------------------------------------------------------
     profiles = {
         practitioner: {"email": "practitioner@gozvision.demo",
-                       "name": "Dr. Ada Optometrist", "role": "Practitioner",
+                       "name": "Dr. O.D. Adegoke", "role": "Practitioner",
                        "clinic_id": clinic, "assigned_patients": []},
         uids["staff@gozvision.demo"]: {
-            "email": "staff@gozvision.demo", "name": "Sam Front Desk",
+            "email": "staff@gozvision.demo", "name": "Amina Bello",
             "role": "Staff", "clinic_id": clinic, "assigned_patients": []},
         caregiver: {"email": "caregiver@gozvision.demo",
-                    "name": "Nina Caregiver", "role": "Caregiver",
+                    "name": "Ngozi Balogun", "role": "Caregiver",
                     "clinic_id": None,
                     "assigned_patients": [demo_patient_uid, "demo_patient_001"],
-                    "caregiver_phone": "+15550000999"},
+                    "caregiver_phone": "+2348030000999"},
         demo_patient_uid: {"email": "demo-patient@gozvision.demo",
-                           "name": "Maria Santos", "role": "Patient",
+                           "name": "Chioma Adeyemi", "role": "Patient",
                            "clinic_id": clinic, "assigned_patients": []},
     }
     for uid, data in profiles.items():
@@ -123,12 +123,12 @@ def main() -> None:
         # The demo patient row is keyed by its auth uid: the copilot's
         # zero-UI session signs in as this account, so every write satisfies
         # RLS under a real identity (CONTEXT.md — Patient identity).
-        demo_patient_uid: {"name": "Maria Santos", "age": 71,
-                           "condition": "AMD (dry)", "phone": "+15550000001"},
-        "demo_patient_002": {"name": "Chidi Okafor", "age": 58,
-                             "condition": "Glaucoma suspect", "phone": "+15550000002"},
-        "demo_patient_003": {"name": "Grace Adeyemi", "age": 66,
-                             "condition": "Diabetic retinopathy", "phone": "+15550000003"},
+        demo_patient_uid: {"name": "Chioma Adeyemi", "age": 71,
+                           "condition": "AMD (dry) & low vision", "phone": "+2348030000001"},
+        "demo_patient_002": {"name": "Babajide Okafor", "age": 58,
+                             "condition": "Glaucoma suspect", "phone": "+2348030000002"},
+        "demo_patient_003": {"name": "Folashade Adeleke", "age": 66,
+                             "condition": "Diabetic retinopathy", "phone": "+2348030000003"},
     }
     for pid, p in patients.items():
         db.table("patients").upsert({

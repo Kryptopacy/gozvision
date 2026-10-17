@@ -26,4 +26,8 @@ class WebAudioBridge {
   static void playPing() {
     // Not used on native
   }
+
+  static void speakOfflinePrompt(String prompt) {
+    // Not used on native
+  }
 }
