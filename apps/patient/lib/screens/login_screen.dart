@@ -344,6 +344,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ),
+                              if (_isLogin) ...[
+                                const SizedBox(height: 6),
+                                Center(
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      _emailController.text = 'caregiver@gozvision.demo';
+                                      _passwordController.text = 'gozvision-demo';
+                                      _submitAuth();
+                                    },
+                                    icon: const Icon(Icons.flash_on_rounded, size: 14, color: GozAITheme.warningAmber),
+                                    label: const Text(
+                                      'Fill Demo Caregiver Credentials (Ngozi Balogun)',
+                                      style: TextStyle(color: GozAITheme.warningAmber, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
