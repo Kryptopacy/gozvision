@@ -286,27 +286,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Center(
-                        child: TextButton.icon(
-                          onPressed: () {
-                            context.read<ClinicScope>().enterDemoMode(DemoPersona.doctor);
-                          },
-                          icon: const Icon(Icons.science_outlined, size: 15, color: ClinicTheme.brandAccent),
-                          label: const Text(
-                            'Explore Interactive Clinical Sandbox →',
-                            style: TextStyle(
-                              color: ClinicTheme.brandAccent,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: TextButton.styleFrom(
-                            foregroundColor: ClinicTheme.brandAccent,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

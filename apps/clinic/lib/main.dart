@@ -32,6 +32,19 @@ class _ClinicAppState extends State<ClinicApp> {
   final _scope = ClinicScope();
 
   @override
+  void initState() {
+    super.initState();
+    // Detect evaluator sandbox entry via query parameter (?demo=true) or fragment (#demo / #sandbox)
+    final uri = Uri.base;
+    final isDemoRequested = uri.queryParameters['demo'] == 'true' ||
+        uri.fragment.contains('demo') ||
+        uri.fragment.contains('sandbox');
+    if (isDemoRequested) {
+      _scope.enterDemoMode(DemoPersona.doctor);
+    }
+  }
+
+  @override
   void dispose() {
     _scope.dispose();
     super.dispose();

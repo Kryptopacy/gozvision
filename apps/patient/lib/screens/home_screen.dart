@@ -1084,12 +1084,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         side: BorderSide(color: GozAITheme.malachite.withValues(alpha: 0.4)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Daughter Sarah', style: TextStyle(fontSize: 11)),
+                      child: const Text('Daughter Zainab', style: TextStyle(fontSize: 11)),
                       onPressed: () {
                         setModalState(() {
-                          spokenText = 'Your daughter Sarah Vance is at the front door.';
+                          spokenText = 'Your daughter Zainab Adeyemi is at the front door.';
                           guidance = 'Safe to unlock and open the door.';
-                          entityName = 'Sarah Vance (Daughter)';
+                          entityName = 'Zainab Adeyemi (Daughter)';
                           isTrusted = true;
                         });
                       },

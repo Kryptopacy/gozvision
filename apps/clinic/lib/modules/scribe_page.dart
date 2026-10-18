@@ -103,7 +103,7 @@ class _ScribePageState extends State<ScribePage> with SingleTickerProviderStateM
       plan:
           '1. Discontinue vasoconstrictor drops (Visine) immediately.\n2. Initiate preservative-free artificial tears (Systane Complete PF) QID OU.\n3. Prescribe Loteprednol etabonate 0.5% ophthalmic suspension BID OU for 2 weeks to calm ocular surface inflammation.\n4. Recommend warm compress eye mask (Bruder mask) 10 min QHS followed by lid margin massage.\n5. Discussed in-office thermal pulsation therapy (LipiFlow / TearCare) if symptoms persist.\n6. Follow-up in 3 weeks for corneal staining re-evaluation.',
       transcript:
-          '''[00:03] Dr. Adegoke: "Hello Marcus, what brings you into the clinic today?"
+          '''[00:03] Dr. Adegoke: "Hello Babajide, what brings you into the clinic today?"
 [00:10] Babajide Okafor: "Dr. Adegoke, my eyes feel like they have sand in them by 2 PM every single day. I'm staring at code on multiple monitors all day and my vision gets blurry until I blink hard."
 [00:24] Dr. Adegoke: "Are you using any over-the-counter drops currently?"
 [00:28] Babajide Okafor: "I was using red-eye relief drops three or four times a day, but my eyes seem even redder now when they wear off."

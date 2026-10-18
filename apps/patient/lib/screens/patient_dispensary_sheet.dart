@@ -43,7 +43,7 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
       'category': 'Frames',
       'price': 185.00,
       'currency': 'USD',
-      'rx': 'Prescribed by Dr. Ada (Right Eye: -2.50, Left Eye: -2.25)',
+      'rx': 'Prescribed by Dr. O.D. Adegoke (Right Eye: -2.50, Left Eye: -2.25)',
       'description': 'Ultra-lightweight, durable frame custom-shaped for comfort and special lenses.',
       'tag': 'Doctor Prescribed',
       'icon': Icons.remove_red_eye_outlined,
@@ -116,8 +116,8 @@ class _PatientDispensarySheetState extends State<PatientDispensarySheet> {
   ) async {
     HapticService.tap();
     final user = Supabase.instance.client.auth.currentUser;
-    final patientEmail = user?.email ?? 'eleanor.vance@example.com';
-    final patientName = user?.userMetadata?['full_name'] as String? ?? 'Eleanor Vance';
+    final patientEmail = user?.email ?? 'chioma.adeyemi@example.com';
+    final patientName = user?.userMetadata?['full_name'] as String? ?? 'Chioma Adeyemi';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

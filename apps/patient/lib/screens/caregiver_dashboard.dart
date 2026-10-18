@@ -34,26 +34,26 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   // Verified Care Circle Members (Dual-Layer BIPA/GDPR Consented Directory)
   final List<Map<String, dynamic>> _careCircleMembers = [
     {
-      'id': 'sarah_vance',
-      'name': 'Sarah Vance',
+      'id': 'zainab_adeyemi',
+      'name': 'Zainab Adeyemi',
       'relationship': 'Daughter / Primary Family Guardian',
-      'phone': '+1 (555) 349-8821',
+      'phone': '+234 803 491 8821',
       'bipaConsent': true,
       'isTrusted': true,
     },
     {
       'id': 'nurse_david',
-      'name': 'Nurse David',
-      'relationship': 'Visiting Home Health Aide',
-      'phone': '+1 (555) 782-9904',
+      'name': 'Nurse David Okonkwo',
+      'relationship': 'Visiting Community Health Aide',
+      'phone': '+234 802 782 9904',
       'bipaConsent': true,
       'isTrusted': true,
     },
     {
-      'id': 'dr_miller',
-      'name': 'Dr. Marcus Miller, O.D.',
+      'id': 'dr_adegoke',
+      'name': 'Dr. O.D. Adegoke, O.D.',
       'relationship': 'Attending Optometrist',
-      'phone': '+1 (555) 431-2290',
+      'phone': '+234 814 431 2290',
       'bipaConsent': true,
       'isTrusted': true,
     },
@@ -61,9 +61,9 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
 
   // Latest Ring Doorstep Entity Recognition Event
   Map<String, dynamic> _doorstepEntity = {
-    'entity': 'Sarah Vance',
+    'entity': 'Zainab Adeyemi',
     'role': 'Daughter / Primary Family Guardian',
-    'spoken': 'Your daughter Sarah Vance is at the front door.',
+    'spoken': 'Your daughter Zainab Adeyemi is at the front door.',
     'guidance': 'Safe to unlock and open the door.',
     'isTrusted': true,
     'layer': 'Layer 1: Consented Care Circle Whitelist',
@@ -745,8 +745,8 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       backgroundColor: GozAITheme.malachite.withValues(alpha: 0.12),
                       side: BorderSide(color: GozAITheme.malachite.withValues(alpha: 0.4)),
                       avatar: const Icon(Icons.family_restroom_rounded, size: 16, color: GozAITheme.malachite),
-                      label: const Text('Daughter Sarah Vance Arrives', style: TextStyle(color: Colors.white, fontSize: 11.5)),
-                      onPressed: () => _simulateDoorstepEntity('sarah'),
+                      label: const Text('Daughter Zainab Adeyemi Arrives', style: TextStyle(color: Colors.white, fontSize: 11.5)),
+                      onPressed: () => _simulateDoorstepEntity('zainab'),
                     ),
                     ActionChip(
                       backgroundColor: const Color(0xFFFF9900).withValues(alpha: 0.12),
@@ -936,11 +936,11 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   void _simulateDoorstepEntity(String scenario) {
     HapticService.tap();
     setState(() {
-      if (scenario == 'sarah') {
+      if (scenario == 'zainab') {
         _doorstepEntity = {
-          'entity': 'Sarah Vance',
+          'entity': 'Zainab Adeyemi',
           'role': 'Daughter / Primary Family Guardian',
-          'spoken': 'Your daughter Sarah Vance is at the front door.',
+          'spoken': 'Your daughter Zainab Adeyemi is at the front door.',
           'guidance': 'Safe to unlock and open the door.',
           'isTrusted': true,
           'layer': 'Layer 1: Consented Care Circle Whitelist',
@@ -1022,7 +1022,7 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
                     labelText: 'Full Name',
-                    hintText: 'e.g. Michael Vance',
+                    hintText: 'e.g. Babajide Adeyemi',
                     prefixIcon: Icon(Icons.badge_outlined, color: GozAITheme.malachite),
                   ),
                 ),

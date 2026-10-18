@@ -639,7 +639,7 @@ class _EhrHubPageState extends State<EhrHubPage> with SingleTickerProviderStateM
       {
         'dir': 'INBOUND',
         'type': 'HL7 SIU^S12 Appointment Booking',
-        'desc': 'New Appointment Ingestion — Marcus Sterling (Comprehensive Exam, Lane 2)',
+        'desc': 'New Appointment Ingestion — Babatunde Danladi (Comprehensive Exam, Lane 2)',
         'status': 'SCHEDULED',
         'time': '10:20:00 AM',
         'color': ClinicTheme.brandAccent,

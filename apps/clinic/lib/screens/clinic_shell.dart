@@ -335,16 +335,16 @@ class _ClinicShellState extends State<ClinicShell> {
     if (!_showTelemetryAlert) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      margin: const EdgeInsets.fromLTRB(24, 10, 24, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1711),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.5)),
+        color: const Color(0xFF181310),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.45)),
         boxShadow: [
           BoxShadow(
-            color: ClinicTheme.warningAmber.withOpacity(0.12),
-            blurRadius: 16,
+            color: ClinicTheme.warningAmber.withOpacity(0.08),
+            blurRadius: 12,
             offset: const Offset(0, 2),
           ),
         ],
@@ -352,43 +352,78 @@ class _ClinicShellState extends State<ClinicShell> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
               color: ClinicTheme.warningAmber.withOpacity(0.18),
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: ClinicTheme.warningAmber.withOpacity(0.35)),
             ),
-            child: const Icon(Icons.notifications_active_rounded, color: ClinicTheme.warningAmber, size: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: ClinicTheme.warningAmber, size: 13),
+                const SizedBox(width: 4),
+                Text(
+                  'HAZARD DETECTED',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontWeight: FontWeight.w800,
+                    color: ClinicTheme.warningAmber,
+                    fontSize: 10.5,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: Colors.white),
-                children: [
-                  TextSpan(
-                    text: 'LIVE SAFETY TELEMETRY: ',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontWeight: FontWeight.w800,
-                      color: ClinicTheme.warningAmber,
-                      fontSize: 11.5,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const TextSpan(
-                    text: 'Chioma Adeyemi triggered Front Doorstep Assistance (Stair / Obstacle detected) · Caregiver Ngozi Balogun alerted via WhatsApp & Voice',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
+          const SizedBox(width: 10),
+          Text(
+            'Chioma Adeyemi',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 14)),
+          ),
+          Text(
+            'Doorstep Obstacle',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white70,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text('·', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 14)),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle_outline_rounded, size: 12, color: ClinicTheme.malachite.withOpacity(0.8)),
+              const SizedBox(width: 4),
+              Text(
+                'Caregiver Notified',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: ClinicTheme.malachite.withOpacity(0.9),
+                ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 12),
+          const Spacer(),
           FilledButton.tonal(
             style: FilledButton.styleFrom(
-              backgroundColor: ClinicTheme.warningAmber.withOpacity(0.2),
+              backgroundColor: ClinicTheme.warningAmber.withOpacity(0.18),
               foregroundColor: ClinicTheme.warningAmber,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              minimumSize: const Size(0, 28),
               textStyle: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               setState(() {
@@ -402,13 +437,16 @@ class _ClinicShellState extends State<ClinicShell> {
                 ),
               );
             },
-            child: const Text('View Telemetry'),
+            child: const Text('Review Telemetry'),
           ),
           const SizedBox(width: 6),
-          IconButton(
-            icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white54),
-            tooltip: 'Acknowledge & Dismiss',
-            onPressed: () => setState(() => _showTelemetryAlert = false),
+          InkWell(
+            borderRadius: BorderRadius.circular(6),
+            onTap: () => setState(() => _showTelemetryAlert = false),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.close_rounded, size: 15, color: Colors.white38),
+            ),
           ),
         ],
       ),
