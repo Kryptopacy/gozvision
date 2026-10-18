@@ -45,19 +45,35 @@
 
 <style>
   :root {
-    --obsidian: #08090c;
-    --obsidian-elevated: #0e1117;
-    --panel: #131722;
-    --panel-glass: rgba(19, 23, 34, 0.75);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --panel-border-hover: rgba(56, 189, 248, 0.35);
-    --ink: #f8fafc;
-    --ink-secondary: #94a3b8;
-    --ink-muted: #64748b;
+    /* Brand Foundation: Deep Obsidian Charcoal */
+    --obsidian: #05070a;
+    --obsidian-elevated: #0b0f17;
+    --charcoal-surface: #0f1522;
+    --charcoal-elevated: #141c2c;
+    --charcoal-highlight: #1b263b;
+    --panel: #0d121c;
+    --panel-glass: rgba(13, 18, 28, 0.82);
+    --panel-border: rgba(255, 255, 255, 0.09);
+    --panel-border-bright: rgba(255, 255, 255, 0.18);
+    --panel-border-hover: rgba(56, 189, 248, 0.45);
+    
+    /* Brand Accent: Medical Optometric Blue & Electric Cyan */
     --accent: #38bdf8;
-    --accent-dim: #0284c7;
-    --accent-glow: rgba(56, 189, 248, 0.18);
-    --accent-faint: rgba(56, 189, 248, 0.06);
+    --accent-blue: #0284c7;
+    --accent-dim: #0369a1;
+    --accent-laser: #7dd3fc;
+    --accent-glow: rgba(56, 189, 248, 0.22);
+    --accent-faint: rgba(56, 189, 248, 0.08);
+    --blue-gradient: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    
+    /* Brand Contrast: Pure Medical White & Crisp Hierarchy */
+    --ink: #ffffff;
+    --ink-secondary: #cbd5e1;
+    --ink-muted: #94a3b8;
+    --white-pure: #ffffff;
+    --white-soft: #f8fafc;
+    
+    /* Functional Semantic Accents */
     --success: #10b981;
     --amber: #f59e0b;
     --alert: #ef4444;
@@ -362,20 +378,19 @@
   .hero-title-lead {
     display: block;
     color: #ffffff;
-    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 2px 6px rgba(0, 0, 0, 0.9);
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.98), 0 2px 8px rgba(0, 0, 0, 0.9);
   }
   .hero-title-sub {
     display: block;
-    color: #ffffff;
-    text-shadow: 
-      0 4px 28px rgba(0, 0, 0, 0.98), 
-      0 2px 10px rgba(0, 0, 0, 0.95), 
-      0 0 35px rgba(56, 189, 248, 0.45);
+    background: linear-gradient(135deg, #ffffff 15%, #7dd3fc 55%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 35px rgba(56, 189, 248, 0.45));
   }
   .hero-desc {
     position: relative;
     z-index: 3;
-    color: #f1f5f9;
+    color: #e2e8f0;
     font-size: clamp(16.5px, 1.85vw, 20px);
     max-width: 58ch;
     margin: 0 auto 38px;
@@ -384,8 +399,7 @@
     letter-spacing: -0.01em;
     text-shadow: 
       0 2px 12px rgba(0, 0, 0, 0.95),
-      0 4px 24px rgba(0, 0, 0, 0.98),
-      0 0 1px rgba(0, 0, 0, 1);
+      0 4px 24px rgba(0, 0, 0, 0.98);
   }
   .hero-actions {
     display: flex; align-items: center; justify-content: center;
@@ -394,12 +408,12 @@
   .hero-metrics-pill {
     display: inline-flex; align-items: center; gap: 16px;
     padding: 10px 24px; border-radius: var(--radius-full);
-    background: rgba(14, 17, 23, 0.82);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: linear-gradient(180deg, rgba(17, 24, 38, 0.88) 0%, rgba(9, 13, 21, 0.94) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 28px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     font-size: 13.5px; color: #cbd5e1;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 28px rgba(56, 189, 248, 0.15);
   }
   .hero-metrics-pill strong { color: #ffffff; font-weight: 700; }
   .hero-metrics-pill .sep { opacity: 0.3; }
@@ -1363,28 +1377,126 @@
     .bento-grid-4 { grid-template-columns: 1fr; }
   }
 
-  /* Dual Portal Action Bar */
+  /* Executive Institutional Perspectives (Doctor & Patient Gateways) */
   .portal-showcase {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-    margin-top: 40px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    margin-top: 48px;
   }
-  @media (max-width: 760px) {
+  @media (max-width: 960px) {
     .portal-showcase { grid-template-columns: 1fr; }
   }
   .portal-tile {
-    background: linear-gradient(180deg, var(--panel-glass) 0%, rgba(8,9,12,0.92) 100%);
-    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, #0e1522 0%, #06090e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
-    padding: 36px;
-    transition: all 0.25s ease;
+    padding: 38px 34px;
+    position: relative;
+    overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between;
+    gap: 24px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
-  .portal-tile:hover {
-    border-color: rgba(56, 189, 248, 0.4);
-    box-shadow: 0 10px 40px var(--accent-glow);
+  .portal-tile.doctor {
+    border-top: 2px solid var(--accent);
   }
-  .portal-tile h3 { font-size: 23px; margin: 16px 0 8px; }
-  .portal-tile p { color: var(--ink-secondary); font-size: 15px; margin-bottom: 24px; }
+  .portal-tile.doctor:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(56, 189, 248, 0.22);
+    transform: translateY(-3px);
+  }
+  .portal-tile.patient {
+    border-top: 2px solid #34d399;
+  }
+  .portal-tile.patient:hover {
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(52, 211, 153, 0.22);
+    transform: translateY(-3px);
+  }
+  .portal-badge-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .portal-badge {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 12px; border-radius: var(--radius-full);
+  }
+  .portal-tile.doctor .portal-badge {
+    color: var(--accent); background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+  }
+  .portal-tile.patient .portal-badge {
+    color: #34d399; background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+  }
+  .portal-tag {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted);
+  }
+  .portal-tile h3 {
+    font-size: clamp(23px, 2.5vw, 29px);
+    font-weight: 800; letter-spacing: -0.025em;
+    color: #fff; margin: 0 0 8px;
+  }
+  .portal-tile p {
+    color: var(--ink-secondary); font-size: 14.5px;
+    line-height: 1.6; margin-bottom: 0;
+  }
+  .portal-stage {
+    background: rgba(5, 7, 11, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    margin: 6px 0;
+  }
+  .portal-stage-top {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-secondary);
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .portal-stage-live {
+    display: flex; align-items: center; gap: 7px; font-weight: 700; color: #fff;
+  }
+  .pulse-dot-live {
+    width: 7px; height: 7px; border-radius: 50%;
+    animation: pulseDotAnim 1.4s infinite;
+  }
+  .portal-tile.doctor .pulse-dot-live { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .portal-tile.patient .pulse-dot-live { background: #34d399; box-shadow: 0 0 10px #34d399; }
+  @keyframes pulseDotAnim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+  .portal-stage-row {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 7px; padding: 9px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .portal-stage-label {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted); text-transform: uppercase;
+  }
+  .portal-stage-val {
+    font-size: 12.5px; font-weight: 700; color: #fff;
+  }
+  .portal-pills-strip {
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 3px;
+  }
+  .portal-pill {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--ink-secondary);
+  }
+  .portal-action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; padding-top: 6px;
+  }
+  .portal-trust-note {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
 
   /* Footer */
   footer {
@@ -2141,36 +2253,118 @@
     </div>
   </section>
 
-  <!-- Portal Navigation Cards -->
-  <section>
+  <!-- Executive Institutional Dual-Perspective Gateway (Doctor & Patient) -->
+  <section id="perspectives">
     <div class="wrap">
+      <div class="section-intro">
+        <span class="section-tag">Two Specialized Experiences · One Unified Ecosystem</span>
+        <h2 class="section-title">Built for Modern Practice & Everyday Autonomy</h2>
+        <p class="section-sub">
+          Whether you are an optometrist streamlining lane documentation or a low-vision patient navigating your day, GozVision delivers purpose-built software engineered for clinical rigor.
+        </p>
+      </div>
+
       <div class="portal-showcase">
-        <div class="portal-tile">
+        <!-- Perspective 1: Doctor & Clinical Practice Suite -->
+        <div class="portal-tile doctor">
           <div>
-            <span class="card-tag">Doctor & Staff Portal</span>
-            <div class="card-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 10h1"></path><path d="M9 14h1"></path><path d="M9 18h1"></path><path d="M14 10h1"></path><path d="M14 14h1"></path><path d="M14 18h1"></path></svg>
+            <div class="portal-badge-row">
+              <span class="portal-badge">Clinic Practice Suite</span>
+              <span class="portal-tag">NOA / ODORBN / AAO Grounded</span>
             </div>
             <h3>Goz Clinic Suite</h3>
             <p>
-              Multi-tenant B2B practice management for optometrists. Clinical Exam Scribe workspace, Optical Dispensary & Storefront with Bachs instant payouts, Low Vision Hub, and Recall CRM.
+              Enterprise practice management for optometrists. Eliminate manual lane typing with on-device Clinical Exam Scribe charting, zero-wait patient recall CRM, and instant optical dispensary payouts.
             </p>
+
+            <!-- Live Clinical Suite Workflow Stage Mockup -->
+            <div class="portal-stage">
+              <div class="portal-stage-top">
+                <span class="portal-stage-live">
+                  <span class="pulse-dot-live"></span>
+                  Scribe Active · Dr. Ada, OD (Lane 02)
+                </span>
+                <span style="color:var(--accent);">FHIR R4 Connected</span>
+              </div>
+              <div class="portal-stage-row">
+                <span class="portal-stage-label">Live Speech-to-Chart</span>
+                <span class="portal-stage-val">IOP: OD 16 · OS 17 mmHg (POAG Stable)</span>
+              </div>
+              <div class="portal-stage-row">
+                <span class="portal-stage-label">Automated Recall</span>
+                <span class="portal-stage-val">84% Re-Booking (WhatsApp & SMS)</span>
+              </div>
+              <div class="portal-pills-strip">
+                <span class="portal-pill">Epic Systems</span>
+                <span class="portal-pill">Eyefinity EHR</span>
+                <span class="portal-pill">RevolutionEHR</span>
+                <span class="portal-pill">ModMed EMA</span>
+                <span class="portal-pill">Bachs POS</span>
+              </div>
+            </div>
           </div>
-          <a class="btn btn-primary" href="/clinic">Access Clinic Suite →</a>
+
+          <div class="portal-action-row">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <a class="btn btn-primary" href="/clinic">Launch Clinic Suite (B2B) →</a>
+              <button class="btn btn-ghost btn-sm" onclick="openLeadModal()">Request Practice Demo</button>
+            </div>
+            <span class="portal-trust-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              Zero Egress Option · Certified FHIR
+            </span>
+          </div>
         </div>
 
-        <div class="portal-tile">
+        <!-- Perspective 2: Low-Vision Patient & Family Companion -->
+        <div class="portal-tile patient">
           <div>
-            <span class="card-tag">Patient Companion</span>
-            <div class="card-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path></svg>
+            <div class="portal-badge-row">
+              <span class="portal-badge">Patient Autonomy</span>
+              <span class="portal-tag">Accessible · Voice & Tactile First</span>
             </div>
-            <h3>Goz Patient App</h3>
+            <h3>Goz Patient Companion</h3>
             <p>
-              The accessible mobile app for patients and caregivers. High-contrast tactile design, spoken scene narration, doctor prescriptions, and direct optical checkout.
+              Continuous everyday visual independence. Real-time spoken floor elevation warnings, voice eye drop bottle verification, and instant caregiver SOS on smart audio frames or mobile.
             </p>
+
+            <!-- Live Assistive Companion HUD Stage Mockup -->
+            <div class="portal-stage">
+              <div class="portal-stage-top">
+                <span class="portal-stage-live">
+                  <span class="pulse-dot-live"></span>
+                  Audio Guidance Active · Solos AirGo 3
+                </span>
+                <span style="color:#34d399;">Battery 88% · BT Connected</span>
+              </div>
+              <div class="portal-stage-row">
+                <span class="portal-stage-label">Elevation Alert</span>
+                <span class="portal-stage-val">"Caution: Step down 3 paces ahead" (40ms)</span>
+              </div>
+              <div class="portal-stage-row">
+                <span class="portal-stage-label">Drop Verification</span>
+                <span class="portal-stage-val">"Latanoprost 0.005% — 1 drop Left Eye"</span>
+              </div>
+              <div class="portal-pills-strip">
+                <span class="portal-pill">Solos AirGo 3</span>
+                <span class="portal-pill">Even Realities G1</span>
+                <span class="portal-pill">Ray-Ban Meta</span>
+                <span class="portal-pill">Rokid</span>
+                <span class="portal-pill">iOS & Android PWA</span>
+              </div>
+            </div>
           </div>
-          <a class="btn btn-ghost" href="/patient">Open Patient App →</a>
+
+          <div class="portal-action-row">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <a class="btn btn-secondary" href="/patient">Open Patient App (PWA) →</a>
+              <a class="btn btn-ghost btn-sm" href="#simulator">Test in Simulator ↑</a>
+            </div>
+            <span class="portal-trust-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+              WCAG 2.1 AAA Compliant · Spoken Dialects
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -2565,11 +2759,12 @@
     alert('Project Brief copied to clipboard!');
   }
 
-  // ── High-Performance Optical Canvas & Interactive Volumetric Spotlight ──
+  // ── High-Performance 6-DoF Optical Engine & Maneuverable Volumetric Spotlight ──
   (function initHeroCanvas() {
     const canvas = document.getElementById('heroCanvas');
     const hero = document.getElementById('heroSection');
     const lensBackdrop = document.getElementById('heroLensBackdrop');
+    const lensHalo = document.querySelector('.hero-lens-halo');
     const bgImage = document.querySelector('.hero-bg-image');
     if (!canvas) return;
 
@@ -2579,13 +2774,21 @@
     let particles = [];
     const PARTICLE_COUNT = 48;
 
-    // Interactive 3D Parallax State
-    let targetRotX = 0, targetRotY = 0;
-    let currRotX = 0, currRotY = 0;
-    let targetLensX = 0, targetLensY = 0;
-    let currLensX = 0, currLensY = 0;
+    // 6-DoF Spatial Physics State (Yaw, Pitch, Roll, X, Y, Z)
+    let targetRotX = 0, targetRotY = 0, targetRotZ = 0;
+    let currRotX = 0, currRotY = 0, currRotZ = 0;
+    let velRotX = 0, velRotY = 0, velRotZ = 0;
+
+    let targetLensX = 0, targetLensY = 0, targetLensZ = 0;
+    let currLensX = 0, currLensY = 0, currLensZ = 0;
+    let velLensX = 0, velLensY = 0, velLensZ = 0;
+
     let targetBgX = 0, targetBgY = 0;
     let currBgX = 0, currBgY = 0;
+
+    let lastInteractTime = Date.now();
+    let isTouchActive = false;
+    let hasGyro = false;
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
@@ -2599,43 +2802,99 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Mouse Tracking across Hero Section
+    // Core Interaction Updater (Mouse, Touch, or Gyro)
+    function updateManeuver(normX, normY, rawX, rawY, isDirect) {
+      lastInteractTime = Date.now();
+      mouse.rawX = rawX;
+      mouse.rawY = rawY;
+      mouse.isOver = true;
+
+      // Dynamic 6-DoF Targets
+      // 1. Pitch (X-rotation) & Yaw (Y-rotation)
+      targetRotX = -normY * 28; // Up to ±28deg pitch
+      targetRotY = normX * 32;  // Up to ±32deg yaw
+
+      // 2. Dynamic Roll (Z-rotation) derived from orbital mouse angle & velocity
+      targetRotZ = normX * normY * 16; // Gyroscopic twist up to ±16deg
+
+      // 3. 3D Spatial Translation (X, Y, Z)
+      targetLensX = normX * 42; // Lateral swing ±42px
+      targetLensY = normY * 30; // Vertical swing ±30px
+      targetLensZ = isDirect ? 38 : 12; // Protrude toward camera on interaction
+
+      // 4. Volumetric Spotlight & Deep Backdrop Counter-Parallax
+      mouse.targetX = normX * 55;
+      mouse.targetY = normY * 36;
+      targetBgX = -normX * 16;
+      targetBgY = -normY * 10;
+    }
+
+    function resetManeuver() {
+      mouse.isOver = false;
+      mouse.targetX = 0;
+      mouse.targetY = 0;
+      targetRotX = 0;
+      targetRotY = 0;
+      targetRotZ = 0;
+      targetLensX = 0;
+      targetLensY = 0;
+      targetLensZ = 0;
+      targetBgX = 0;
+      targetBgY = 0;
+    }
+
+    // 1. Desktop Mouse Movement
     if (hero) {
       hero.addEventListener('mousemove', (e) => {
         const rect = hero.getBoundingClientRect();
         const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-
-        mouse.rawX = e.clientX - rect.left;
-        mouse.rawY = e.clientY - rect.top;
-        mouse.isOver = true;
-
-        mouse.targetX = normX * 45;
-        mouse.targetY = normY * 30;
-
-        // 3D Lens Parallax behind Visual Autonomy
-        targetRotX = -normY * 15;
-        targetRotY = normX * 16;
-        targetLensX = normX * 24;
-        targetLensY = normY * 18;
-
-        // Subtle Deep Background Parallax
-        targetBgX = -normX * 12;
-        targetBgY = -normY * 8;
+        updateManeuver(normX, normY, e.clientX - rect.left, e.clientY - rect.top, true);
       });
 
       hero.addEventListener('mouseleave', () => {
-        mouse.isOver = false;
-        mouse.targetX = 0;
-        mouse.targetY = 0;
-        targetRotX = 0;
-        targetRotY = 0;
-        targetLensX = 0;
-        targetLensY = 0;
-        targetBgX = 0;
-        targetBgY = 0;
+        resetManeuver();
       });
+
+      // 2. Mobile Touch Support (Full 360-degree finger tracking on mobile devices)
+      hero.addEventListener('touchstart', (e) => {
+        if (!e.touches || !e.touches[0]) return;
+        isTouchActive = true;
+        const touch = e.touches[0];
+        const rect = hero.getBoundingClientRect();
+        const normX = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const normY = ((touch.clientY - rect.top) / rect.height) * 2 - 1;
+        updateManeuver(normX, normY, touch.clientX - rect.left, touch.clientY - rect.top, true);
+      }, { passive: true });
+
+      hero.addEventListener('touchmove', (e) => {
+        if (!e.touches || !e.touches[0]) return;
+        const touch = e.touches[0];
+        const rect = hero.getBoundingClientRect();
+        const normX = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const normY = ((touch.clientY - rect.top) / rect.height) * 2 - 1;
+        updateManeuver(normX, normY, touch.clientX - rect.left, touch.clientY - rect.top, true);
+      }, { passive: true });
+
+      hero.addEventListener('touchend', () => {
+        isTouchActive = false;
+        resetManeuver();
+      }, { passive: true });
     }
+
+    // 3. Mobile Hardware Gyroscope (Device Orientation Parallax)
+    window.addEventListener('deviceorientation', (e) => {
+      if (e.gamma === null || e.beta === null) return;
+      hasGyro = true;
+      // When not actively dragging by touch, physical device tilt controls the eye!
+      if (!isTouchActive) {
+        // gamma: left-right tilt [-30, 30]deg
+        // beta: front-back tilt [20, 70]deg (centered at 45deg)
+        const normX = Math.max(-1, Math.min(1, e.gamma / 26));
+        const normY = Math.max(-1, Math.min(1, (e.beta - 45) / 28));
+        updateManeuver(normX, normY, width / 2 + normX * 160, height / 2 + normY * 110, false);
+      }
+    });
 
     // Initialize Upward Floating Photon Particles
     for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -2643,7 +2902,7 @@
         x: Math.random() * (width || window.innerWidth),
         y: Math.random() * (height || 700),
         vx: (Math.random() - 0.5) * 0.35,
-        vy: -(Math.random() * 0.45 + 0.15), // Upward drift like light dust
+        vy: -(Math.random() * 0.45 + 0.15),
         radius: Math.random() * 2.2 + 0.8,
         alpha: Math.random() * 0.45 + 0.2,
         pulseSpeed: Math.random() * 0.025 + 0.015,
@@ -2652,48 +2911,90 @@
     }
 
     let time = 0;
+    // Spring physics constants (Tension & Damping for fluid weighted inertia)
+    const SPRING_TENSION = 0.095;
+    const SPRING_DAMPING = 0.82;
+
     function render() {
       time += 0.018;
 
-      // Smooth Lerp for Mouse Coordinates & Parallax
-      mouse.x += (mouse.targetX - mouse.x) * 0.06;
-      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+      // Autonomous Idle Scanning (Gentle Living Micro-Saccades when untouched)
+      const idleSeconds = (Date.now() - lastInteractTime) / 1000;
+      if (idleSeconds > 2.2 && !hasGyro && !mouse.isOver) {
+        const scanCycle = time * 0.85;
+        const microX = Math.sin(scanCycle) * 0.22 + Math.sin(scanCycle * 2.1) * 0.12;
+        const microY = Math.cos(scanCycle * 0.95) * 0.16 + Math.sin(scanCycle * 1.6) * 0.08;
+        targetRotX = -microY * 18;
+        targetRotY = microX * 22;
+        targetRotZ = microX * microY * 10;
+        targetLensX = microX * 22;
+        targetLensY = microY * 16;
+        targetLensZ = 8;
+        mouse.targetX = microX * 35;
+        mouse.targetY = microY * 25;
+      }
 
-      currRotX += (targetRotX - currRotX) * 0.08;
-      currRotY += (targetRotY - currRotY) * 0.08;
-      currLensX += (targetLensX - currLensX) * 0.07;
-      currLensY += (targetLensY - currLensY) * 0.07;
+      // Spring-Damper Physics Integration
+      velRotX = (velRotX + (targetRotX - currRotX) * SPRING_TENSION) * SPRING_DAMPING;
+      currRotX += velRotX;
+
+      velRotY = (velRotY + (targetRotY - currRotY) * SPRING_TENSION) * SPRING_DAMPING;
+      currRotY += velRotY;
+
+      velRotZ = (velRotZ + (targetRotZ - currRotZ) * SPRING_TENSION) * SPRING_DAMPING;
+      currRotZ += velRotZ;
+
+      velLensX = (velLensX + (targetLensX - currLensX) * SPRING_TENSION) * SPRING_DAMPING;
+      currLensX += velLensX;
+
+      velLensY = (velLensY + (targetLensY - currLensY) * SPRING_TENSION) * SPRING_DAMPING;
+      currLensY += velLensY;
+
+      velLensZ = (velLensZ + (targetLensZ - currLensZ) * SPRING_TENSION) * SPRING_DAMPING;
+      currLensZ += velLensZ;
+
+      mouse.x += (mouse.targetX - mouse.x) * 0.07;
+      mouse.y += (mouse.targetY - mouse.y) * 0.07;
       currBgX += (targetBgX - currBgX) * 0.05;
       currBgY += (targetBgY - currBgY) * 0.05;
 
-      // Apply 3D Transforms to Lens Backdrop
+      // Apply Full 6-DoF 3D Transform to Lens Backdrop
       if (lensBackdrop) {
-        lensBackdrop.style.transform = `translate(calc(-50% + ${currLensX.toFixed(2)}px), calc(-15% + ${currLensY.toFixed(2)}px)) perspective(1000px) rotateX(${currRotX.toFixed(2)}deg) rotateY(${currRotY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        const scaleVal = (1.02 + (currLensZ / 600)).toFixed(3);
+        lensBackdrop.style.transform = `translate(calc(-50% + ${currLensX.toFixed(2)}px), calc(-42% + ${currLensY.toFixed(2)}px)) perspective(1100px) rotateX(${currRotX.toFixed(2)}deg) rotateY(${currRotY.toFixed(2)}deg) rotateZ(${currRotZ.toFixed(2)}deg) translateZ(${currLensZ.toFixed(1)}px) scale3d(${scaleVal}, ${scaleVal}, ${scaleVal})`;
       }
+
+      // Counter-Parallax Specular Glint Refraction on Halo
+      if (lensHalo) {
+        const glintX = (-currLensX * 0.85).toFixed(1);
+        const glintY = (-currLensY * 0.85).toFixed(1);
+        const glintScale = (1 + Math.hypot(currLensX, currLensY) / 180).toFixed(2);
+        lensHalo.style.transform = `translate(${glintX}px, ${glintY}px) scale(${glintScale})`;
+      }
+
       if (bgImage) {
         bgImage.style.transform = `scale(1.03) translate(${currBgX.toFixed(2)}px, ${currBgY.toFixed(2)}px)`;
       }
 
       ctx.clearRect(0, 0, width, height);
 
-      // ── 1. Draw Celestial Volumetric Spotlight Rays ──
-      const raySourceX = width / 2 + mouse.x * 1.8;
+      // ── 1. Volumetric Light Shafts Tracking Dynamic Lens Center ──
+      const raySourceX = width / 2 + currLensX * 2.2 + mouse.x * 0.8;
       const raySourceY = -60;
-      const emblemCenterY = 175; // Approx pixel height of emblem in hero
 
       ctx.save();
       const shaftCount = 7;
       for (let s = 0; s < shaftCount; s++) {
-        const spreadAngle = (s - (shaftCount - 1) / 2) * 0.085 + Math.sin(time * 0.5 + s) * 0.015;
+        const spreadAngle = (s - (shaftCount - 1) / 2) * 0.088 + Math.sin(time * 0.5 + s) * 0.015;
         const shaftLength = height * 0.95;
         const targetX = raySourceX + Math.sin(spreadAngle) * shaftLength;
         const targetY = raySourceY + Math.cos(spreadAngle) * shaftLength;
 
         const shaftGrad = ctx.createLinearGradient(raySourceX, raySourceY, targetX, targetY);
-        const baseAlpha = 0.08 + Math.sin(time + s * 1.2) * 0.03;
-        shaftGrad.addColorStop(0, `rgba(224, 242, 254, ${baseAlpha * 1.5})`);
-        shaftGrad.addColorStop(0.25, `rgba(56, 189, 248, ${baseAlpha * 1.1})`);
-        shaftGrad.addColorStop(0.65, `rgba(56, 189, 248, ${baseAlpha * 0.3})`);
+        const baseAlpha = 0.085 + Math.sin(time + s * 1.2) * 0.035;
+        shaftGrad.addColorStop(0, `rgba(224, 242, 254, ${baseAlpha * 1.6})`);
+        shaftGrad.addColorStop(0.25, `rgba(56, 189, 248, ${baseAlpha * 1.2})`);
+        shaftGrad.addColorStop(0.65, `rgba(2, 132, 199, ${baseAlpha * 0.4})`);
         shaftGrad.addColorStop(1, 'transparent');
 
         ctx.strokeStyle = shaftGrad;
@@ -2709,8 +3010,8 @@
       if (mouse.isOver && mouse.rawX > 0 && mouse.rawY > 0) {
         ctx.save();
         const cursorBloom = ctx.createRadialGradient(mouse.rawX, mouse.rawY, 0, mouse.rawX, mouse.rawY, 260);
-        cursorBloom.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
-        cursorBloom.addColorStop(0.5, 'rgba(2, 132, 199, 0.04)');
+        cursorBloom.addColorStop(0, 'rgba(56, 189, 248, 0.14)');
+        cursorBloom.addColorStop(0.5, 'rgba(2, 132, 199, 0.05)');
         cursorBloom.addColorStop(1, 'transparent');
         ctx.fillStyle = cursorBloom;
         ctx.beginPath();
@@ -2722,7 +3023,7 @@
       // ── 3. Draw & Animate Photon Dust Particles ──
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        p.x += p.vx + mouse.x * 0.008;
+        p.x += p.vx + currLensX * 0.012;
         p.y += p.vy;
 
         // Wrap around viewport with reset to bottom
@@ -2733,7 +3034,6 @@
           p.x = Math.random() * width;
         }
 
-        // Particles near the central spotlight beam illuminate brighter
         const distFromCenter = Math.abs(p.x - width / 2);
         const inBeamBoost = distFromCenter < 240 ? 1.6 : 0.8;
         const currentAlpha = p.alpha * inBeamBoost * (0.6 + 0.4 * Math.sin(time * p.pulseSpeed * 60 + p.phase));
