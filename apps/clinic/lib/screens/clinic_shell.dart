@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/clinic_theme.dart';
 import '../data/clinic_scope.dart';
@@ -44,6 +45,8 @@ class _ClinicShellState extends State<ClinicShell> {
         _index = 7; // Open Developer Console directly for developer
       } else if (scope.isStaff && !scope.isClinicManager) {
         _index = 1; // Open Front Desk directly for staff
+      } else if (scope.currentDemoPersona == DemoPersona.frontDesk) {
+        _index = 1; // Open Front Desk directly for demo frontDesk persona
       }
       _initializedIndex = true;
     }
@@ -263,6 +266,26 @@ class _ClinicShellState extends State<ClinicShell> {
                             setState(() => _index = 1);
                           } else if (persona == DemoPersona.doctor) {
                             setState(() => _index = 0);
+                          } else if (persona == DemoPersona.caregiver) {
+                            _showExternalPersonaDialog(
+                              context: context,
+                              title: 'Caregiver Safety Portal',
+                              personaName: 'Ngozi Balogun',
+                              roleBadge: 'CAREGIVER · SAFETY SUITE',
+                              description: 'The Caregiver Safety Dashboard runs in the GozVision Patient & Caregiver suite. It connects to the Doorstep AI Camera, fall/drop-off telemetry sensors, and automated WhatsApp alert triggers for low-vision family members.',
+                              actionLabel: 'Launch Caregiver Portal',
+                              url: '/patient/#/caregiver',
+                            );
+                          } else if (persona == DemoPersona.patient) {
+                            _showExternalPersonaDialog(
+                              context: context,
+                              title: 'Low-Vision Patient Copilot',
+                              personaName: 'Chioma Adeyemi',
+                              roleBadge: 'PATIENT · ACCESSIBLE PWA',
+                              description: 'The Low-Vision Copilot operates on mobile and smart glasses with zero-UI voice interactions, real-time auditory navigation, and prescription bottle scanning.',
+                              actionLabel: 'Launch Patient Copilot',
+                              url: '/patient',
+                            );
                           }
                         }
                       },
@@ -1109,6 +1132,123 @@ class _ClinicShellState extends State<ClinicShell> {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showExternalPersonaDialog({
+    required BuildContext context,
+    required String title,
+    required String personaName,
+    required String roleBadge,
+    required String description,
+    required String actionLabel,
+    required String url,
+  }) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return Dialog(
+          backgroundColor: const Color(0xFF0D1117),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: ClinicTheme.border),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 480),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: ClinicTheme.brandAccentFaint,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: ClinicTheme.brandAccent.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        roleBadge,
+                        style: GoogleFonts.jetbrainsMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: ClinicTheme.brandAccent,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 18, color: ClinicTheme.textMuted),
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  style: GoogleFonts.sora(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: ClinicTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Demo Persona: $personaName',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: ClinicTheme.brandAccent,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  description,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: ClinicTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                      child: Text(
+                        'Stay in Clinic Suite',
+                        style: GoogleFonts.plusJakartaSans(color: ClinicTheme.textMuted, fontSize: 13),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: ClinicTheme.brandAccent,
+                        foregroundColor: ClinicTheme.obsidian,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                      label: Text(
+                        actionLabel,
+                        style: GoogleFonts.sora(fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                      onPressed: () async {
+                        Navigator.of(dialogCtx).pop();
+                        final uri = Uri.base.resolve(url);
+                        await launchUrl(uri, webOnlyWindowName: '_blank');
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

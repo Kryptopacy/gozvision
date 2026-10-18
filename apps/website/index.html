@@ -1556,6 +1556,120 @@
     font-size: 20px; cursor: pointer;
   }
   .modal-close:hover { color: #fff; }
+
+  /* Demo Persona Gateway Modal */
+  .modal-card-demo {
+    background: var(--obsidian-elevated);
+    border: 1px solid var(--panel-border-hover);
+    border-radius: var(--radius-lg);
+    max-width: 860px;
+    width: 100%;
+    padding: 34px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.9), 0 0 40px var(--accent-glow);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .demo-persona-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 740px) {
+    .demo-persona-grid {
+      grid-template-columns: 1fr;
+    }
+    .modal-card-demo {
+      padding: 24px 18px;
+    }
+  }
+  .demo-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    color: var(--ink);
+  }
+  .demo-card:hover {
+    background: rgba(56, 189, 248, 0.04);
+    border-color: rgba(56, 189, 248, 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(56, 189, 248, 0.12);
+  }
+  .demo-card-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    width: fit-content;
+  }
+  .badge-doctor { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+  .badge-frontdesk { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .badge-caregiver { background: rgba(244, 63, 94, 0.12); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+  .badge-patient { background: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+  
+  .demo-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .demo-card-persona {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+  .demo-card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    font-size: 12px;
+    color: var(--ink-secondary);
+    line-height: 1.5;
+  }
+  .demo-card-features li {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .demo-card-features li::before {
+    content: "•";
+    color: var(--cyan);
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .demo-card-btn {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
 </style>
 </head>
 
@@ -1578,7 +1692,7 @@
     </div>
     <div class="nav-right">
       <a class="btn btn-ghost btn-sm" href="/patient">Patient App</a>
-      <a class="btn btn-secondary btn-sm" href="/clinic?demo=true" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">⚡ Explore Demo</a>
+      <a class="btn btn-secondary btn-sm" href="javascript:void(0)" onclick="openDemoModal()" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">⚡ Explore Demo</a>
       <a class="btn btn-primary btn-sm" href="/clinic">Clinic Login</a>
     </div>
   </div>
@@ -1610,7 +1724,7 @@
         Built by eye care clinicians. Clinical exam scribe charting, automated patient recall, and Goz — the voice-guided visual companion patients use at home on smart glasses and mobile.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/clinic?demo=true">
+        <a class="btn btn-primary" href="javascript:void(0)" onclick="openDemoModal()">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
           Explore Interactive Demo
         </a>
@@ -2390,7 +2504,7 @@
         <ul>
           <li><a href="/clinic">Goz Clinic Suite (B2B)</a></li>
           <li><a href="/patient">Patient App (PWA)</a></li>
-          <li><a href="#simulator">Interactive Demo</a></li>
+          <li><a href="javascript:void(0)" onclick="openDemoModal()">⚡ Interactive Demo (All Roles)</a></li>
           <li><a href="#roi">Practice ROI Calculator</a></li>
         </ul>
       </div>
@@ -2471,6 +2585,102 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Interactive Demo Persona Gateway Modal -->
+<div class="modal-overlay" id="demoModal" onclick="handleDemoOverlayClick(event)">
+  <div class="modal-card-demo">
+    <button class="modal-close" onclick="closeDemoModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <img src="assets/gozvision_lens.png" alt="GozVision" style="height:32px;width:32px;object-fit:contain;border-radius:8px;" />
+      <div>
+        <h3 style="font-size:22px;letter-spacing:-0.02em;color:var(--ink);margin:0;">Choose Demo Experience</h3>
+        <p style="font-size:12px;color:var(--cyan);font-weight:600;margin:0;">Select a role to explore GozVision from that stakeholder's viewpoint</p>
+      </div>
+    </div>
+    <p style="color:var(--ink-secondary);font-size:13.5px;margin-top:8px;line-height:1.5;">
+      GozVision bridges the exam room, front desk operations, home caregiver safety, and patient visual autonomy into one real-time clinical network. Select an environment below:
+    </p>
+
+    <div class="demo-persona-grid">
+      <!-- Card 1: Attending Optometrist -->
+      <div class="demo-card">
+        <div>
+          <span class="demo-card-badge badge-doctor">Doctor · Clinical Lead</span>
+          <div class="demo-card-title">👨‍⚕️ Attending Optometrist</div>
+          <div class="demo-card-persona">Dr. O.D. Adegoke, O.D.</div>
+          <ul class="demo-card-features">
+            <li>Ambient AI exam scribe with real-time audio transcription</li>
+            <li>Instant SOAP note & ICD-10/CPT billing generation</li>
+            <li>Low Vision Care Hub with visual field tracking</li>
+            <li>FHIR R4 interoperability bridge & AI optical orders</li>
+          </ul>
+        </div>
+        <a class="demo-card-btn btn-primary" href="/clinic?demo=doctor">
+          Launch Doctor View (Clinic Suite) →
+        </a>
+      </div>
+
+      <!-- Card 2: Front Desk Coordinator -->
+      <div class="demo-card">
+        <div>
+          <span class="demo-card-badge badge-frontdesk">Clinic Operations · Triage</span>
+          <div class="demo-card-title">📋 Front Desk Coordinator</div>
+          <div class="demo-card-persona">Amina Bello</div>
+          <ul class="demo-card-features">
+            <li>Real-time exam lane occupancy & patient schedule</li>
+            <li>Automated 2-way WhatsApp Business & SMS recall queue</li>
+            <li>Patient check-in triage & 1-click scribe exam handoff</li>
+            <li>Live clinic arrival telemetry & appointment metrics</li>
+          </ul>
+        </div>
+        <a class="demo-card-btn btn-secondary" href="/clinic?demo=frontDesk" style="border-color: rgba(245, 158, 11, 0.4); color: #f59e0b;">
+          Launch Front Desk View →
+        </a>
+      </div>
+
+      <!-- Card 3: Family Caregiver -->
+      <div class="demo-card">
+        <div>
+          <span class="demo-card-badge badge-caregiver">Family Caregiver · Safety</span>
+          <div class="demo-card-title">🛡️ Family Caregiver</div>
+          <div class="demo-card-persona">Ngozi Balogun</div>
+          <ul class="demo-card-features">
+            <li>Doorstep Camera AI facial recognition & live doorbell</li>
+            <li>Real-time fall detection, drop-off & obstacle alerts</li>
+            <li>WhatsApp & voice safety telemetry notifications</li>
+            <li>Daily patient mobility, medication & safety logs</li>
+          </ul>
+        </div>
+        <a class="demo-card-btn btn-secondary" href="/patient/#/login?demo=caregiver" style="border-color: rgba(244, 63, 94, 0.4); color: #fb7185;">
+          Launch Caregiver Portal →
+        </a>
+      </div>
+
+      <!-- Card 4: Low-Vision Patient -->
+      <div class="demo-card">
+        <div>
+          <span class="demo-card-badge badge-patient">Patient · Low-Vision Copilot</span>
+          <div class="demo-card-title">👁️ Low-Vision Patient</div>
+          <div class="demo-card-persona">Chioma Adeyemi</div>
+          <ul class="demo-card-features">
+            <li>Goz Voice Copilot with auditory scene awareness</li>
+            <li>Medication bottle & barcode reading in real time</li>
+            <li>Hands-free zero-UI mobile & smart glasses experience</li>
+            <li>Instant SOS trigger connected to family caregivers</li>
+          </ul>
+        </div>
+        <a class="demo-card-btn btn-secondary" href="/patient" style="border-color: rgba(52, 211, 153, 0.4); color: #34d399;">
+          Launch Patient Copilot (PWA) →
+        </a>
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-secondary);">
+      <span style="font-size:16px;">⚡</span>
+      <span><strong>Zero-Config Evaluator Sandbox:</strong> All accounts are pre-seeded with authentic clinical histories, telemetry logs, and recall records. You can switch personas anytime using the in-app role switchers.</span>
+    </div>
   </div>
 </div>
 
@@ -2732,9 +2942,23 @@
 
   // Lead Modal & Pacy Labs Integration
   const modal = document.getElementById('leadModal');
-  function openLeadModal() { modal.classList.add('active'); }
-  function closeLeadModal() { modal.classList.remove('active'); }
-  function handleOverlayClick(e) { if(e.target === modal) closeLeadModal(); }
+  function openLeadModal() { if (modal) modal.classList.add('active'); }
+  function closeLeadModal() { if (modal) modal.classList.remove('active'); }
+  function handleOverlayClick(e) { if (e.target === modal) closeLeadModal(); }
+
+  // Demo Persona Gateway Modal
+  const demoModal = document.getElementById('demoModal');
+  function openDemoModal() { if (demoModal) demoModal.classList.add('active'); }
+  function closeDemoModal() { if (demoModal) demoModal.classList.remove('active'); }
+  function handleDemoOverlayClick(e) { if (e.target === demoModal) closeDemoModal(); }
+
+  // Accessibility: ESC closes open modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLeadModal();
+      closeDemoModal();
+    }
+  });
 
   function getBriefText() {
     const name = document.getElementById('leadName').value || 'Anonymous Lead';

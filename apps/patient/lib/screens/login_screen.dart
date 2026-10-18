@@ -25,6 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
   String _selectedRole = 'Patient';
   String? _errorMessage;
 
+  @override
+  void initState() {
+    super.initState();
+    final uri = Uri.base;
+    final isDemoCaregiver = uri.queryParameters['demo'] == 'caregiver' ||
+        uri.queryParameters['role'] == 'caregiver' ||
+        uri.fragment.contains('demo=caregiver') ||
+        uri.fragment.contains('caregiver');
+    if (isDemoCaregiver) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _emailController.text = 'caregiver@gozvision.demo';
+        _passwordController.text = 'gozvision-demo';
+        _submitAuth();
+      });
+    }
+  }
+
   Future<void> _submitAuth() async {
     setState(() {
       _isLoading = true;

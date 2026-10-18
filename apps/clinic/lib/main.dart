@@ -34,13 +34,22 @@ class _ClinicAppState extends State<ClinicApp> {
   @override
   void initState() {
     super.initState();
-    // Detect evaluator sandbox entry via query parameter (?demo=true) or fragment (#demo / #sandbox)
+    // Detect evaluator sandbox entry via query parameter (?demo=true, ?demo=doctor, ?demo=frontDesk) or fragment
     final uri = Uri.base;
-    final isDemoRequested = uri.queryParameters['demo'] == 'true' ||
+    final demoParam = uri.queryParameters['demo'] ?? uri.queryParameters['role'];
+    final isDemoRequested = (demoParam != null && demoParam.isNotEmpty && demoParam != 'false') ||
         uri.fragment.contains('demo') ||
         uri.fragment.contains('sandbox');
     if (isDemoRequested) {
-      _scope.enterDemoMode(DemoPersona.doctor);
+      if (demoParam == 'frontDesk' || uri.fragment.contains('frontDesk') || uri.fragment.contains('front_desk')) {
+        _scope.enterDemoMode(DemoPersona.frontDesk);
+      } else if (demoParam == 'caregiver' || uri.fragment.contains('caregiver')) {
+        _scope.enterDemoMode(DemoPersona.caregiver);
+      } else if (demoParam == 'patient' || uri.fragment.contains('patient')) {
+        _scope.enterDemoMode(DemoPersona.patient);
+      } else {
+        _scope.enterDemoMode(DemoPersona.doctor);
+      }
     }
   }
 
