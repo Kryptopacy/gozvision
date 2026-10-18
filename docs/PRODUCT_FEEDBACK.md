@@ -1,6 +1,6 @@
-# GozVision — Official Hackathon Product Feedback
+# GozVision — Cloud Ecosystem & API Product Feedback
 
-> **Submission Ecosystem:** GozVision  
+> **Platform:** GozVision  
 > **Evaluation Period:** October 2026  
 > **Products Evaluated:** Model Context Protocol (MCP) / Alexa+ Tools, Ring APIs & Simulators, AWS Cloud Services (ECS Fargate, CloudFront, CodeBuild, Amplify, Bedrock).
 

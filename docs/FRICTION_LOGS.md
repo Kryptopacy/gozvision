@@ -1,7 +1,7 @@
-# GozVision — Official Hackathon Friction Logs (+10% Bonus Category)
+# GozVision — Developer Experience & Architectural Friction Logs
 
-> **Submission Ecosystem:** GozVision  
-> **Target Tracks:** Alexa+ (Model Context Protocol), Ring (Accessibility & Caretaking), AWS Builder  
+> **Platform:** GozVision Ambient & Clinical Systems  
+> **Technologies Evaluated:** Model Context Protocol (MCP), Ring APIs, AWS ECS Fargate, CloudFront  
 > **Evaluation Period:** October 2026  
 
 ---
@@ -80,3 +80,52 @@
   Created an adaptive dual-representation formatter: returning a concise human-audible summary string for Alexa speech output, while persisting the granular FHIR/SOAP JSON directly to the Supabase database via persistent ID references.
 * **Actionable Suggestion for Developer Relations / Engineering:**  
   Encourage a "Summary + Resource Reference" pattern in the Alexa+ Agent Skill guidelines when handling regulated healthcare or dense technical data structures.
+
+---
+
+### Friction Log #5: CloudFront Origin Invalidation on Dynamic ECS Fargate Public IP Recycling Without ALB
+
+* **Specific Task Attempted:**  
+  Maintain continuous HTTPS access (`https://d7icpdzxenshi.cloudfront.net/health`) to a containerized FastAPI backend running on a serverless Amazon ECS Fargate standalone task without the $18+/month fixed overhead of an Application Load Balancer (ALB).
+* **Steps Taken:**  
+  1. Ran ECS Fargate task `3957985cdc55475b82b61c203ec09039` in `gozvision-cluster` (`eu-north-1`) with `assignPublicIp: ENABLED`.
+  2. Routed AWS CloudFront distribution `E1GRK4O263U8SX` origin directly to the task's public IP (`16.171.40.255`).
+  3. Stopped and restarted the task for configuration updates, which assigned a new public IP (`13.48.55.209`).
+  4. Tested CloudFront endpoint `https://d7icpdzxenshi.cloudfront.net/health`.
+* **Expected vs. Actual Result:**  
+  * *Expected:* CloudFront dynamically resolves the new Fargate task instance, or AWS provides an internal Service Discovery / Cloud Map origin adapter for CloudFront.  
+  * *Actual:* CloudFront timed out with `504 Gateway Timeout` because the origin was hardcoded to the stale public IP. Updating the CloudFront distribution via `aws cloudfront update-distribution` required an explicit ETag fetch and took ~3 minutes to propagate across edge points of presence.
+* **Severity Rating:** **Important**
+* **Workaround Used:**  
+  Created an automated task-reconciliation script that queries `aws ecs describe-tasks`, extracts the current ENI public IP, updates the CloudFront origin domain name via AWS CLI v2, and invalidates the `/health` cache path.
+* **Actionable Suggestion for Developer Relations / Engineering:**  
+  Introduce direct **AWS Cloud Map / ECS Service Discovery Origin Support** in AWS CloudFront, allowing CloudFront to route traffic directly to ephemeral Fargate task IPs without mandating an intermediate ALB.
+
+---
+
+### Friction Log #6: Alexa+ MCP Apps Extension Display Mode Metadata Definition in Python MCP SDK
+
+* **Specific Task Attempted:**  
+  Render multimodal UI cards (patient care cards, hazard triptychs) on Echo Show smart displays when Alexa+ triggers GozVision MCP tools, adhering to the 2026 MCP Apps Extension standard (`inline`, `fullscreen`, `voice-only`).
+* **Steps Taken:**  
+  1. Annotated MCP tools and resources using the official Python MCP SDK (`@mcp.tool()` and `@mcp.resource()`).
+  2. Attempted to pass visual display metadata (`_meta: {"ui": {"display_mode": "inline"}}`) through standard tool return dicts.
+  3. Inspected the client JSON-RPC message payload generated during Alexa+ tool execution.
+* **Expected vs. Actual Result:**  
+  * *Expected:* Native SDK support for declaring display mode metadata directly within `@mcp.tool(display_mode="inline")` decorators.  
+  * *Actual:* Python MCP SDK tool decorator dropped unrecognized kwargs, and standard return types stripped out custom root-level JSON-RPC metadata fields unless explicitly injected as an auxiliary object in the response body.
+* **Severity Rating:** **Important**
+* **Workaround Used:**  
+  Standardized an explicit `mcp_apps_display` envelope in all tool and resource responses:
+  ```json
+  {
+    "mcp_apps_display": {
+      "mode": "inline",
+      "template": "care_card",
+      "supports_touch": true
+    }
+  }
+  ```
+* **Actionable Suggestion for Developer Relations / Engineering:**  
+  Provide first-class helper decorators in the Python MCP SDK (e.g., `@mcp.apps.display(mode="inline")`) so developers building for screen-enabled Alexa+ devices (Echo Show, Fire TV) can define layout modes without custom response envelopes.
+

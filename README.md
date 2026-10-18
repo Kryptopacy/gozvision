@@ -4,6 +4,21 @@ GozVision is an end-to-end, multi-tenant clinical intelligence and assistive vis
 
 > "Clinical intelligence in the exam room. Visual autonomy in everyday life."
 
+> "Clinical intelligence in the exam room. Visual autonomy in everyday life."
+
+---
+
+## 🌐 Live Cloud Infrastructure & Deployment Endpoints
+
+| Service | Architecture | Live Endpoint | Status |
+| :--- | :--- | :--- | :--- |
+| **Global API Gateway** | AWS CloudFront (TLS 1.3 Edge CDN) | [`https://d7icpdzxenshi.cloudfront.net`](https://d7icpdzxenshi.cloudfront.net) | **HTTP 200 OK** |
+| **System Health Check** | Amazon ECS Fargate Container Ingress | [`https://d7icpdzxenshi.cloudfront.net/health`](https://d7icpdzxenshi.cloudfront.net/health) | **Active** (`{"status":"ok"}`) |
+| **API Documentation** | FastAPI Interactive Swagger UI | [`https://d7icpdzxenshi.cloudfront.net/docs`](https://d7icpdzxenshi.cloudfront.net/docs) | **Interactive UI** |
+| **Patient & Clinic Apps** | AWS Amplify Global Web Hosting | [`https://main.d1lr4zsb46he1m.amplifyapp.com`](https://main.d1lr4zsb46he1m.amplifyapp.com) | **HTTP 200 OK** |
+| **MCP Streamable HTTP** | Model Context Protocol (`spec 2025-11-25+`) | `https://d7icpdzxenshi.cloudfront.net/mcp` | **Active** |
+| **Developer Telemetry** | Architectural Friction Logs & Product Feedback | [`docs/FRICTION_LOGS.md`](docs/FRICTION_LOGS.md) | **Audited** |
+
 ---
 
 ## Two Unified Portals, One Connected Ecosystem

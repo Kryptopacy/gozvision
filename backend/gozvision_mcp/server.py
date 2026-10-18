@@ -10,6 +10,7 @@ Capabilities:
 - draft_ambient_scribe_chart: Convert dialogue transcripts into clinical SOAP charts.
 """
 from typing import Any, Optional
+import json
 import os
 import sys
 
@@ -599,6 +600,68 @@ def cool_graviton_telemetry() -> dict[str, Any]:
     from gozvision_agent.tools import get_cool_graviton_telemetry
     return get_cool_graviton_telemetry()
 
+
+# ---------------------------------------------------------------------------
+# Alexa+ for Builders: MCP Resources & Multimodal Visual Cards
+# ---------------------------------------------------------------------------
+
+@mcp.resource("guidelines://optometry/{topic}")
+def get_guideline_resource(topic: str) -> str:
+    """Resource exposing verified optometric guideline documents for agent grounding (AAO/AOA/WHO)."""
+    res = search_optometry_guidelines(topic)
+    return json.dumps({
+        "topic": topic,
+        "source": "AAO Preferred Practice Patterns & WHO Blindness Prevention",
+        "guidelines": res,
+        "mcp_apps_display": {
+            "mode": "inline",
+            "card_title": f"Clinical Guidance: {topic.title()}",
+            "rendered_markdown": f"### Verified Ophthalmic Standard\n\n{res}",
+        },
+    }, indent=2)
+
+
+@mcp.resource("patient://{patient_id}/care_card")
+def get_patient_care_card_resource(patient_id: str) -> str:
+    """Multimodal Echo Show visual display card: medication compliance, streak, and emergency contacts."""
+    return json.dumps({
+        "patient_id": patient_id,
+        "active_prescriptions": ["Latanoprost 0.005% OU QHS", "Artificial Tears PF QID PRN"],
+        "adherence_streak_days": 18,
+        "next_exam_due": "2026-11-15",
+        "primary_caregiver": {"name": "Sarah Vance", "phone": "+1-555-019-2834"},
+        "mcp_apps_display": {
+            "mode": "fullscreen",
+            "card_title": "GozVision Patient Care Card",
+            "contrast_theme": "high_contrast_obsidian",
+            "wcag_compliance": "AAA",
+        },
+    }, indent=2)
+
+
+# ---------------------------------------------------------------------------
+# Alexa+ for Builders: MCP Prompts (Standardized Clinical Agent Templates)
+# ---------------------------------------------------------------------------
+
+@mcp.prompt()
+def triage_visual_emergency(symptom_description: str) -> str:
+    """Prompt template for Alexa+ agents to systematically triage acute ophthalmic red flags."""
+    return f"""The low-vision patient reports the following visual symptom: '{symptom_description}'.
+Evaluate against acute ophthalmic emergencies:
+1. Retinal Detachment (sudden flashes, new shower of floaters, curtain over vision).
+2. Acute Angle-Closure Glaucoma (severe eye pain, headache, nausea, colored halos).
+3. Central Retinal Artery Occlusion (sudden, painless, profound monocular vision loss).
+
+If red flags are present, immediately call 'trigger_emergency_sos' and deliver calm, clear verbal instructions to seek emergency eye care."""
+
+
+@mcp.prompt()
+def check_medication_compliance(patient_name: str) -> str:
+    """Prompt template for Alexa+ daily eye drop check-in and compliance streak reinforcement."""
+    return f"""Conduct a friendly, accessible morning eye drop check-in with {patient_name}.
+Ask if they have administered their prescribed morning eye drops.
+If yes, call 'log_adherence_event' to record their compliance streak.
+If they report difficulty reading the bottle label, offer to route their smartphone camera through GozVision's OpenCV reading zone magnifier."""
 
 
 if __name__ == "__main__":

@@ -4,20 +4,20 @@ Engineered for the AWS Graviton & OpenCV 5 Cloud Acceleration Track.
 
 Features:
 1. Native AWS Graviton (Arm64 / Neoverse) optimization leveraging ARM NEON & SVE SIMD vectors.
-2. Cloud-Optimized OpenCV Library (COOL) runtime profile management and telemetry.
-3. High-throughput batch streaming for multi-camera clinics and real-time copilot feeds.
-4. Transparent fallback to baseline OpenCV 5 for hybrid x86_64 edge-cloud coexistence.
+2. OpenCV 5 Universal Intrinsics 2.0 with native FP16/BF16 data type support (CV_16BF).
+3. Cloud-Optimized OpenCV Library (COOL) runtime profile management and telemetry.
+4. OpenCV 5 DNN Spatial Depth Disparity acceleration for real-time cloud stream processing.
 5. Telemetry and cost-performance analytics ($ per 1M frames processed on Graviton vs. x86).
 """
+from dataclasses import dataclass, field
 import os
 import platform
 import time
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from .cv_pipeline import LowVisionEnhancer, VisionEnhancementConfig
+from .cv_pipeline import LowVisionEnhancer, VisionEnhancementConfig, SpatialHazardProfile
 
 
 @dataclass
@@ -31,6 +31,9 @@ class GravitonOptimizationProfile:
     instance_type: str = os.environ.get("AWS_INSTANCE_TYPE", "c7g.xlarge" if is_arm else "c6i.xlarge")
     hourly_rate_usd: float = 0.145 if is_arm else 0.170  # c7g.xlarge ($0.145) vs c6i.xlarge ($0.170)
     simd_instruction_set: str = "ARM_NEON_SVE" if is_arm else "AVX2_AVX512"
+    universal_intrinsics: str = "Universal_Intrinsics_2.0_ARM_NEON_SVE" if is_arm else "Universal_Intrinsics_2.0_AVX512"
+    opencv_dnn_backend: str = "DNN_BACKEND_OPENCV"
+    supported_tensor_types: List[str] = field(default_factory=lambda: ["CV_8U", "CV_32F", "CV_16BF", "CV_Bool"])
 
 
 @dataclass
@@ -45,6 +48,7 @@ class BenchmarkResult:
     cost_per_million_frames_usd: float
     device_arch: str
     cool_active: bool
+    mode: str = "enhanced_contrast"
 
 
 class CoolGravitonPipeline:
@@ -76,7 +80,10 @@ class CoolGravitonPipeline:
             "is_aws_graviton_arm": self.profile.is_arm,
             "cool_accelerated": self.profile.cool_enabled,
             "simd_vector_extensions": self.profile.simd_instruction_set,
+            "universal_intrinsics": self.profile.universal_intrinsics,
             "opencv_version": cv2.__version__,
+            "opencv_dnn_backend": self.profile.opencv_dnn_backend,
+            "supported_tensor_types": self.profile.supported_tensor_types,
             "opencv_optimized": cv2.useOptimized(),
             "active_worker_threads": cv2.getNumThreads(),
             "target_instance_type": self.profile.instance_type,
@@ -97,6 +104,7 @@ class CoolGravitonPipeline:
         metadata["architecture"] = self.profile.architecture
         metadata["latency_ms"] = round(latency_ms, 3)
         metadata["effective_fps"] = round(1000.0 / max(latency_ms, 0.001), 1)
+        metadata["simd_intrinsics"] = self.profile.simd_instruction_set
 
         return processed, metadata
 
@@ -126,7 +134,6 @@ class CoolGravitonPipeline:
         throughput_fps = (len(frames) / (total_time_ms / 1000.0)) if total_time_ms > 0 else 0.0
 
         # Cost calculation based on AWS Graviton ($0.145/hr on c7g.xlarge vs $0.170/hr on c6i.xlarge)
-        # Frames per hour = throughput_fps * 3600
         frames_per_hour = max(throughput_fps * 3600.0, 1.0)
         cost_per_million = (self.profile.hourly_rate_usd / frames_per_hour) * 1_000_000.0
 
@@ -140,6 +147,7 @@ class CoolGravitonPipeline:
             cost_per_million_frames_usd=round(cost_per_million, 4),
             device_arch=self.profile.architecture,
             cool_active=self.profile.cool_enabled,
+            mode=mode,
         )
 
         return processed_frames, benchmark

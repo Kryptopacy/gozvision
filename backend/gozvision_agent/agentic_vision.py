@@ -46,6 +46,10 @@ class PerceptionMetrics:
     text_bounding_boxes: List[Dict[str, int]] = field(default_factory=list)
     dominant_luminance: float = 128.0
     mode_applied: str = "enhanced_contrast"
+    is_vertical_drop: bool = False
+    vertical_drop_score: float = 0.0
+    estimated_drop_cm: float = 0.0
+    hazard_category: str = "coplanar_clear"
 
 
 @dataclass
@@ -100,7 +104,12 @@ class AgenticVisionOrchestrator:
         hazard_salience = float(hazard_pixels) / float(nav_zone.size)
         hazard_detected = hazard_salience > 0.04
 
-        # 3. Reading / Text region detection
+        # 3. OpenCV 5 Spatial Depth Disparity & Elevation Analysis
+        _, spatial_profile = self.enhancer.assess_spatial_hazards(frame)
+        if spatial_profile.is_vertical_drop or spatial_profile.is_elevation_barrier:
+            hazard_detected = True
+
+        # 4. Reading / Text region detection
         text_boxes = self.enhancer.detect_reading_regions(frame)
 
         return PerceptionMetrics(
@@ -110,6 +119,10 @@ class AgenticVisionOrchestrator:
             text_regions_count=len(text_boxes),
             text_bounding_boxes=text_boxes[:5],
             dominant_luminance=round(luminance, 1),
+            is_vertical_drop=spatial_profile.is_vertical_drop,
+            vertical_drop_score=spatial_profile.vertical_drop_score,
+            estimated_drop_cm=spatial_profile.estimated_drop_cm,
+            hazard_category=spatial_profile.hazard_category,
         )
 
     def execute_hazard_mitigation_workflow(
@@ -134,31 +147,44 @@ class AgenticVisionOrchestrator:
         steps.append(AgenticExecutionStep(
             step_number=1,
             step_type="perception",
-            component="OpenCV 5 (CLAHE & Canny Salience)",
-            action="Corridor Hazard Boundary Analysis",
+            component="OpenCV 5 (CLAHE, Canny & DNN Spatial Depth)",
+            action="Corridor Hazard Boundary & 3D Depth Analysis",
             details={
                 "hazard_salience_score": metrics.hazard_salience_score,
                 "hazard_detected": metrics.hazard_detected,
                 "glare_fraction": metrics.glare_fraction,
+                "is_vertical_drop": metrics.is_vertical_drop,
+                "estimated_drop_cm": metrics.estimated_drop_cm,
+                "hazard_category": metrics.hazard_category,
             },
         ))
 
         # 2. Decision Logic
         if metrics.hazard_detected:
             # OpenCV output altered the plan: Trigger high-contrast enhancement & alert
+            plan_desc = (
+                f"Spatial depth disparity indicates physical vertical drop of {metrics.estimated_drop_cm}cm. "
+                "Trigger high-priority auditory guidance; monitor IMU for stumble."
+                if metrics.is_vertical_drop
+                else "Hazard salience threshold exceeded. Trigger high-priority auditory guidance; monitor IMU for stumble."
+            )
             steps.append(AgenticExecutionStep(
                 step_number=2,
                 step_type="reasoning",
                 component="Agent Reasoning Engine",
-                action="Plan Adaptation: Hazard Salience Threshold Exceeded",
+                action="Plan Adaptation: Hazard Salience / Depth Disparity Exceeded",
                 details={
-                    "rule": "hazard_salience > 0.04",
-                    "plan": "Trigger high-priority auditory guidance; monitor IMU for stumble.",
+                    "rule": "hazard_salience > 0.04 or is_vertical_drop == True",
+                    "plan": plan_desc,
                 },
             ))
 
             # Step 3: Actuator
-            guidance = "Caution: Abrupt curb or step edge detected 3 feet ahead."
+            guidance = (
+                f"Caution: Abrupt step down of approximately {int(metrics.estimated_drop_cm)}cm detected ahead."
+                if metrics.is_vertical_drop
+                else "Caution: Abrupt curb or step edge detected 3 feet ahead."
+            )
             steps.append(AgenticExecutionStep(
                 step_number=3,
                 step_type="actuator",
@@ -169,8 +195,13 @@ class AgenticVisionOrchestrator:
 
             # Step 4: Conditional Downstream Action based on subsequent state
             if telemetry_stumble_detected:
+                hazard_detail = (
+                    f"detected 3D step-down ({metrics.estimated_drop_cm}cm drop)"
+                    if metrics.is_vertical_drop
+                    else "detected optical hazard"
+                )
                 sos_message = (
-                    f"AUTOMATED EMERGENCY: Patient stumbled near detected optical hazard "
+                    f"AUTOMATED EMERGENCY: Patient stumbled near {hazard_detail} "
                     f"(OpenCV salience score: {metrics.hazard_salience_score}). Immediate check required."
                 )
                 sos_result = send_sos_alert(

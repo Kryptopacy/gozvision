@@ -28,7 +28,7 @@ docs/
 ### 1. [System Architecture & Topology](ARCHITECTURE.md)
 * High-level architectural diagram (Mermaid).
 * Breakdown of Client Surfaces (Flutter B2C/B2B), Computer Vision Engine (OpenCV 5.0), Agentic MCP Core, and Cloud Persistence (Supabase + AWS).
-* Alignment with **Amazon Developer Hackathon** (Alexa+ Track) and **OpenCV AI Competition 2026**.
+* Integrations with the **Alexa+ Model Context Protocol** and **OpenCV 5 DNN Depth Systems**.
 
 ### 2. [Multi-Tenant Data Model & Security](DATA_MODEL.md)
 * Tenancy design via `clinic_id` scoping and PostgreSQL Row-Level Security (RLS).

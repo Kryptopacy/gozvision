@@ -55,7 +55,7 @@ def run_benchmark_suite(num_frames: int = 60, res: tuple = (640, 480)) -> Dict[s
     frames = generate_synthetic_stream(num_frames, width=w, height=h)
     pipeline = CoolGravitonPipeline()
 
-    modes = ["enhanced_contrast", "glare_suppression", "reading"]
+    modes = ["enhanced_contrast", "glare_suppression", "reading", "spatial_depth"]
     results = {
         "telemetry": pipeline.get_system_telemetry(),
         "benchmarks": {},

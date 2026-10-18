@@ -51,10 +51,27 @@ class TestOpenCV5AccessibilityPipeline(unittest.TestCase):
         self.assertIn("h", first)
 
     def test_process_frame_modes(self):
-        for mode in ["enhanced_contrast", "glare_suppression", "reading"]:
+        for mode in ["enhanced_contrast", "glare_suppression", "reading", "spatial_depth"]:
             proc, meta = self.enhancer.process_frame(self.frame, mode=mode)
             self.assertEqual(proc.shape, self.frame.shape)
             self.assertEqual(meta["mode"], mode)
+            if mode == "spatial_depth":
+                self.assertIn("spatial_hazard", meta)
+                self.assertIn("category", meta["spatial_hazard"])
+
+    def test_spatial_depth_and_vertical_drop_detection(self):
+        # Create a frame with a sharp curb/stair step down in the walking corridor
+        step_frame = np.full((400, 500, 3), 160, dtype=np.uint8)
+        # Drop-off edge across corridor (y=280) with sharp dark shadow beneath
+        step_frame[280:, :] = 40
+        cv2.line(step_frame, (0, 280), (500, 280), (255, 255, 255), 4)
+
+        depth_map, profile = self.enhancer.assess_spatial_hazards(step_frame)
+        self.assertEqual(depth_map.shape, (400, 500))
+        self.assertTrue(profile.is_vertical_drop)
+        self.assertEqual(profile.hazard_category, "vertical_drop")
+        self.assertGreater(profile.vertical_drop_score, 0.0)
+        self.assertGreater(profile.estimated_drop_cm, 5.0)
 
 
 if __name__ == "__main__":
