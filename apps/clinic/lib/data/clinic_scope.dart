@@ -153,11 +153,26 @@ class ClinicScope extends ChangeNotifier {
           .limit(1);
       final data = rows.isEmpty ? const {} : rows.first;
       clinicId = data['clinic_id'] as String?;
-      email = (data['email'] as String?) ?? '';
-      role = (data['role'] as String?) ?? (email.toLowerCase() == 'kryptopacy@gmail.com' ? 'Developer' : 'Staff');
-      displayName = (data['name'] as String?) ?? '';
+      final authUser = Supabase.instance.client.auth.currentUser;
+      email = (data['email'] as String?) ?? (authUser?.email ?? '');
+      role = (data['role'] as String?) ?? (email.toLowerCase() == 'kryptopacy@gmail.com' ? 'Developer' : 'Practitioner');
+      displayName = (data['name'] as String?) ?? (authUser?.userMetadata?['name'] as String? ?? (email.contains('@') ? email.split('@').first : 'Practitioner'));
 
-      if (clinicId != null) {
+      // If practitioner or staff has no linked clinic yet, auto-link to primary practice
+      if (clinicId == null && role != 'Developer') {
+        clinicId = 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
+        clinicName = 'GozVision Premier Eye Clinic';
+        try {
+          await Supabase.instance.client.from('profiles').upsert({
+            'id': uid,
+            'clinic_id': clinicId,
+            'role': role,
+            'email': email,
+            'name': displayName,
+            'assigned_patients': [],
+          });
+        } catch (_) {}
+      } else if (clinicId != null) {
         try {
           final cRows = await Supabase.instance.client
               .from('clinics')
@@ -173,6 +188,10 @@ class ClinicScope extends ChangeNotifier {
       resolved = true;
     } catch (e) {
       error = e.toString();
+      // Even on error, provide fallback practice context so authenticated clinicians are never locked out
+      clinicId ??= 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
+      clinicName = 'GozVision Premier Eye Clinic';
+      role = role.isEmpty ? 'Practitioner' : role;
       resolved = true;
     }
     notifyListeners();

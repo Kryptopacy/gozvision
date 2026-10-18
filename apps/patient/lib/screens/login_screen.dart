@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         context.go('/');
       }
-    } on AuthApiException catch (e) {
+    } on AuthException catch (e) {
       setState(() => _errorMessage = e.message);
     } catch (e) {
       setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
@@ -106,13 +106,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final client = Supabase.instance.client;
+      final redirect = kIsWeb
+          ? '${Uri.base.origin}/patient/'
+          : 'io.supabase.gozvision://login-callback';
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: kIsWeb ? null : 'io.supabase.gozvision://login-callback',
+        redirectTo: redirect,
       );
       // On OAuth completion, auth state listener navigates, and Postgres
       // on_auth_user_created trigger automatically provisions the profile row.
-    } on AuthApiException catch (e) {
+    } on AuthException catch (e) {
       setState(() => _errorMessage = e.message);
     } catch (e) {
       setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));

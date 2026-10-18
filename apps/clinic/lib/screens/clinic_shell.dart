@@ -87,6 +87,18 @@ class _ClinicShellState extends State<ClinicShell> {
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   style: FilledButton.styleFrom(backgroundColor: ClinicTheme.brandAccent, foregroundColor: ClinicTheme.obsidian),
+                  icon: const Icon(Icons.add_business_rounded, size: 16),
+                  label: const Text('Open GozVision Premier Eye Clinic'),
+                  onPressed: () {
+                    scope.clinicId = 'a3450a9b-6820-40dd-be8e-25c7a2deb360';
+                    scope.clinicName = 'GozVision Premier Eye Clinic';
+                    scope.role = 'Practitioner';
+                    scope.notifyListeners();
+                  },
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(foregroundColor: ClinicTheme.textMuted),
                   icon: const Icon(Icons.logout, size: 16),
                   label: const Text('Sign Out'),
                   onPressed: () => Supabase.instance.client.auth.signOut(),

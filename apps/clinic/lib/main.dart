@@ -68,15 +68,20 @@ class _ClinicAppState extends State<ClinicApp> {
                 : StreamBuilder<AuthState>(
                     stream: Supabase.instance.client.auth.onAuthStateChange,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
+                      final currentAuthUser = Supabase.instance.client.auth.currentUser;
+                      if (!snapshot.hasData && currentAuthUser == null) {
                         return const _Booting();
                       }
-                      final user = snapshot.data?.session?.user;
+                      final user = snapshot.data?.session?.user ?? currentAuthUser;
                       if (user == null) {
                         return const LoginScreen();
                       }
                       if (!scope.resolved) {
-                        scope.resolve(user.id);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!scope.resolved) {
+                            scope.resolve(user.id);
+                          }
+                        });
                       }
                       return const ClinicShell();
                     },

@@ -16,39 +16,73 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _fullName = TextEditingController();
   String? _error;
   bool _busy = false;
+  bool _isRegister = false;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _fullName.dispose();
     super.dispose();
   }
 
   Future<void> _demoLogin() async {
     _email.text = 'practitioner@gozvision.demo';
     _password.text = 'gozvision-demo';
-    await _signIn();
+    await _submit();
   }
 
-  Future<void> _signIn() async {
-    if (_email.text.trim().isEmpty && _password.text.isEmpty) {
+  Future<void> _submit() async {
+    final emailText = _email.text.trim();
+    final passText = _password.text;
+
+    if (emailText.isEmpty && passText.isEmpty && !_isRegister) {
       _email.text = 'practitioner@gozvision.demo';
       _password.text = 'gozvision-demo';
+    } else if (emailText.isEmpty || passText.isEmpty) {
+      setState(() => _error = 'Please enter your email and password.');
+      return;
     }
+
     setState(() {
       _busy = true;
       _error = null;
     });
+
     try {
-      await Supabase.instance.client.auth.signInWithPassword(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+      final client = Supabase.instance.client;
+      if (_isRegister) {
+        final res = await client.auth.signUp(
+          email: _email.text.trim(),
+          password: _password.text,
+          data: {'name': _fullName.text.trim().isNotEmpty ? _fullName.text.trim() : 'Practitioner'},
+        );
+        if (res.user != null) {
+          try {
+            await client.from('profiles').upsert({
+              'id': res.user!.id,
+              'email': _email.text.trim(),
+              'name': _fullName.text.trim().isNotEmpty ? _fullName.text.trim() : 'Attending Optometrist',
+              'role': 'Practitioner',
+              'clinic_id': 'a3450a9b-6820-40dd-be8e-25c7a2deb360',
+              'assigned_patients': [],
+            });
+          } catch (_) {}
+        }
+      } else {
+        await client.auth.signInWithPassword(
+          email: _email.text.trim(),
+          password: _password.text,
+        );
+      }
       // Auth state stream in main.dart routes into the shell.
-    } on AuthApiException catch (e) {
+    } on AuthException catch (e) {
       setState(() => _error = e.message);
+    } catch (e) {
+      setState(() => _error = e.toString().replaceAll('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -60,12 +94,17 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
+      final redirect = kIsWeb
+          ? '${Uri.base.origin}/clinic/'
+          : 'io.supabase.gozvision://login-callback';
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: kIsWeb ? null : 'io.supabase.gozvision://login-callback',
+        redirectTo: redirect,
       );
-    } on AuthApiException catch (e) {
+    } on AuthException catch (e) {
       setState(() => _error = e.message);
+    } catch (e) {
+      setState(() => _error = e.toString().replaceAll('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -166,6 +205,31 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 28),
+                      if (_isRegister) ...[
+                        TextField(
+                          controller: _fullName,
+                          decoration: InputDecoration(
+                            labelText: 'Practitioner Full Name',
+                            hintText: 'e.g. Dr. O.D. Adegoke, O.D.',
+                            labelStyle: TextStyle(color: ClinicTheme.textSecondary, fontSize: 13),
+                            fillColor: const Color(0xFF06090F),
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: ClinicTheme.malachite, width: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       TextField(
                         controller: _email,
                         decoration: InputDecoration(
@@ -211,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         obscureText: true,
-                        onSubmitted: (_) => _signIn(),
+                        onSubmitted: (_) => _submit(),
                       ),
                       const SizedBox(height: 22),
                       if (_error != null)
@@ -224,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       FilledButton(
-                        onPressed: _busy ? null : _signIn,
+                        onPressed: _busy ? null : _submit,
                         style: FilledButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF08090D),
@@ -241,12 +305,46 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Color(0xFF08090D),
                                 ),
                               )
-                            : const Text(
-                                'Sign In to Practice',
-                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                            : Text(
+                                _isRegister ? 'Create Practice Account' : 'Sign In to Practice',
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isRegister = !_isRegister;
+                              _error = null;
+                            });
+                          },
+                          child: Text(
+                            _isRegister
+                                ? 'Already have an account? Sign In'
+                                : 'New practice? Register Account',
+                            style: const TextStyle(
+                              color: ClinicTheme.brandAccent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (!_isRegister) ...[
+                        const SizedBox(height: 4),
+                        Center(
+                          child: TextButton.icon(
+                            onPressed: _demoLogin,
+                            icon: const Icon(Icons.flash_on_rounded, size: 14, color: ClinicTheme.warningAmber),
+                            label: const Text(
+                              'Fill Demo Credentials (Dr. O.D. Adegoke)',
+                              style: TextStyle(color: ClinicTheme.warningAmber, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.08))),
