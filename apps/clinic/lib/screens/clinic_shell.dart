@@ -226,7 +226,7 @@ class _ClinicShellState extends State<ClinicShell> {
                   const Icon(Icons.science_rounded, size: 14, color: ClinicTheme.brandAccent),
                   const SizedBox(width: 6),
                   Text(
-                    'Sandbox Persona:',
+                    'Demo Persona:',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -279,7 +279,7 @@ class _ClinicShellState extends State<ClinicShell> {
             ),
             const SizedBox(width: 8),
             IconButton(
-              tooltip: 'Exit Demo Sandbox',
+              tooltip: 'Exit Demo Mode',
               icon: const Icon(Icons.logout_rounded, size: 18, color: ClinicTheme.textMuted),
               onPressed: () => scope.exitDemoMode(),
             ),
