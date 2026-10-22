@@ -18,5 +18,5 @@ RUN uv pip install --system .
 ENV PORT=8080
 EXPOSE 8080
 
-# Run ADK in API server mode
-CMD ["adk", "api_server", "--host", "0.0.0.0", "--port", "8080", "gozvision_agent"]
+# Run GozVision Alexa+ Streamable HTTP MCP Server & Health Ingress
+CMD ["python", "-m", "gozvision_mcp.server", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8080"]

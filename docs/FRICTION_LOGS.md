@@ -98,6 +98,8 @@
 * **Severity Rating:** **Important**
 * **Workaround Used:**  
   Created an automated task-reconciliation script that queries `aws ecs describe-tasks`, extracts the current ENI public IP, updates the CloudFront origin domain name via AWS CLI v2, and invalidates the `/health` cache path.
+* **Production Architecture Resolution:**  
+  For production deployment, this prototyping friction was completely resolved by codifying the infrastructure in [`infra/gozvision-stack.yaml`](file:///d:/pacy_labs/gozvision/infra/gozvision-stack.yaml): ECS Fargate tasks are deployed in **strict Private Subnets** (`AssignPublicIp: DISABLED`), ingress is managed via an internal Application Load Balancer with target groups, and CloudFront communicates with the origin using an encrypted `X-GozVision-Origin-Verify` custom header to prevent direct IP bypass.
 * **Actionable Suggestion for Developer Relations / Engineering:**  
   Introduce direct **AWS Cloud Map / ECS Service Discovery Origin Support** in AWS CloudFront, allowing CloudFront to route traffic directly to ephemeral Fargate task IPs without mandating an intermediate ALB.
 

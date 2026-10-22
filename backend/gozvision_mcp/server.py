@@ -664,17 +664,57 @@ If yes, call 'log_adherence_event' to record their compliance streak.
 If they report difficulty reading the bottle label, offer to route their smartphone camera through GozVision's OpenCV reading zone magnifier."""
 
 
+# ---------------------------------------------------------------------------
+# Health Check and Root Diagnostics for Cloud & ECS Ingress
+# ---------------------------------------------------------------------------
+
+try:
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health_check(request):
+        from starlette.responses import JSONResponse
+        return JSONResponse({
+            "status": "ok",
+            "service": "gozvision-mcp",
+            "transport": "streamable-http",
+            "version": "2.2.0",
+            "spec": "2025-11-25",
+        })
+
+    @mcp.custom_route("/", methods=["GET"])
+    async def root_info(request):
+        from starlette.responses import JSONResponse
+        return JSONResponse({
+            "name": "GozVision Assistive & Clinical MCP Server",
+            "service": "gozvision-mcp",
+            "status": "active",
+            "endpoints": {
+                "health": "/health",
+                "mcp": "/mcp",
+            },
+            "target_platform": "Amazon Alexa+ & Assistive Care Ecosystem",
+            "spec": "2025-11-25",
+        })
+except Exception as e:
+    # Fallback if running on older FastMCP without custom_route decorator
+    pass
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="GozVision MCP Server (Alexa+ & Assistive Ecosystem)")
     parser.add_argument(
         "--transport",
         choices=["stdio", "streamable-http", "sse"],
-        default=os.environ.get("MCP_TRANSPORT", "stdio"),
-        help="Transport protocol: 'stdio' (default), 'streamable-http' (Alexa+ MCP spec 2025-11-25), or 'sse'.",
+        default=os.environ.get("MCP_TRANSPORT", "streamable-http"),
+        help="Transport protocol: 'streamable-http' (default, Alexa+ MCP spec 2025-11-25), 'stdio', or 'sse'.",
     )
     parser.add_argument("--host", default="0.0.0.0", help="Host address for HTTP/SSE transport")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("MCP_PORT", "8000")), help="Port for HTTP/SSE transport")
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("PORT", os.environ.get("MCP_PORT", "8080"))),
+        help="Port for HTTP/SSE transport",
+    )
     args = parser.parse_args()
 
     if args.transport in ["streamable-http", "sse"]:

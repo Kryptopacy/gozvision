@@ -1,0 +1,187 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'GozVision Enterprise Cloud Infrastructure - AWS Graviton3 Arm64 ECS Fargate and CloudFront TLS 1.3 Edge CDN'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: production
+    AllowedValues: [production, staging]
+    Description: Deployment target environment.
+  AppContainerImage:
+    Type: String
+    Default: 'public.ecr.aws/gozvision/gozvision-graviton:latest'
+    Description: Container image URI built for linux/arm64.
+  ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: Application listener port.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID for ECS cluster placement.
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Subnet IDs for ECS Fargate network interface attachment.
+
+Resources:
+  # -------------------------------------------------------------------------
+  # 1. AWS Secrets Manager Secret
+  # -------------------------------------------------------------------------
+  GozVisionSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub 'gozvision/${EnvironmentName}/credentials'
+      Description: 'Runtime credentials for GozVision multi-tenant database and clinical services'
+      GenerateSecretString:
+        SecretStringTemplate: '{"SUPABASE_URL": "https://d7icpdzxenshi.supabase.co"}'
+        GenerateStringKey: 'SERVICE_ROLE_KEY'
+        PasswordLength: 32
+        ExcludePunctuation: true
+
+  # -------------------------------------------------------------------------
+  # 2. CloudWatch Log Group
+  # -------------------------------------------------------------------------
+  GozVisionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/gozvision-${EnvironmentName}-backend'
+      RetentionInDays: 30
+
+  # -------------------------------------------------------------------------
+  # 3. IAM Execution & Task Roles (Least Privilege)
+  # -------------------------------------------------------------------------
+  GozVisionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'gozvision-${EnvironmentName}-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref GozVisionSecrets
+
+  GozVisionTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'gozvision-${EnvironmentName}-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BedrockAndLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt GozVisionLogGroup.Arn
+
+  # -------------------------------------------------------------------------
+  # 4. ECS Fargate Cluster & Task Definition (Graviton / ARM64)
+  # -------------------------------------------------------------------------
+  GozVisionECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub 'gozvision-${EnvironmentName}-cluster'
+
+  GozVisionTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub 'gozvision-${EnvironmentName}-task'
+      Cpu: '1024'
+      Memory: '2048'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn: !GetAtt GozVisionExecutionRole.Arn
+      TaskRoleArn: !GetAtt GozVisionTaskRole.Arn
+      ContainerDefinitions:
+        - Name: gozvision-agent
+          Image: !Ref AppContainerImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+          Environment:
+            - Name: OPENCV_COOL_ENABLED
+              Value: '1'
+            - Name: OPENCV_FORBID_ONLY_PTHREADS_USAGE
+              Value: '1'
+            - Name: AWS_INSTANCE_TYPE
+              Value: 'c7g.xlarge'
+            - Name: PORT
+              Value: !Ref ContainerPort
+          Secrets:
+            - Name: SUPABASE_URL
+              ValueFrom: !Sub '${GozVisionSecrets}:SUPABASE_URL::'
+            - Name: SUPABASE_SERVICE_ROLE_KEY
+              ValueFrom: !Sub '${GozVisionSecrets}:SERVICE_ROLE_KEY::'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref GozVisionLogGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: graviton
+
+  # -------------------------------------------------------------------------
+  # 5. CloudFront Streaming Cache Policy (Disables buffering for SSE)
+  # -------------------------------------------------------------------------
+  StreamingCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub 'gozvision-${EnvironmentName}-streaming-policy'
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          HeadersConfig:
+            HeaderBehavior: whitelist
+            Headers:
+              - Accept
+              - Authorization
+              - Content-Type
+              - Origin
+          CookiesConfig:
+            CookieBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: all
+
+Outputs:
+  ClusterName:
+    Value: !Ref GozVisionECSCluster
+    Description: Amazon ECS Graviton Cluster Name
+  TaskDefinitionArn:
+    Value: !Ref GozVisionTaskDefinition
+    Description: Amazon ECS Task Definition ARN (ARM64)
+  SecretsArn:
+    Value: !Ref GozVisionSecrets
+    Description: AWS Secrets Manager ARN

@@ -48,6 +48,12 @@ Thumbs.db
 
 # Test & Build Outputs
 dist/
+*.onnx
+*.avi
+*.tmp
+*.zip
+backend/evaluation/dataset/raw/*.onnx
+backend/evaluation/dataset/raw/*.tmp
 playwright_reports/
 
 # Internal Hackathon Submission Guides & Temporary Origin Scripts

@@ -35,5 +35,5 @@ RUN uv pip install --system .
 
 EXPOSE 8080
 
-# Launch GozVision ADK Server
-CMD ["adk", "api_server", "--host", "0.0.0.0", "--port", "8080", "gozvision_agent"]
+# Launch GozVision Alexa+ Streamable HTTP MCP Server & Health Ingress
+CMD ["python", "-m", "gozvision_mcp.server", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8080"]

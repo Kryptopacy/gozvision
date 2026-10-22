@@ -1,0 +1,1907 @@
+{
+  "generated_utc": "2026-10-22T13:03:40.364016+00:00",
+  "harness_version": "1.0.0",
+  "environment": {
+    "python": "3.14.4",
+    "opencv_version": "5.0.0",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "opencv_num_threads": 8
+  },
+  "depth_backend": {
+    "active_backend": "opencv_dnn_onnx",
+    "model": "model-small.onnx",
+    "model_path": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\model-small.onnx",
+    "model_loaded": true,
+    "model_error": null,
+    "preprocess": {
+      "scalefactor": 0.00392156862745098,
+      "mean": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "swapRB": false
+    },
+    "input_size": [
+      192,
+      192
+    ]
+  },
+  "dataset": {
+    "dataset_dir": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw",
+    "total_cases": 69,
+    "evaluated_cases": 69,
+    "labelled_cases": 53,
+    "synthetic_inputs_used": 0,
+    "note": "All evaluation inputs are real media files decoded through gozvision_vision.frame_source. No synthetic placeholder frames are used."
+  },
+  "cases": [
+    {
+      "name": "street1.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\street1.jpg",
+      "frame_index": 0,
+      "content_sha256": "1d570e49654e84c7a943918537bd9e5e1ef82920152e147c834006e235be97c9",
+      "width": 548,
+      "height": 342,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "stairs_down.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\stairs_down.jpg",
+      "frame_index": 0,
+      "content_sha256": "d861ab001cf35a5a3000c79671117697ac67fea187b2f64938a38de2c2ea91e3",
+      "width": 960,
+      "height": 1280,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "_dl_stairs.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\_dl_stairs.jpg",
+      "frame_index": 0,
+      "content_sha256": "655986c64c2fd26198ce69bea72ac8141bf563ebd2e8f2043d52b1507115a11d",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "curb_street.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\curb_street.jpg",
+      "frame_index": 0,
+      "content_sha256": "6a1c22e5a0d08fb1e9a9a7e6af851c90c67be2acaa9c694e4c777066e65654ac",
+      "width": 960,
+      "height": 1280,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "sidewalk_curb.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\sidewalk_curb.jpg",
+      "frame_index": 0,
+      "content_sha256": "3057feee82b493e2011ce9334e551493f3fbb0c53fbba9ab39c9a316da9435ac",
+      "width": 960,
+      "height": 640,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_89050.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_89050.jpg",
+      "frame_index": 0,
+      "content_sha256": "7c309001d723c7a45f9cad020aa4de8075b6ce2d7d8775fc7dd0c34384f78718",
+      "width": 661,
+      "height": 1024,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_83935.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_83935.jpg",
+      "frame_index": 0,
+      "content_sha256": "7c9bd02f7fa63abaf25ae36bcb3c6bd9203bac8d4ed166750168c3d7795d32fd",
+      "width": 768,
+      "height": 1024,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_33472.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_33472.jpg",
+      "frame_index": 0,
+      "content_sha256": "3abd4d4521da9ad21ec98b7a41eb57341f5ff4ed9028e0353a3f21f48c72cc69",
+      "width": 1280,
+      "height": 1707,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_80195.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_80195.jpg",
+      "frame_index": 0,
+      "content_sha256": "0dfadc67d9d2e744001fc4ecab6f9bdbbe43b4a44c9066778e5e701a74902202",
+      "width": 1024,
+      "height": 760,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_26807.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_26807.jpg",
+      "frame_index": 0,
+      "content_sha256": "b8cee407406217f5287170caf2d533daae89f8a26de37c557cb3508516eb9698",
+      "width": 754,
+      "height": 1024,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q1_75227.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q1_75227.jpg",
+      "frame_index": 0,
+      "content_sha256": "36547e1f096a5921e85d8dcd28eae55a21cecb62337380887471ec8df389cb51",
+      "width": 1280,
+      "height": 915,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q3_5668.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q3_5668.jpg",
+      "frame_index": 0,
+      "content_sha256": "f77381c026450ad0c5ad2e3dbe7b6e13dc165138fe476bb8b069a24a84445982",
+      "width": 419,
+      "height": 640,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q3_46245.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q3_46245.jpg",
+      "frame_index": 0,
+      "content_sha256": "e92fd469df37c18d311b50924e2194ff6d035392045d8f113b2ecc26e9dec3ec",
+      "width": 640,
+      "height": 480,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q3_90620.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q3_90620.jpg",
+      "frame_index": 0,
+      "content_sha256": "e62db8c4d3d82f032721b2e8f269fa93cdb5f953e6fee2ade8e843846ed893be",
+      "width": 480,
+      "height": 640,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q3_81154.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q3_81154.jpg",
+      "frame_index": 0,
+      "content_sha256": "edef9a53f2b28523c088b45575d2e5b59e33f419ce0afe77cc496beb695922fa",
+      "width": 1280,
+      "height": 835,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q3_99391.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q3_99391.jpg",
+      "frame_index": 0,
+      "content_sha256": "2db8e8e31240e7544739e5b43045e9be5e4824f40298a6ad13a05e179736fdc2",
+      "width": 1024,
+      "height": 680,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_28177.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_28177.jpg",
+      "frame_index": 0,
+      "content_sha256": "d32c07d17dbb3082d033f4b1ce4d27a7e39a875bc331847c38248f5100abcb56",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_79393.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_79393.jpg",
+      "frame_index": 0,
+      "content_sha256": "fb44cec40e0fa6ee5bfc19ab0f9681371c5fae416737b1c02e6c45e575d79dd2",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_74777.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_74777.jpg",
+      "frame_index": 0,
+      "content_sha256": "77e9693adbfbedc8a83f4b96d64f00bfd557703870606876330c0f4690ec8f48",
+      "width": 1280,
+      "height": 1707,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_63134.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_63134.jpg",
+      "frame_index": 0,
+      "content_sha256": "4c6b6b0f4ea82d50f53bb419a02d07879375afc5f27474bb1ec83900f82dd043",
+      "width": 1280,
+      "height": 852,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_55107.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_55107.jpg",
+      "frame_index": 0,
+      "content_sha256": "c4e57d1be1be2c1e516e8742af901cf286d4392f23a648bc9f0a3ae62adabe84",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q4_83960.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q4_83960.jpg",
+      "frame_index": 0,
+      "content_sha256": "a15124622c62d9817596f1665d6194b037ad8d739f24333d1f8a2e85606db97c",
+      "width": 1280,
+      "height": 928,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_70409.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_70409.jpg",
+      "frame_index": 0,
+      "content_sha256": "5e352e6c90dddd7e456f95102bbb3bc0563131033124e02c4462b00e23c84c46",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_99341.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_99341.jpg",
+      "frame_index": 0,
+      "content_sha256": "c66756a2e109ff696c73bcaab4c83c5f84ae7e78f09f49318486a6ead6e6c0d6",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_19940.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_19940.jpg",
+      "frame_index": 0,
+      "content_sha256": "2eb8fe9f64564febd735e3eebcbc0a8ecd3efde89d222379bb35800c7b188b5a",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_7887.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_7887.jpg",
+      "frame_index": 0,
+      "content_sha256": "b585b6201416244e9693a61b8160bac519f307191c8f8227515fbda9ec3cdac0",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_54833.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_54833.jpg",
+      "frame_index": 0,
+      "content_sha256": "8c8653ffad8b76fd81e3410249aa6c284a99eb418c90335633c16b856b261cc4",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q5_90653.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q5_90653.jpg",
+      "frame_index": 0,
+      "content_sha256": "e25a59bd6793cdfaf10a9aa812cd2e7d1daa4c9bad9461ce9e43b92b1d5ae3f1",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": true,
+      "is_synthetic": false
+    },
+    {
+      "name": "shadow_ground.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\shadow_ground.jpg",
+      "frame_index": 0,
+      "content_sha256": "5e3ee8c25732b7548ba54aa93cb8ec195d4b2aa69746f96ec5fc6fa7920dafb0",
+      "width": 960,
+      "height": 674,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "pedestrian_crossing.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\pedestrian_crossing.jpg",
+      "frame_index": 0,
+      "content_sha256": "ba86d23d8b933d5af4ed173b5ad5d838934c7507a11294f692e00970d9cb06f5",
+      "width": 960,
+      "height": 641,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "ramp_sidewalk.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\ramp_sidewalk.jpg",
+      "frame_index": 0,
+      "content_sha256": "3057feee82b493e2011ce9334e551493f3fbb0c53fbba9ab39c9a316da9435ac",
+      "width": 960,
+      "height": 640,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_6425.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_6425.jpg",
+      "frame_index": 0,
+      "content_sha256": "5789c476463a5491eea605400b2953432a099786b9e02d0c6f2e68fbda685284",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_99330.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_99330.jpg",
+      "frame_index": 0,
+      "content_sha256": "13974627673695d9aa0786fedb6041618f69df8eed470d0dd61171e69e1f39c1",
+      "width": 1280,
+      "height": 966,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_10263.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_10263.jpg",
+      "frame_index": 0,
+      "content_sha256": "1e4e68f33372a1438f0c5ba17c9ebf03eac092a455b0cbae20f9d95187706257",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q7_38959.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q7_38959.jpg",
+      "frame_index": 0,
+      "content_sha256": "504d00d5ba106558382e0c94c055eb1f7b10f84e80aae359e84734a4297a91bc",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q7_42238.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q7_42238.jpg",
+      "frame_index": 0,
+      "content_sha256": "16c8e5b64256003aa7bb7f6d2649b9d6ac13e74cb3756b3a4573f2fa12f5de40",
+      "width": 1280,
+      "height": 1707,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q7_74620.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q7_74620.jpg",
+      "frame_index": 0,
+      "content_sha256": "ee812245fdaeb6bdf0e2fef613d0bd5650910a97f14dcaa996e6621736a97ae2",
+      "width": 1280,
+      "height": 2329,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q7_72953.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q7_72953.jpg",
+      "frame_index": 0,
+      "content_sha256": "252c66e5d92ba41e331927df445e7636c962cf5534ce6fae4bb795ce18a2f887",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_49558.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_49558.jpg",
+      "frame_index": 0,
+      "content_sha256": "e1a05020d153041cd206ace61f8534ff2602c8becf385da65ba145d2cdcba6d4",
+      "width": 1280,
+      "height": 964,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_56774.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_56774.jpg",
+      "frame_index": 0,
+      "content_sha256": "f3a62fce3f877e206cd00e05b83cf0f11f2b25f805a5391a3adfad554a342500",
+      "width": 1280,
+      "height": 964,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_77902.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_77902.jpg",
+      "frame_index": 0,
+      "content_sha256": "3ce671a8a380726ffb7e5623d1ea5e8ddb9010715d7a51e153dfa8db3f2639ec",
+      "width": 1280,
+      "height": 964,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_23302.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_23302.jpg",
+      "frame_index": 0,
+      "content_sha256": "99a8e5f0c40873c177f02a797b1e896020bd4a5ca8934d330e5863a9c73a4fe5",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_74032.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_74032.jpg",
+      "frame_index": 0,
+      "content_sha256": "16b4c972be7019b7bb14e242e3217481a9b6168cd0c232241206ad556c7cc2e0",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q0_64441.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q0_64441.jpg",
+      "frame_index": 0,
+      "content_sha256": "b3e268958b22f4acc1c75d6840f0b806f617b685d9ccfaa05ed5d328b8023f97",
+      "width": 1280,
+      "height": 964,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_929.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_929.jpg",
+      "frame_index": 0,
+      "content_sha256": "a7e3602132d3950acb2158e4e427b13eb5b96616698f35ed0553aa772aa361a0",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_77553.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_77553.jpg",
+      "frame_index": 0,
+      "content_sha256": "c864236a6de095efd5af626b1d11b2aec6e1c263a0f2a4dcda4ea826fcb96b38",
+      "width": 1280,
+      "height": 851,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_32611.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_32611.jpg",
+      "frame_index": 0,
+      "content_sha256": "8857cb5b71dfb06f1d6930f63863a86396ab8cf9fda8b73de2bd40a77b7e3982",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_10784.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_10784.jpg",
+      "frame_index": 0,
+      "content_sha256": "1af518bf3ff7fb226c5752b818547d24568f105323ab921398aea0657ae5e999",
+      "width": 640,
+      "height": 480,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_59134.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_59134.jpg",
+      "frame_index": 0,
+      "content_sha256": "4ec5eafaeba31be1132f8c2508646763ed607b602aafca1be5e449b0707052f9",
+      "width": 640,
+      "height": 480,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q2_72195.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q2_72195.jpg",
+      "frame_index": 0,
+      "content_sha256": "381f96414c38427268dd31ca45d02707b7086522b8a1bb218e4890adffc5555b",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_29958.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_29958.jpg",
+      "frame_index": 0,
+      "content_sha256": "50ee101c5c2d7e9e9ce1656cb9409376a2d4ed762c916bc84f69248a66717d8a",
+      "width": 1280,
+      "height": 852,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_15510.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_15510.jpg",
+      "frame_index": 0,
+      "content_sha256": "83887beb43530e67e84d1cc94c2c5dab5c2c32da2e6d0a42abeb359309635563",
+      "width": 1280,
+      "height": 853,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "commons_q6_47832.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\commons_q6_47832.jpg",
+      "frame_index": 0,
+      "content_sha256": "29baa743e55df7f8aae54093aee4a1343b3ed421d1fb8585df23a56683523842",
+      "width": 1280,
+      "height": 960,
+      "expect_hazard": false,
+      "is_synthetic": false
+    },
+    {
+      "name": "building.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\building.jpg",
+      "frame_index": 0,
+      "content_sha256": "742a1baad62ac82e91e718e77eedf7e85c2eddc4badfb8c87c6cbc86c45a8b07",
+      "width": 868,
+      "height": 600,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "left01.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\left01.jpg",
+      "frame_index": 0,
+      "content_sha256": "9621899098adffa1440c8264606bb7be535ccfd9ad126ae8e0bd9b0c5a5b8676",
+      "width": 640,
+      "height": 480,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "right.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\right.jpg",
+      "frame_index": 0,
+      "content_sha256": "20972954be263a99194d1373d9a5cd8d2dc92acf69b55470b6951f3b3475017f",
+      "width": 612,
+      "height": 459,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "fruits.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\fruits.jpg",
+      "frame_index": 0,
+      "content_sha256": "9c031d80a1c52da5eca790db896baffec6a7e52bf786cdb7bbfca5c7f880e6a1",
+      "width": 512,
+      "height": 480,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "lena.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\lena.jpg",
+      "frame_index": 0,
+      "content_sha256": "7de7ed51a1594fff247f4cae2301eceacf5313d6011e37b4a4c8733f7bb72c07",
+      "width": 512,
+      "height": 512,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "baboon.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\baboon.jpg",
+      "frame_index": 0,
+      "content_sha256": "1a1dd18d78eec44420af3b0b7f08ee3d41c982916cae3ce203d7ff35d754cc0f",
+      "width": 512,
+      "height": 512,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "messi5.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\messi5.jpg",
+      "frame_index": 0,
+      "content_sha256": "1d570e49654e84c7a943918537bd9e5e1ef82920152e147c834006e235be97c9",
+      "width": 548,
+      "height": 342,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "text_motion.jpg",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\text_motion.jpg",
+      "frame_index": 0,
+      "content_sha256": "85b43c44379fc4906c8feb0ba4ca701edce862c9aa6eb171d513929fbab19807",
+      "width": 588,
+      "height": 365,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "box.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\box.png",
+      "frame_index": 0,
+      "content_sha256": "1094629c1e2ebbc8a9ae2c9c63e18c1dff0f5f1481146e02f3b11a3d30feb20a",
+      "width": 324,
+      "height": 223,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "pic1.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\pic1.png",
+      "frame_index": 0,
+      "content_sha256": "0244e20a34fa2d30c60e60928d6d71f89d32e0e0266b4644980798cc2368765a",
+      "width": 400,
+      "height": 300,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "pic3.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\pic3.png",
+      "frame_index": 0,
+      "content_sha256": "1e2fe4632c0d5350d48525cc88a01a0764d9043d51a4110309b999eb79297db0",
+      "width": 400,
+      "height": 300,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "graf1.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\graf1.png",
+      "frame_index": 0,
+      "content_sha256": "1504b769303c7bde00fa578eeaad3c68e02aceabeb1242e556f1f8d19e4bdea5",
+      "width": 800,
+      "height": 640,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "imageTextN.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\imageTextN.png",
+      "frame_index": 0,
+      "content_sha256": "78e5141dea1ad97e7d3d903de47fe95e9031e8f559bf14179f7e1e539cb1f94f",
+      "width": 556,
+      "height": 257,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "imageTextR.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\imageTextR.png",
+      "frame_index": 0,
+      "content_sha256": "6a4adfe5e08abd805a9989e5cbe605074001a1566840b24189b0285c0246f700",
+      "width": 556,
+      "height": 323,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "mask.png",
+      "source_type": "image_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\mask.png",
+      "frame_index": 0,
+      "content_sha256": "d367226b00919d9487a59b0173592b7ee631337728fdd01f1b76beeab9b3f97a",
+      "width": 128,
+      "height": 128,
+      "expect_hazard": null,
+      "is_synthetic": false
+    },
+    {
+      "name": "vtest.avi",
+      "source_type": "video_file",
+      "source_ref": "D:\\pacy_labs\\gozvision\\backend\\evaluation\\dataset\\raw\\vtest.avi",
+      "frame_index": 0,
+      "content_sha256": "6327fa3c189bd3af33ea4dec74682603ec28a3efa2b0bb02b4959ca6c204f7d2",
+      "width": 768,
+      "height": 576,
+      "expect_hazard": null,
+      "is_synthetic": false
+    }
+  ],
+  "mode_metrics": {
+    "enhanced_contrast": {
+      "mode": "enhanced_contrast",
+      "frames_evaluated": 68,
+      "avg_latency_ms": 14.677,
+      "median_latency_ms": 16.083,
+      "p95_latency_ms": 32.117,
+      "min_latency_ms": 0.59,
+      "max_latency_ms": 57.806,
+      "throughput_fps": 68.13
+    },
+    "glare_suppression": {
+      "mode": "glare_suppression",
+      "frames_evaluated": 68,
+      "avg_latency_ms": 152.487,
+      "median_latency_ms": 100.583,
+      "p95_latency_ms": 533.48,
+      "min_latency_ms": 0.397,
+      "max_latency_ms": 1453.601,
+      "throughput_fps": 6.56
+    },
+    "reading": {
+      "mode": "reading",
+      "frames_evaluated": 68,
+      "avg_latency_ms": 8.852,
+      "median_latency_ms": 8.281,
+      "p95_latency_ms": 20.141,
+      "min_latency_ms": 0.28,
+      "max_latency_ms": 33.802,
+      "throughput_fps": 112.97
+    },
+    "spatial_depth": {
+      "mode": "spatial_depth",
+      "frames_evaluated": 68,
+      "avg_latency_ms": 398.527,
+      "median_latency_ms": 318.628,
+      "p95_latency_ms": 1447.599,
+      "min_latency_ms": 70.514,
+      "max_latency_ms": 3270.186,
+      "throughput_fps": 2.51
+    }
+  },
+  "hazard_metrics": {
+    "labelled_cases": 53,
+    "unlabelled_cases": 16,
+    "true_positive": 14,
+    "false_positive": 8,
+    "false_negative": 14,
+    "true_negative": 17,
+    "accuracy": 0.5849,
+    "precision": 0.6364,
+    "recall": 0.5,
+    "f1": 0.56,
+    "note": "The labelled subset is small and consists of general-purpose photographs, not a curated curb/stairs benchmark. Treat these figures as a smoke test of the classifier wiring, not as a validated safety claim."
+  },
+  "hazard_outcomes": [
+    {
+      "name": "street1.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2188,
+      "estimated_drop_cm": 28.1,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "stairs_down.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "_dl_stairs.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0081,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "curb_street.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "sidewalk_curb.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0003,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_89050.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0056,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_83935.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0483,
+      "estimated_drop_cm": 22.1,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_33472.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_80195.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0738,
+      "estimated_drop_cm": 35.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_26807.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0005,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_75227.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_5668.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0956,
+      "estimated_drop_cm": 19.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_46245.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0405,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_90620.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0323,
+      "estimated_drop_cm": 14.4,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_81154.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1588,
+      "estimated_drop_cm": 24.4,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_99391.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0864,
+      "estimated_drop_cm": 25.8,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_28177.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1359,
+      "estimated_drop_cm": 16.1,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_79393.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_74777.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.001,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_63134.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0338,
+      "estimated_drop_cm": 19.9,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_55107.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.217,
+      "estimated_drop_cm": 14.9,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_83960.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1189,
+      "estimated_drop_cm": 26.2,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_70409.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.3027,
+      "estimated_drop_cm": 15.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_99341.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1234,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_19940.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0932,
+      "estimated_drop_cm": 17.3,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_7887.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0298,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_54833.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1837,
+      "estimated_drop_cm": 15.6,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_90653.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1812,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "shadow_ground.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "pedestrian_crossing.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "ramp_sidewalk.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0003,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_6425.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_99330.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_10263.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.3279,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q7_38959.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0032,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q7_42238.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q7_74620.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q7_72953.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_49558.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0817,
+      "estimated_drop_cm": 21.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_56774.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_77902.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_23302.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0012,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_74032.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0598,
+      "estimated_drop_cm": 15.6,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_64441.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_929.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_77553.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2569,
+      "estimated_drop_cm": 15.3,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_32611.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.3005,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_10784.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.3077,
+      "estimated_drop_cm": 32.3,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_59134.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.2199,
+      "estimated_drop_cm": 0.0,
+      "correct": true,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_72195.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0197,
+      "estimated_drop_cm": 15.4,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_29958.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1275,
+      "estimated_drop_cm": 14.1,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_15510.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.5529,
+      "estimated_drop_cm": 16.4,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_47832.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.266,
+      "estimated_drop_cm": 20.9,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "building.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.2394,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "left01.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2081,
+      "estimated_drop_cm": 19.3,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "right.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "fruits.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1048,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "lena.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0511,
+      "estimated_drop_cm": 35.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "baboon.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0102,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "messi5.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2188,
+      "estimated_drop_cm": 28.1,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "text_motion.jpg",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0001,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "box.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0114,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "pic1.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0009,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "pic3.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "graf1.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1341,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "imageTextN.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "imageTextR.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0005,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "mask.png",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0692,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "vtest.avi",
+      "expect_hazard": null,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": null,
+      "depth_backend": "opencv_dnn_onnx"
+    }
+  ],
+  "failure_cases": [
+    {
+      "name": "stairs_down.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "_dl_stairs.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0081,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "curb_street.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "sidewalk_curb.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0003,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_89050.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0056,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_33472.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_26807.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0005,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q1_75227.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q3_46245.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0405,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_79393.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q4_74777.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.001,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_99341.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1234,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_7887.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.0298,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q5_90653.jpg",
+      "expect_hazard": true,
+      "predicted_hazard": false,
+      "hazard_category": "coplanar_clear",
+      "vertical_drop_score": 0.1812,
+      "estimated_drop_cm": 0.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_49558.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0817,
+      "estimated_drop_cm": 21.0,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q0_74032.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0598,
+      "estimated_drop_cm": 15.6,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_77553.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2569,
+      "estimated_drop_cm": 15.3,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_10784.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.3077,
+      "estimated_drop_cm": 32.3,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_72195.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.0197,
+      "estimated_drop_cm": 15.4,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_29958.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.1275,
+      "estimated_drop_cm": 14.1,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_15510.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.5529,
+      "estimated_drop_cm": 16.4,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q6_47832.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.266,
+      "estimated_drop_cm": 20.9,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    }
+  ],
+  "stream_benchmark": {
+    "stream_cases": 53,
+    "true_positive": 17,
+    "false_positive": 7,
+    "false_negative": 11,
+    "true_negative": 18,
+    "recall": 0.6071,
+    "precision": 0.7083,
+    "f1": 0.6538,
+    "video_far_per_minute": 0.0,
+    "video_frames_tested": 60
+  },
+  "dave_experiment": [
+    {
+      "profile": "generic_baseline",
+      "icd10_codes": [],
+      "frames_evaluated": 69,
+      "full_frame_ssim_generic": 0.5285,
+      "full_frame_ssim_dave": 0.5285,
+      "full_frame_ssim_delta": 0.0,
+      "sighted_region_ssim_generic": 0.5285,
+      "sighted_region_ssim_dave": 0.5285,
+      "sighted_region_ssim_delta": 0.0,
+      "spatial_mask_active": false,
+      "processing_order": [
+        "contrast",
+        "glare",
+        "edges"
+      ],
+      "clahe_clip_limit": 3.0,
+      "cii_generic": 1.2245,
+      "cii_dave": 1.2245,
+      "cii_delta": 0.0,
+      "edge_energy_ratio": 2.2282
+    },
+    {
+      "profile": "amd_peripheral_annulus",
+      "icd10_codes": [
+        "H35.31"
+      ],
+      "frames_evaluated": 69,
+      "full_frame_ssim_generic": 0.5285,
+      "full_frame_ssim_dave": 0.4732,
+      "full_frame_ssim_delta": -0.0553,
+      "sighted_region_ssim_generic": 0.5281,
+      "sighted_region_ssim_dave": 0.4361,
+      "sighted_region_ssim_delta": -0.092,
+      "spatial_mask_active": true,
+      "processing_order": [
+        "contrast",
+        "glare",
+        "edges"
+      ],
+      "clahe_clip_limit": 4.5,
+      "cii_generic": 1.2245,
+      "cii_dave": 1.2912,
+      "cii_delta": 0.0667,
+      "edge_energy_ratio": 2.5173
+    },
+    {
+      "profile": "glaucoma_central_emphasis",
+      "icd10_codes": [
+        "H40.11"
+      ],
+      "frames_evaluated": 69,
+      "full_frame_ssim_generic": 0.5285,
+      "full_frame_ssim_dave": 0.7403,
+      "full_frame_ssim_delta": 0.2118,
+      "sighted_region_ssim_generic": 0.5288,
+      "sighted_region_ssim_dave": 0.6719,
+      "sighted_region_ssim_delta": 0.1431,
+      "spatial_mask_active": true,
+      "processing_order": [
+        "contrast",
+        "edges",
+        "glare"
+      ],
+      "clahe_clip_limit": 3.5,
+      "cii_generic": 1.2245,
+      "cii_dave": 1.0848,
+      "cii_delta": -0.1397,
+      "edge_energy_ratio": 1.577
+    },
+    {
+      "profile": "cataract_glare_first",
+      "icd10_codes": [
+        "H26.9"
+      ],
+      "frames_evaluated": 69,
+      "full_frame_ssim_generic": 0.5285,
+      "full_frame_ssim_dave": 0.4518,
+      "full_frame_ssim_delta": -0.0767,
+      "sighted_region_ssim_generic": 0.5285,
+      "sighted_region_ssim_dave": 0.4518,
+      "sighted_region_ssim_delta": -0.0767,
+      "spatial_mask_active": false,
+      "processing_order": [
+        "glare",
+        "contrast",
+        "edges"
+      ],
+      "clahe_clip_limit": 2.5,
+      "cii_generic": 1.2245,
+      "cii_dave": 1.1404,
+      "cii_delta": -0.0841,
+      "edge_energy_ratio": 2.0849
+    },
+    {
+      "profile": "rp_nyctalopia",
+      "icd10_codes": [
+        "H35.52"
+      ],
+      "frames_evaluated": 69,
+      "full_frame_ssim_generic": 0.5285,
+      "full_frame_ssim_dave": 0.8674,
+      "full_frame_ssim_delta": 0.3389,
+      "sighted_region_ssim_generic": 0.5284,
+      "sighted_region_ssim_dave": 0.7075,
+      "sighted_region_ssim_delta": 0.1791,
+      "spatial_mask_active": true,
+      "processing_order": [
+        "contrast",
+        "glare",
+        "edges"
+      ],
+      "clahe_clip_limit": 1.8,
+      "cii_generic": 1.2245,
+      "cii_dave": 1.0621,
+      "cii_delta": -0.1624,
+      "edge_energy_ratio": 1.2598
+    }
+  ],
+  "limitations": [
+    "Depth is monocular and relative. 'estimated_drop_cm' is a heuristic derived from a depth-discontinuity ratio, not a metric measurement; it has not been validated against a surveyed curb/stairs dataset.",
+    "Latency figures are single-process, warm-cache CPU measurements on the machine named in 'environment'. They are not a substitute for a controlled AWS Graviton benchmark run."
+  ],
+  "total_wall_time_s": 478.63
+}

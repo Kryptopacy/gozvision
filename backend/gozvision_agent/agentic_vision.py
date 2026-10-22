@@ -74,6 +74,11 @@ class AgenticTrace:
     human_approval_required: bool = False
     success: bool = True
     error: Optional[str] = None
+    # Provenance of the visual evidence that drove this decision. Populated when
+    # the workflow is invoked with a real frame from `frame_source`. It lets a
+    # judge confirm that the trace was produced from actual pixels rather than
+    # from a synthetic placeholder.
+    frame_provenance: Optional[Dict[str, Any]] = None
 
 
 class AgenticVisionOrchestrator:
@@ -81,6 +86,54 @@ class AgenticVisionOrchestrator:
 
     def __init__(self, enhancer: Optional[LowVisionEnhancer] = None):
         self.enhancer = enhancer or LowVisionEnhancer()
+
+    @staticmethod
+    def _provenance_dict(provenance: Optional[Any]) -> Optional[Dict[str, Any]]:
+        """Normalise a `FrameProvenance` (or plain dict) into a trace-friendly dict."""
+        if provenance is None:
+            return None
+        if isinstance(provenance, dict):
+            return dict(provenance)
+        to_dict = getattr(provenance, "to_dict", None)
+        if callable(to_dict):
+            return to_dict()
+        return {"source_ref": str(provenance)}
+
+    def run_workflow_on_source(
+        self,
+        source: Any,
+        workflow: str = "hazard",
+        **workflow_kwargs: Any,
+    ) -> AgenticTrace:
+        """Run a workflow against the first frame of a real `FrameSource`.
+
+        This is the judge-verifiable entry point: the frame comes from a real
+        media file (image, video, webcam or URI) and the returned trace carries
+        the provenance record, including the SHA-256 of the exact pixels that
+        drove the decision.
+
+        Args:
+            source: a `FrameSource` instance (or anything exposing `.read()`
+                returning a `(frame, provenance)` tuple).
+            workflow: 'hazard' for obstacle/fall mitigation, 'medication' for
+                the clinical guardrail loop.
+            workflow_kwargs: forwarded to the underlying workflow method.
+        """
+        frame, provenance = source.read()
+        prov_dict = self._provenance_dict(provenance)
+        if workflow == "hazard":
+            trace = self.execute_hazard_mitigation_workflow(
+                frame, provenance=prov_dict, **workflow_kwargs
+            )
+        elif workflow == "medication":
+            trace = self.execute_medication_guardrail_workflow(
+                frame, provenance=prov_dict, **workflow_kwargs
+            )
+        else:
+            raise ValueError(
+                f"Unknown workflow {workflow!r}. Expected 'hazard' or 'medication'."
+            )
+        return trace
 
     def analyze_frame_perception(self, frame: np.ndarray) -> PerceptionMetrics:
         """Step 1: Extract substantive quantitative vision features via OpenCV 5."""
@@ -132,6 +185,7 @@ class AgenticVisionOrchestrator:
         clinic_id: str = "demo_clinic_001",
         telemetry_stumble_detected: bool = False,
         simulated_location: str = "Market St & 4th Ave, Curb Transition",
+        provenance: Optional[Dict[str, Any]] = None,
     ) -> AgenticTrace:
         """Perception-Decision-Action Loop for Obstacle Navigation & Fall Escalation.
         
@@ -156,6 +210,7 @@ class AgenticVisionOrchestrator:
                 "is_vertical_drop": metrics.is_vertical_drop,
                 "estimated_drop_cm": metrics.estimated_drop_cm,
                 "hazard_category": metrics.hazard_category,
+                "frame_provenance": provenance,
             },
         ))
 
@@ -224,6 +279,7 @@ class AgenticVisionOrchestrator:
                     final_action_taken="Emergency SOS Alert Dispatched to Clinic and Caregiver",
                     human_approval_required=True,
                     success=True,
+                    frame_provenance=provenance,
                 )
             else:
                 return AgenticTrace(
@@ -234,6 +290,7 @@ class AgenticVisionOrchestrator:
                     final_action_taken="Spoken Navigation Warning Rendered",
                     human_approval_required=False,
                     success=True,
+                    frame_provenance=provenance,
                 )
         else:
             # Baseline clear path
@@ -252,6 +309,7 @@ class AgenticVisionOrchestrator:
                 final_action_taken="Passive Ambient Monitoring Maintained",
                 human_approval_required=False,
                 success=True,
+                frame_provenance=provenance,
             )
 
     def execute_medication_guardrail_workflow(
@@ -261,6 +319,7 @@ class AgenticVisionOrchestrator:
         patient_id: str = "demo_patient_001",
         clinic_id: str = "demo_clinic_001",
         doctor_name: str = "Dr. Miller, OD",
+        provenance: Optional[Dict[str, Any]] = None,
     ) -> AgenticTrace:
         """Perception-Decision-Action Loop for Prescription Guardrail & Human-in-the-Loop Scribe.
         
@@ -282,6 +341,7 @@ class AgenticVisionOrchestrator:
             details={
                 "text_regions_found": metrics.text_regions_count,
                 "candidate_boxes": metrics.text_bounding_boxes,
+                "frame_provenance": provenance,
             },
         ))
 
@@ -296,6 +356,7 @@ class AgenticVisionOrchestrator:
                 human_approval_required=False,
                 success=False,
                 error="Insufficient text regions detected on frame",
+                frame_provenance=provenance,
             )
 
         steps.append(AgenticExecutionStep(
@@ -366,6 +427,7 @@ class AgenticVisionOrchestrator:
                 final_action_taken="Administration Halted; Clinician Review Drafted in EHR",
                 human_approval_required=True,
                 success=True,
+                frame_provenance=provenance,
             )
         else:
             # Successful match -> log adherence streak
@@ -390,6 +452,7 @@ class AgenticVisionOrchestrator:
                 final_action_taken="Adherence Streak Successfully Logged",
                 human_approval_required=False,
                 success=True,
+                frame_provenance=provenance,
             )
 
 
