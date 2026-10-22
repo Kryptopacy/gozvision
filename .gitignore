@@ -50,8 +50,10 @@ Thumbs.db
 dist/
 *.onnx
 *.avi
+*.mp4
 *.tmp
 *.zip
+demo_output/
 backend/evaluation/dataset/raw/*.onnx
 backend/evaluation/dataset/raw/*.tmp
 playwright_reports/

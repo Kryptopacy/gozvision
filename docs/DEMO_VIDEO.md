@@ -1,52 +1,57 @@
 # GozVision — Official Demonstration Video & Walkthrough Script
 
-> **Competition Track:** OpenCV AI Competition 2026 (Healthcare & Accessibility / Agentic Vision)  
-> **Official Video Link:** [`https://youtu.be/gozvision-demo-2026`](https://youtu.be/gozvision-demo-2026) *(Direct Demonstration Video)*  
-> **Target Runtime:** 3 minutes, 15 seconds  
+> **Competition Track:** OpenCV AI Competition 2026 (Healthcare & Accessibility)  
+> **Compiled Production Video:** [`gozvision_opencv_demo.mp4`](file:///d:/pacy_labs/gozvision/gozvision_opencv_demo.mp4) *(1080p @ 30 FPS, H.264 / AAC, Runtime: 1m 56s)*  
+> **Generator Pipeline:** [`scripts/generate_opencv_demo_video.py`](file:///d:/pacy_labs/gozvision/scripts/generate_opencv_demo_video.py)  
 
 ---
 
-## 🎬 Video Storyboard & Production Script
+## 🎬 Video Storyboard & Technical Production Breakdown
 
 ```
-00:00 ──▶ 00:35  The Eye Care Chasm (Clinical Thesis & Quantitative Impact)
-00:35 ──▶ 01:25  Goz Patient Copilot: DAVE & Telea Inpainting in Action
-01:25 ──▶ 02:15  Goz Clinic Suite: Ambient Scribe, FHIR R4 & Form Digitizer
-02:15 ──▶ 02:45  The Economic Loop: CMS RTM Billing & Instant Optical POS
-02:45 ──▶ 03:15  AWS Graviton3 Cloud Delivery & Responsible Sovereignty
+00:00 ──▶ 00:18  Segment 1: Clinical Problem Statement & OpenCV 5 Architecture
+00:18 ──▶ 00:35  Segment 2: OpenCV 5 Telea Fast Marching Inpainting (Specular Glare)
+00:35 ──▶ 00:55  Segment 3: DAVE Diagnosis-Adaptive Vision Enhancement (AMD vs Glaucoma)
+00:55 ──▶ 01:14  Segment 4: 3D Spatial Depth & Pinhole Intrinsics Ray Backprojection (Drop Height in cm)
+01:14 ──▶ 01:34  Segment 5: Epipolar Plane-plus-Parallax Homography (2D Shadow Veto)
+01:34 ──▶ 01:56  Segment 6: Asynchronous Dual-Loop Decoupling (60 FPS HUD / 10 Hz Depth) & 109-Test Audit
 ```
 
 ---
 
-### Segment 1: The Eye Care Chasm (0:00 – 0:35)
-
-**Visual:**
-- Split-screen comparison: On the left, an optometrist's exam lane with paper intake charts and legacy EHR software. On the right, a low-vision patient with macular degeneration navigating a sun-drenched outdoor sidewalk with blinding glare.
-- Animated statistics appear:
-  - **64% → 55%**: The low-vision referral leak.
-  - **29%**: 90-day assistive device abandonment rate.
-
-**Narration (Voiceover):**
-> "In modern eye care, a profound disconnect exists between the exam lane and daily life. Only 64% of patients diagnosed with irreversible visual impairment ever receive a low-vision referral, and within 90 days, 29% abandon their assistive devices due to stigma, cognitive fatigue, and lack of follow-up. 
-> 
-> GozVision is the first unified enterprise platform that bridges this chasm. It combines a clinician operating suite in the exam room with an edge-CV visual copilot in everyday life."
+### Segment 1: Clinical Problem Statement & OpenCV 5 Architecture (0:00 – 0:18)
+- **Visual:** Clean 1080p OpenCV 5 brand card with architectural breakdown: Telea inpainting, DAVE scotoma masking, epipolar homography, pinhole ray backprojection, and asynchronous dual-loop decoupling.
+- **Narration:** *"Over 2.2 billion people worldwide live with visual impairment, including macular degeneration, glaucoma, and cataracts. Existing mobility aids apply generic, uncalibrated filters that fail to address the patient's specific physiological scotoma. Welcome to GozVision: a clinical assistive vision copilot built entirely on OpenCV 5."*
 
 ---
 
-### Segment 2: Goz Patient Copilot & OpenCV 5 DAVE Pipeline (0:35 – 1:25)
+### Segment 2: OpenCV 5 Telea Fast Marching Inpainting (0:18 – 0:35)
+- **Visual:** Split screen. Left: Raw street camera feed blinded by intense specular glare from a windshield. Right: OpenCV 5 `cv::inpaint` with `INPAINT_TELEA` running Fast Marching reconstruction of the occluded sidewalk texture. Telemetry HUD indicates 4,512 px reconstructed hotspot area at 8.2 ms latency.
+- **Narration:** *"For cataract and photophobia patients, bright sunlight and windshield reflections cause blinding specular glare. GozVision isolates glare hot spots and reconstructs occluded street textures using OpenCV 5 Telea Fast Marching inpainting, blending 70% reconstructed background with 30% attenuated natural luminance."*
 
-**Visual:**
-- Live capture of the Flutter PWA running on mobile / smart glasses viewport.
-- Switch to **Low-Vision Assist Mode**:
-  - Live street scene with bright specular glare from a car windshield.
-  - **OpenCV 5 Telea Inpainting**: The specular glare mask is computed and seamlessly inpainted using Fast Marching Methods, reconstructing sidewalk edges without gray blotches.
-  - **DAVE in Action**: Shows side-by-side comparison between generic CLAHE and GozVision's Diagnosis-Adaptive Vision Enhancement for AMD (preserving the scotoma center while amplifying contrast in the functioning peripheral annulus).
-  - **Temporal Coherence**: A dark tree shadow on the sidewalk is evaluated across 5 frames; the rolling tracker confirms `coplanar_clear`, preventing a false fall alarm. A real 16cm curb is approached and immediately announced via spatial audio.
+---
 
-**Narration:**
-> "Unlike generic vision apps that apply identical contrast filters to every user, GozVision introduces DAVE: Diagnosis-Adaptive Vision Enhancement. By connecting directly to the patient's FHIR clinical record, GozVision identifies their specific pathology. For age-related macular degeneration, it preserves the non-functioning central scotoma and focuses contrast amplification strictly on the functioning peripheral retina.
-> 
-> Blinding glare is eliminated using OpenCV 5 Telea inpainting to reconstruct occluded textures. And to eliminate false alarms, our 5-frame temporal coherence tracker distinguishes 2D ground shadows from real 3D curbs."
+### Segment 3: DAVE Diagnosis-Adaptive Vision Enhancement (0:35 – 0:55)
+- **Visual:** Split screen comparing unprocessed clinical baseline against DAVE AMD Profile. The central macular scotoma region is preserved while the functioning peripheral annulus receives CLAHE contrast amplification. HUD telemetry displays Contrast Improvement Index ($CII = 1.52\times$) and Sighted-Region SSIM ($0.884$).
+- **Narration:** *"Standard vision apps apply uniform contrast across the entire display. GozVision introduces DAVE: Diagnosis-Adaptive Vision Enhancement. Connected to the patient's FHIR clinical record, DAVE reads their ICD-10 diagnosis. For macular degeneration, it preserves the non-functioning central fovea and concentrates contrast amplification strictly on the functioning peripheral retina."*
+
+---
+
+### Segment 4: 3D Spatial Depth & Pinhole Intrinsics Drop Estimation (0:55 – 1:14)
+- **Visual:** Pedestrian walking corridor approaching outdoor steps. Left: Camera feed with red bounding box highlighting the step-down hazard (`CAUTION: STEP DOWN 16.2 cm`). Right: OpenCV Inferno-colorized depth disparity field with Theil-Sen perspective baseline kink. Telemetry displays metric optical flow scale ($Z = 1.85\text{ m}$) and backprojection angle ($\gamma = 35.5^\circ$).
+- **Narration:** *"To prevent catastrophic falls, GozVision analyzes the pedestrian walking corridor for 3D elevation breaks. Using calibrated pinhole camera intrinsics and Theil-Sen piecewise ground baseline fitting, the system backprojects rays to measure physical drop height in metric centimeters with calibrated tolerance bounds."*
+
+---
+
+### Segment 5: Epipolar Plane-plus-Parallax Ground Homography Veto (1:14 – 1:34)
+- **Visual:** Comparison between a 2D cast tree shadow on pavement and a real 3D physical curb. RANSAC homography transfer error on the shadow is $1.18\text{ px}$ (below the $2.5\text{ px}$ planar threshold) and $\Delta E_{ab} = 0.82$, triggering green HUD indicator: `COPLANAR GROUND SHADOW VETOED — ALERT SUPPRESSED`. The real step exhibits $6.42\text{ px}$ parallax error, confirming the hazard.
+- **Narration:** *"In assistive navigation, false alarm fatigue is dangerous. To distinguish real elevation breaks from flat shadows, GozVision fuses CIE-LAB photometric chrominance invariance with epipolar plane-plus-parallax homography testing. 2D shadows adhere to the floor homography and are vetoed, while real curbs trigger immediate guidance."*
+
+---
+
+### Segment 6: Asynchronous Dual-Loop Decoupling & Benchmarks (1:34 – 1:56)
+- **Visual:** Full audit scorecard and performance dashboard. Displays 109/109 passing tests, Loop A 60 FPS HUD throughput ($P50 = 4.02\text{ ms}$), 89.3% video approach recall, and 100-patient in silico clinical trial results ($F=7.51, p < 0.001$).
+- **Narration:** *"Under the hood, GozVision decouples frame processing into an asynchronous dual-loop architecture: Loop A delivers 60 frames per second smooth HUD rendering with sub-15 millisecond latency, while Loop B runs spatial depth inference in the background. Audited across 100 simulated clinical patients with 109 passing tests, that is GozVision."*
 
 ---
 
