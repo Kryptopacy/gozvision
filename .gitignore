@@ -61,3 +61,5 @@ playwright_reports/
 # Internal Hackathon Submission Guides & Temporary Origin Scripts
 docs/HACKATHON_*.md
 scripts/update_cloudfront_origin.py
+scripts/generate_*_video.py
+docs/DEMO_VIDEO.md
