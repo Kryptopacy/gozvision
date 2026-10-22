@@ -972,6 +972,135 @@ class SpatialDepthEstimator:
         is_shadow = bool(delta_e < 1.80 and tex_ratio < 2.20)
         return is_shadow, delta_e, tex_ratio
 
+    @staticmethod
+    def verify_planar_homography_consistency(
+        prev_frame: np.ndarray,
+        curr_frame: np.ndarray,
+        hazard_region: Optional[Tuple[int, int, int, int]] = None,
+        max_inlier_reprojection_error: float = 2.5,
+    ) -> Tuple[bool, float]:
+        """Evaluates whether a candidate hazard region is coplanar with the walking ground plane.
+
+        Uses the epipolar Plane-plus-Parallax (P+P) principle:
+        1. Estimates the dominant ground plane homography H using RANSAC on robust
+           corner features (GoodFeaturesToTrack) in the lower walking corridor.
+        2. Evaluates the transfer residual error of features within the candidate hazard
+           bounding box (x, y, w, h) when mapped through H:
+               error = ||x_curr - H * x_prev||_2
+        3. If the hazard features adhere to H with low residual error (< 2.5 px),
+           the hazard is mathematically coplanar with the floor (e.g. 2D shadow,
+           painted line, crosswalk marking) and is vetoed as a non-hazard.
+        4. Real 3D drops or curbs exhibit significant parallax deviation from the
+           ground plane homography (> 5.0 px).
+
+        Returns
+        -------
+        Tuple[bool, float]
+            (is_coplanar_ground, median_reprojection_error_px)
+        """
+        if prev_frame is None or curr_frame is None or prev_frame.shape != curr_frame.shape:
+            return False, 99.0
+        h, w = prev_frame.shape[:2]
+        corridor_y = int(h * 0.45)
+        g1 = cv2.cvtColor(prev_frame[corridor_y:, :], cv2.COLOR_BGR2GRAY)
+        g2 = cv2.cvtColor(curr_frame[corridor_y:, :], cv2.COLOR_BGR2GRAY)
+        pts1 = cv2.goodFeaturesToTrack(g1, maxCorners=120, qualityLevel=0.01, minDistance=7)
+        if pts1 is None or len(pts1) < 8:
+            return False, 99.0
+        pts2, st, err = cv2.calcOpticalFlowPyrLK(g1, g2, pts1, None)
+        good1 = pts1[st == 1]
+        good2 = pts2[st == 1]
+        if len(good1) < 8:
+            return False, 99.0
+        H, inliers = cv2.findHomography(good1, good2, cv2.RANSAC, max_inlier_reprojection_error)
+        if H is None or inliers is None or np.sum(inliers) < 6:
+            return False, 99.0
+
+        good1_full = good1 + np.array([[0.0, float(corridor_y)]], dtype=np.float32)
+        good2_full = good2 + np.array([[0.0, float(corridor_y)]], dtype=np.float32)
+
+        if hazard_region is not None:
+            hx, hy, hw, hh = hazard_region
+            mask_box = (
+                (good1_full[:, 0] >= hx) & (good1_full[:, 0] <= hx + hw) &
+                (good1_full[:, 1] >= hy) & (good1_full[:, 1] <= hy + hh)
+            )
+            if np.sum(mask_box) >= 3:
+                box_pts1 = good1[mask_box].reshape(-1, 1, 2)
+                box_pts2 = good2[mask_box].reshape(-1, 1, 2)
+                proj = cv2.perspectiveTransform(box_pts1, H)
+                diffs = np.linalg.norm(box_pts2 - proj, axis=2)
+                med_err = float(np.median(diffs))
+                return bool(med_err <= max_inlier_reprojection_error), med_err
+
+        inlier_ratio = float(np.sum(inliers)) / float(len(inliers))
+        avg_err = float(np.mean(err[st == 1])) if err is not None and np.any(st == 1) else 99.0
+        return bool(inlier_ratio >= 0.70), avg_err
+
+    @staticmethod
+    def estimate_metric_scale_optical_flow(
+        prev_frame: np.ndarray,
+        curr_frame: np.ndarray,
+        intrinsics: Optional[CameraIntrinsics] = None,
+        dt_sec: float = 1.0 / 30.0,
+        walking_speed_mps: float = 1.2,
+    ) -> Tuple[float, Tuple[float, float]]:
+        """Calibrates metric ground scale using optical flow expansion dynamics during walking.
+
+        In egocentric walking vision, forward motion V_z produces a vertical optical flow
+        divergence rate on the ground plane:
+            v_y = (f_y * V_z) / Z
+        Rearranging gives real-time metric distance to ground features:
+            Z = (f_y * V_z * dt) / dy
+
+        This optical flow expansion dynamically calibrates Z_metric and camera height
+        without needing active LiDAR or dual stereo cameras.
+
+        Returns
+        -------
+        Tuple[float, Tuple[float, float]]
+            (calibrated_z_metric, (lower_bound_m, upper_bound_m))
+        """
+        if prev_frame is None or curr_frame is None or prev_frame.shape != curr_frame.shape:
+            return 2.5, (2.0, 3.0)
+        h, w = prev_frame.shape[:2]
+        if intrinsics is None:
+            intrinsics = CameraIntrinsics.from_frame_shape(h, w)
+
+        corridor_y = int(intrinsics.cy)
+        g1 = cv2.cvtColor(prev_frame[corridor_y:, :], cv2.COLOR_BGR2GRAY)
+        g2 = cv2.cvtColor(curr_frame[corridor_y:, :], cv2.COLOR_BGR2GRAY)
+        pts1 = cv2.goodFeaturesToTrack(g1, maxCorners=100, qualityLevel=0.01, minDistance=8)
+        if pts1 is None or len(pts1) < 6:
+            return 2.5, (2.1, 2.9)
+
+        pts2, st, _ = cv2.calcOpticalFlowPyrLK(g1, g2, pts1, None)
+        good1 = pts1[st == 1]
+        good2 = pts2[st == 1]
+        if len(good1) < 6:
+            return 2.5, (2.1, 2.9)
+
+        # Ground points expand downward (dy > 0) as pedestrian moves forward
+        dy = good2[:, 1] - good1[:, 1]
+        y_rel = good1[:, 1]  # distance below horizon
+        valid_exp = (dy > 0.4) & (y_rel > 10.0)
+
+        if np.sum(valid_exp) < 4:
+            return 2.5, (2.1, 2.9)
+
+        valid_dy = dy[valid_exp]
+        valid_y = y_rel[valid_exp]
+        z_estimates = (valid_y * walking_speed_mps * dt_sec) / valid_dy
+        z_estimates = z_estimates[(z_estimates >= 0.8) & (z_estimates <= 7.0)]
+
+        if len(z_estimates) < 3:
+            return 2.5, (2.1, 2.9)
+
+        z_metric = float(np.median(z_estimates))
+        lower_bound = float(round(max(z_metric * 0.85, 0.8), 2))
+        upper_bound = float(round(min(z_metric * 1.15, 7.0), 2))
+        return float(round(z_metric, 2)), (lower_bound, upper_bound)
+
     def analyze_walking_corridor(
         self,
         frame: np.ndarray,

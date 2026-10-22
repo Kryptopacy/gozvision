@@ -177,6 +177,19 @@ class TestCmsRtmBillingEngine(unittest.TestCase):
         self.assertIn("SV1*HC:98981*39.72", edi_payload)
         self.assertIn("HI*ABK:H3531", edi_payload)
 
+    def test_in_silico_cohort_trial_execution(self):
+        """Execute in silico 20-patient subset validation verifying statistical adaptiveness."""
+        from evaluation.clinical_trial_simulation import InSilicoClinicalTrialHarness
+        harness = InSilicoClinicalTrialHarness(cohort_size=20, seed=42)
+        results = harness.execute_in_silico_trial()
+        self.assertEqual(len(results), 20)
+        summary = harness.generate_clinical_validation_report(results, output_md_path="backend/evaluation/results/TRIAL_TEST_VAL.md")
+        self.assertEqual(summary["total_patients"], 20)
+        self.assertGreater(summary["f_statistic"], 0.0)
+        self.assertIn("AMD", summary["cohorts"])
+        self.assertIn("Glaucoma", summary["cohorts"])
+        self.assertIn("Cataract", summary["cohorts"])
+
 
 if __name__ == "__main__":
     unittest.main()

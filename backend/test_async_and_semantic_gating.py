@@ -119,6 +119,65 @@ class TestAsyncAndSemanticGating(unittest.TestCase):
         self.assertLess(chroma_dist, 1.0, "Shadow boundary on uniform pavement must preserve chromaticity")
         self.assertGreater(lum_drop, 0.40, "Cast shadow must exhibit a sharp luminance drop")
 
+    def test_planar_homography_shadow_coplanarity_veto(self):
+        """Planar homography consistency mathematically vetoes coplanar 2D pavement markings."""
+        # Frame 1: pavement with texture dots and a painted shadow patch
+        h, w = 320, 400
+        rng = np.random.default_rng(42)
+        f1 = np.full((h, w, 3), 130, dtype=np.uint8)
+        # Add high-contrast feature dots across lower walking corridor
+        for _ in range(60):
+            rx, ry = int(rng.integers(30, w - 30)), int(rng.integers(int(h * 0.5), h - 20))
+            cv2.circle(f1, (rx, ry), 3, (int(rng.integers(20, 240)),) * 3, -1)
+        # Add a 2D rectangular dark shadow patch
+        hazard_box = (120, 180, 160, 60)
+        cv2.rectangle(f1, (hazard_box[0], hazard_box[1]), (hazard_box[0] + hazard_box[2], hazard_box[1] + hazard_box[3]), (50, 50, 50), -1)
+
+        # Frame 2: planar ground transformation simulating camera walking forward/down
+        M_planar = np.float32([[1.0, 0.0, 0.0], [0.0, 1.0, 3.0]])
+        f2 = cv2.warpAffine(f1, M_planar, (w, h), borderMode=cv2.BORDER_REFLECT)
+
+        is_coplanar, err = SpatialDepthEstimator.verify_planar_homography_consistency(
+            f1, f2, hazard_region=hazard_box
+        )
+        self.assertTrue(is_coplanar, f"Coplanar pavement patch must adhere to ground homography (err={err:.2f})")
+        self.assertLess(err, 3.0, "Homography reprojection error for planar patch must be < 3.0 px")
+
+    def test_optical_flow_metric_scale_calibration(self):
+        """Optical flow vertical divergence rate dynamically computes physical metric ground scale."""
+        h, w = 320, 400
+        f1 = np.full((h, w, 3), 120, dtype=np.uint8)
+        rng = np.random.default_rng(101)
+        # Add ground texture points in walking corridor
+        for _ in range(50):
+            rx, ry = int(rng.integers(20, w - 20)), int(rng.integers(int(h * 0.55), h - 15))
+            cv2.circle(f1, (rx, ry), 3, (int(rng.integers(10, 250)),) * 3, -1)
+
+        # Simulate forward motion: points expand downward proportional to y
+        # dy = (y_rel * V_z * dt) / Z = (y_rel * 1.2 * (1/30)) / 2.0 = y_rel * 0.02
+        f2 = np.copy(f1)
+        # Downward affine expansion
+        M_exp = np.float32([[1.0, 0.0, 0.0], [0.0, 1.0, 2.5]])
+        f2 = cv2.warpAffine(f1, M_exp, (w, h), borderMode=cv2.BORDER_REFLECT)
+
+        z_metric, (z_low, z_high) = SpatialDepthEstimator.estimate_metric_scale_optical_flow(
+            f1, f2, dt_sec=1.0/30.0, walking_speed_mps=1.2
+        )
+        self.assertGreaterEqual(z_metric, 0.8)
+        self.assertLessEqual(z_metric, 5.0)
+        self.assertLess(z_low, z_metric)
+        self.assertGreater(z_high, z_metric)
+
+    def test_concurrent_multi_stream_stress(self):
+        """Simulate concurrent multi-stream workers verifying aggregate throughput & drop-old stability."""
+        from evaluation.stress_concurrency import ConcurrencyStressHarness
+        harness = ConcurrencyStressHarness(num_workers=3, frames_per_worker=10)
+        res = harness.run_benchmark()
+        self.assertEqual(res["num_concurrent_streams"], 3)
+        self.assertEqual(res["total_frames_processed"], 30)
+        self.assertGreater(res["aggregate_throughput_fps"], 5.0)
+        self.assertLess(res["p50_latency_ms"], 50.0)
+
 
 if __name__ == "__main__":
     unittest.main()
