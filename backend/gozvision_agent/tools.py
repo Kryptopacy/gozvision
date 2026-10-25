@@ -7,6 +7,7 @@ hallucinations and ensure the agent always has a valid structured response.
 import os
 import traceback
 from datetime import datetime, timezone, timedelta
+from typing import Any
 
 from .rag_service import SemanticKnowledgeBase
 
