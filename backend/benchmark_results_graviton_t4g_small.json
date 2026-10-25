@@ -1,0 +1,58 @@
+{
+  "measurement_environment": {
+    "label": "aws_t4g.small",
+    "host_os": "Linux-6.1.189-236.399.amzn2023.aarch64-aarch64-with-glibc2.34",
+    "cpu": "aarch64",
+    "python_version": "3.11.17",
+    "opencv_version": "5.0.0",
+    "opencv_dnn_backend": "DNN_BACKEND_OPENCV",
+    "architecture": "aarch64",
+    "is_aws_graviton_arm": true,
+    "simd_detected": {
+      "opencv_baseline": "NEON FP16",
+      "opencv_dispatched_code": "NEON_DOTPROD NEON_FP16 NEON_BF16"
+    },
+    "active_worker_threads": 2,
+    "depth_backend_used": "opencv_dnn_onnx",
+    "depth_model": "model-small.onnx",
+    "aws_instance_reference": {
+      "instance_type": "t4g.small",
+      "hourly_rate_usd": 0.0168,
+      "note": "Reference on-demand hourly rate for the detected architecture, applied to measured throughput for cost-per-million-frames only. This run was executed on the machine named above."
+    }
+  },
+  "benchmarks": {
+    "enhanced_contrast": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 9.116,
+      "p95_latency_ms": 11.407,
+      "throughput_fps": 109.67,
+      "cost_per_million_frames_usd": 0.0426
+    },
+    "glare_suppression": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 20.071,
+      "p95_latency_ms": 20.24,
+      "throughput_fps": 49.82,
+      "cost_per_million_frames_usd": 0.0937
+    },
+    "reading": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 1.67,
+      "p95_latency_ms": 2.038,
+      "throughput_fps": 598.56,
+      "cost_per_million_frames_usd": 0.0078
+    },
+    "spatial_depth": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 249.652,
+      "p95_latency_ms": 326.603,
+      "throughput_fps": 4.01,
+      "cost_per_million_frames_usd": 1.165
+    }
+  }
+}

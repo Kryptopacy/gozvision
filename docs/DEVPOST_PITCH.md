@@ -71,11 +71,15 @@ Amazon ECS Fargate behind CloudFront (IaC: `infra/gozvision-stack.yaml`,
 `CpuArchitecture: ARM64`). Our benchmark emits **only measured numbers**
 (`backend/benchmark_cool_graviton.py`): dev-workstation, OpenCV 5.0.0,
 640x480, DNN active — spatial depth 12.4 FPS, enhanced contrast 414 FPS,
-glare suppression 71 FPS, reading-zone isolation 919 FPS. Cross-architecture
-Graviton3-vs-x86 figures are produced by running the identical benchmark on
-Spot `c7g.xlarge` and `c6i.xlarge` instances (`scripts/run_graviton_benchmark.sh`,
-merged by `compare_benchmarks.py`) — no ratio is published unless both sides
-were measured.
+glare suppression 71 FPS, reading-zone isolation 919 FPS. We then ran the
+identical benchmark on real AWS Spot instances — Graviton2 (`t4g.small`) and
+Intel (`c7i-flex.large`) — and measured: Intel is 1.29–2.08x faster per mode,
+while **Graviton delivers the same workload 2.5–4.0x cheaper per million
+frames** (spatial depth $1.17 vs $2.87 per 1M frames; reading $0.0078 vs
+$0.0285). Reproduce both runs yourself: `scripts/run_graviton_benchmark.sh` +
+`compare_benchmarks.py`; full telemetry in
+`backend/benchmark_results_graviton_t4g_small.json` and
+`backend/benchmark_results_x86_c7i-flex_large.json`.
 
 **Reproducibility.** Pinned deps (`opencv-python-headless>=5.0.0,<5.1`,
 `numpy>=2.0,<3`), fresh-venv verified: 27/27 tests pass

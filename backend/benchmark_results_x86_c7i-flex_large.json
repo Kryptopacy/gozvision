@@ -1,0 +1,58 @@
+{
+  "measurement_environment": {
+    "label": "aws_c7i-flex.large",
+    "host_os": "Linux-6.1.189-236.399.amzn2023.x86_64-x86_64-with-glibc2.34",
+    "cpu": "x86_64",
+    "python_version": "3.11.17",
+    "opencv_version": "5.0.0",
+    "opencv_dnn_backend": "DNN_BACKEND_OPENCV",
+    "architecture": "x86_64",
+    "is_aws_graviton_arm": false,
+    "simd_detected": {
+      "opencv_baseline": "SSE SSE2 SSE3",
+      "opencv_dispatched_code": "SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX"
+    },
+    "active_worker_threads": 2,
+    "depth_backend_used": "opencv_dnn_onnx",
+    "depth_model": "model-small.onnx",
+    "aws_instance_reference": {
+      "instance_type": "c7i-flex.large",
+      "hourly_rate_usd": 0.0864,
+      "note": "Reference on-demand hourly rate for the detected architecture, applied to measured throughput for cost-per-million-frames only. This run was executed on the machine named above."
+    }
+  },
+  "benchmarks": {
+    "enhanced_contrast": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 7.046,
+      "p95_latency_ms": 7.706,
+      "throughput_fps": 141.86,
+      "cost_per_million_frames_usd": 0.1692
+    },
+    "glare_suppression": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 15.342,
+      "p95_latency_ms": 16.527,
+      "throughput_fps": 65.17,
+      "cost_per_million_frames_usd": 0.3683
+    },
+    "reading": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 1.185,
+      "p95_latency_ms": 1.625,
+      "throughput_fps": 843.1,
+      "cost_per_million_frames_usd": 0.0285
+    },
+    "spatial_depth": {
+      "resolution": "640x480",
+      "batch_size": 100,
+      "avg_latency_ms": 119.722,
+      "p95_latency_ms": 127.535,
+      "throughput_fps": 8.35,
+      "cost_per_million_frames_usd": 2.8734
+    }
+  }
+}

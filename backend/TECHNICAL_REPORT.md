@@ -88,7 +88,16 @@ Over **2.2 billion people** globally live with vision impairment (WHO). For pati
 ## 6. Empirical Evaluation & Key Results
 - **Empirical Dataset:** 69 real-world street and corridor frames (0 synthetic placeholders) decoded via `frame_source.py`.
 - **Stream Approach Hazard Detection:** **100.0% Precision**, **71.4% Recall**, **83.3% F1-Score**, and **0.0 False Alarms / minute** on continuous walking video.
-- **Measured Pipeline Economics (dev workstation: Windows 11, Intel Tiger Lake amd64, 8 threads, OpenCV 5.0.0, 640x480, `model-small.onnx` DNN depth):** spatial depth disparity **12.4 FPS** (80.4 ms avg), enhanced contrast **414 FPS**, glare suppression **71 FPS**, reading-zone isolation **919 FPS** — full telemetry in `backend/benchmark_results.json`. Cross-architecture Graviton3 (`c7g.xlarge`) vs. x86 (`c6i.xlarge`) figures are **measured on real instances** by `scripts/run_graviton_benchmark.sh` and merged with `backend/compare_benchmarks.py` (results: `backend/benchmark_results_graviton_c7g.json`, `backend/benchmark_results_x86_c6i.json`). Production runs the linux/arm64 container on Graviton-backed Amazon ECS Fargate (`infra/gozvision-stack.yaml`, `CpuArchitecture: ARM64`).
+- **Measured AWS Graviton vs x86 (identical benchmark on both sides: OpenCV 5.0.0, 640x480, 100 frames/mode, `model-small.onnx` DNN active on both, `scripts/run_graviton_benchmark.sh`, Spot instances eu-north-1):**
+
+| Mode | Graviton2 `t4g.small` | Intel `c7i-flex.large` | Throughput ratio | Cost per 1M frames |
+|---|---|---|---|---|
+| enhanced_contrast | 109.7 FPS | 141.9 FPS | 1.29x | **$0.043 vs $0.169 (3.97x cheaper on Graviton)** |
+| glare_suppression | 49.8 FPS | 65.2 FPS | 1.31x | **$0.094 vs $0.368 (3.93x cheaper on Graviton)** |
+| reading | 598.6 FPS | 843.1 FPS | 1.41x | **$0.008 vs $0.029 (3.65x cheaper on Graviton)** |
+| spatial_depth (DNN) | 4.0 FPS | 8.4 FPS | 2.08x | **$1.17 vs $2.87 (2.47x cheaper on Graviton)** |
+
+  Per-core, the newer-generation Intel instance is faster; per dollar, Graviton processes the identical workload **2.5-4.0x cheaper**, which is the cloud-economics result. Full telemetry: `backend/benchmark_results_graviton_t4g_small.json`, `backend/benchmark_results_x86_c7i-flex_large.json`. Dev-workstation measurements (Windows 11, Intel Tiger Lake amd64, 640x480): spatial depth 12.4 FPS, enhanced contrast 414 FPS, glare suppression 71 FPS, reading-zone isolation 919 FPS (`backend/benchmark_results.json`). Production runs the linux/arm64 container on Graviton-backed Amazon ECS Fargate (`infra/gozvision-stack.yaml`, `CpuArchitecture: ARM64`).
 - **In Silico Clinical Trial ($N=100$):** One-way ANOVA across pathology cohorts proves statistically significant condition-specific contrast amplification ($F(3, 96) = 7.51, p < 0.001$), with strong LogMAR correlation ($r = 0.566$).
 
 ---
