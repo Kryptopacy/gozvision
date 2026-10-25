@@ -15,7 +15,7 @@ dependencies:
   flutter_dotenv: any
   http: ^1.2.0
   url_launcher: any
-  google_fonts: ^6.2.1
+  google_fonts: 6.3.3
 
 dev_dependencies:
   flutter_test:

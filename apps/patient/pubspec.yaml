@@ -30,7 +30,7 @@ dependencies:
   path_provider: any
   uuid: any
   cupertino_icons: any
-  google_fonts: ^6.2.1
+  google_fonts: 6.3.3
   go_router: any
   image: ^4.8.0
   flutter_animate: ^4.5.2
