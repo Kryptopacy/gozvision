@@ -128,3 +128,30 @@ bash scripts/run_graviton_benchmark.sh
 ```
 
 The depth model (`model-small.onnx`, MiDaS v2.1 small via `cv2.dnn.readNetFromONNX`) is auto-discovered from `backend/evaluation/dataset/raw/` or `GOZVISION_DEPTH_MODEL`. Every hazard number in `docs/EVALUATION_REPORT.md` names the backend that produced it; benchmark JSONs embed the machine label, architecture, and OpenCV build SIMD paths they were measured on.
+
+---
+
+## 10. Related Products & Differentiation
+
+GozVision's feature scope compared with shipping assistive-vision products (a
+feature-scope comparison, not a maturity one: those are certified products with
+years of field refinement, GozVision is a research-grade prototype):
+
+| Product | Form factor | What it detects | Elevation drop-off vs coplanar pattern? | Diagnosis-conditioned processing? |
+|---|---|---|---|---|
+| WeWalk Smart Cane 2 | Instrumented cane | Ultrasonic obstacle proximity | No (range-based, no 3D classification) | No |
+| BuzzClip / Sunu Band | Chest / wrist sonar | Obstacle proximity via haptics | No | No |
+| OrCam MyEye | Clip-on camera | Text OCR, faces, products | No | No |
+| Seeing AI (Microsoft) | Handheld phone | Scene/text narration (cloud) | No | No |
+| Envision Glasses | Glass-mounted camera | OCR, scene description, calls | No | No |
+| Be My Eyes / Be My AI | Phone photo Q&A | On-demand descriptions | No (not continuous) | No |
+| **GozVision** | Glasses / phone stream | **Depth-disparity vertical drop-off vs coplanar shadow decision, reading-zone OCR, glare suppression** | **Yes (temporal coherence + homography veto, 71.4% recall / 100% precision measured)** | **Yes (DAVE from FHIR ICD-10)** |
+
+Two capability claims distinguish GozVision: (1) the evaluated coplanarity
+discriminator - no mainstream product classifies whether an edge is a physical
+elevation change versus a flat painted/shadow pattern, which is the specific
+failure mode that produces alarm fatigue in 2D systems; (2) DAVE derives
+enhancement parameters from the patient's clinical record rather than applying
+uniform processing. The full aid suite (reading zones, glare inpainting,
+contrast) overlaps existing products; the novelty is the spatial-depth decision
+layer and the closed-loop agent acting on it.

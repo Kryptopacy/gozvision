@@ -94,10 +94,10 @@ sudo -u bench bash -s <<'INNER'
 set -euxo pipefail
 export AWS_INSTANCE_TYPE="${inst}"
 cd /home/bench
-curl -sL "\${CODE_URL}" -o backend.tar.gz
+curl -sL "${CODE_URL}" -o backend.tar.gz
 tar xzf backend.tar.gz
 cd backend
-curl -sL "\${MODEL_URL}" -o model-small.onnx
+curl -sL "${MODEL_URL}" -o model-small.onnx
 mkdir -p evaluation/dataset/raw
 mv model-small.onnx evaluation/dataset/raw/
 python3.11 -m venv venv
