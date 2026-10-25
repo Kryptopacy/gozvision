@@ -29,11 +29,26 @@ class GravitonOptimizationProfile:
     num_threads: int = cv2.getNumThreads()
     use_optimized: bool = cv2.useOptimized()
     instance_type: str = os.environ.get("AWS_INSTANCE_TYPE", "c7g.xlarge" if is_arm else "c6i.xlarge")
-    hourly_rate_usd: float = 0.145 if is_arm else 0.170  # c7g.xlarge ($0.145) vs c6i.xlarge ($0.170)
     simd_instruction_set: str = "ARM_NEON_SVE" if is_arm else "AVX2_AVX512"
     universal_intrinsics: str = "Universal_Intrinsics_2.0_ARM_NEON_SVE" if is_arm else "Universal_Intrinsics_2.0_AVX512"
     opencv_dnn_backend: str = "DNN_BACKEND_OPENCV"
     supported_tensor_types: List[str] = field(default_factory=lambda: ["CV_8U", "CV_32F", "CV_16BF", "CV_Bool"])
+
+    # Reference on-demand hourly rates (USD) for the instance types GozVision is
+    # benchmarked on. Falls back to the architecture's xlarge rate when the type
+    # is unknown.
+    _INSTANCE_RATES = {
+        "t4g.small": 0.0168, "t4g.micro": 0.0084, "t4g.medium": 0.0336,
+        "c7g.xlarge": 0.145, "c8g.xlarge": 0.144, "m7g.xlarge": 0.1728,
+        "t3.micro": 0.0104, "t3.small": 0.0208, "t3.medium": 0.0416,
+        "c6i.xlarge": 0.170, "c7i-flex.large": 0.0864, "m7i-flex.large": 0.1022,
+    }
+
+    def __post_init__(self):
+        self.hourly_rate_usd = self._INSTANCE_RATES.get(
+            self.instance_type,
+            0.145 if self.is_arm else 0.170,
+        )
 
 
 @dataclass

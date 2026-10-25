@@ -13,17 +13,29 @@
 #
 # Usage:
 #   bash scripts/run_graviton_benchmark.sh [--region eu-north-1] [--keep] [--frames 100]
+#        [--arm-instance t4g.small] [--x86-instance c7i-flex.large]
+# Defaults are Free-Plan-eligible types: t4g.small is AWS Graviton2 (ARM64),
+# c7i-flex.large is Intel x86_64. On a paid plan, pass --arm-instance c7g.xlarge
+# --x86-instance c6i.xlarge for a Graviton3-vs-c6i pair.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Windows-style path under Git Bash (pwd -W); plain POSIX path elsewhere.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && (pwd -W 2>/dev/null || pwd))"
+# Git Bash on Windows rewrites leading-slash arguments into file paths; the AWS
+# CLI needs them verbatim (parameter paths, IAM ARNs with paths, etc.).
+export MSYS_NO_PATHCONV=1
 REGION="${AWS_REGION:-$(aws configure get region 2>/dev/null || echo eu-north-1)}"
 FRAMES=100
 KEEP=0
+ARM_INSTANCE="t4g.small"
+X86_INSTANCE="c7i-flex.large"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --region) REGION="$2"; shift 2;;
     --keep) KEEP=1; shift;;
     --frames) FRAMES="$2"; shift 2;;
+    --arm-instance) ARM_INSTANCE="$2"; shift 2;;
+    --x86-instance) X86_INSTANCE="$2"; shift 2;;
     *) echo "Unknown arg: $1"; exit 1;;
   esac
 done
@@ -47,11 +59,9 @@ fi
 git -C "${REPO_ROOT}" archive HEAD backend -o "${WORKDIR}/backend.tar.gz"
 
 # ---------- 1. IAM role for SSM (idempotent) ----------
+TRUST_POLICY='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
 if ! aws iam get-role --role-name "${ROLE_NAME}" >/dev/null 2>&1; then
-  cat > "${WORKDIR}/trust.json" <<'EOF'
-{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}
-EOF
-  aws iam create-role --role-name "${ROLE_NAME}" --assume-role-policy-document "file://${WORKDIR}/trust.json" >/dev/null
+  aws iam create-role --role-name "${ROLE_NAME}" --assume-role-policy-document "${TRUST_POLICY}" >/dev/null
   aws iam attach-role-policy --role-name "${ROLE_NAME}" \
     --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore >/dev/null
   sleep 10
@@ -74,6 +84,7 @@ MODEL_URL="$(aws s3 presign "s3://${BUCKET}/models/model-small.onnx" --expires-i
 # ---------- 3. User data ----------
 write_user_data() {
   local out="$1"
+  local inst="$2"
   cat > "${out}" <<EOF
 #!/bin/bash
 set -euxo pipefail
@@ -81,6 +92,7 @@ dnf install -y python3.11 python3.11-pip git tar gzip
 useradd -m bench 2>/dev/null || true
 sudo -u bench bash -s <<'INNER'
 set -euxo pipefail
+export AWS_INSTANCE_TYPE="${inst}"
 cd /home/bench
 curl -sL "\${CODE_URL}" -o backend.tar.gz
 tar xzf backend.tar.gz
@@ -91,7 +103,7 @@ mv model-small.onnx evaluation/dataset/raw/
 python3.11 -m venv venv
 ./venv/bin/pip install -q "opencv-python-headless>=5.0.0,<5.1" "numpy>=2.0,<3"
 ARCH=\$(uname -m)
-LABEL="aws_\${ARCH}"
+LABEL="aws_\${AWS_INSTANCE_TYPE}"
 ./venv/bin/python benchmark_cool_graviton.py --frames ${FRAMES} --resolution 640x480 --label "\${LABEL}" --save-json benchmark_results.json
 INNER
 EOF
@@ -100,7 +112,7 @@ EOF
 # ---------- 4. Launch both Spot instances ----------
 launch() {
   local arch="$1" itype="$2" ud="$3"
-  local param="/aws/service/ami-amazon-linux-latest/al2023-ami-2023.*-kernel-6.1-${arch}"
+  local param="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-${arch}"
   local ami
   ami="$(aws ssm get-parameters --names "${param}" --region "${REGION}" \
         --query 'Parameters[0].Value' --output text)"
@@ -112,13 +124,15 @@ launch() {
     --instance-market-options '{"MarketType":"spot"}' \
     --iam-instance-profile Name="${PROFILE_NAME}" \
     --security-group-ids "${sg_id}" \
-    --user-data "file://${ud}" \
+    --user-data "$(cat "${ud}")" \
     --tag-specifications "ResourceType=instance,Tags=[{Key=${TAG_KEY},Value=${TAG_VAL}},{Key=type,Value=${itype}}]" \
     --query 'Instances[0].InstanceId' --output text
 }
 
-UD_C7G="${WORKDIR}/ud_c7g.sh"; UD_C6I="${WORKDIR}/ud_c6i.sh"
-write_user_data "${UD_C7G}"; write_user_data "${UD_C6I}"
+ARM_TAG="$(echo "${ARM_INSTANCE}" | tr '.' '_')"
+X86_TAG="$(echo "${X86_INSTANCE}" | tr '.' '_')"
+UD_ARM="${WORKDIR}/ud_${ARM_TAG}.sh"; UD_X86="${WORKDIR}/ud_${X86_TAG}.sh"
+write_user_data "${UD_ARM}" "${ARM_INSTANCE}"; write_user_data "${UD_X86}" "${X86_INSTANCE}"
 
 # Clean up any stale instances from a previous run
 STALE="$(aws ec2 describe-instances --region "${REGION}" \
@@ -130,9 +144,9 @@ if [[ -n "${STALE}" ]]; then
   sleep 15
 fi
 
-echo "Launching c7g.xlarge (Graviton3) and c6i.xlarge (x86) Spot instances..."
-ID_ARM="$(launch arm64 c7g.xlarge "${UD_C7G}")"
-ID_X86="$(launch x86_64 c6i.xlarge "${UD_C6I}")"
+echo "Launching ${ARM_INSTANCE} (Graviton/ARM64) and ${X86_INSTANCE} (x86) Spot instances..."
+ID_ARM="$(launch arm64 "${ARM_INSTANCE}" "${UD_ARM}")"
+ID_X86="$(launch x86_64 "${X86_INSTANCE}" "${UD_X86}")"
 echo "ARM: ${ID_ARM}   x86: ${ID_X86}"
 
 aws ec2 wait instance-status-ok --region "${REGION}" --instance-ids "${ID_ARM}" "${ID_X86}"
@@ -157,16 +171,16 @@ fetch_results() {
 }
 
 echo "Waiting for benchmarks to complete (this takes a few minutes)..."
-fetch_results "${ID_ARM}" "${WORKDIR}/results_c7g_xlarge.json"
-fetch_results "${ID_X86}" "${WORKDIR}/results_c6i_xlarge.json"
+fetch_results "${ID_ARM}" "${WORKDIR}/results_${ARM_TAG}.json"
+fetch_results "${ID_X86}" "${WORKDIR}/results_${X86_TAG}.json"
 
 cd "${REPO_ROOT}/backend"
-py -3 compare_benchmarks.py "${WORKDIR}/results_c7g_xlarge.json" "${WORKDIR}/results_c6i_xlarge.json" \
+py -3 compare_benchmarks.py "${WORKDIR}/results_${ARM_TAG}.json" "${WORKDIR}/results_${X86_TAG}.json" \
   | tee "${WORKDIR}/COMPARISON.txt"
 
-cp "${WORKDIR}/results_c7g_xlarge.json" benchmark_results_graviton_c7g.json
-cp "${WORKDIR}/results_c6i_xlarge.json" benchmark_results_x86_c6i.json
-echo "Saved: backend/benchmark_results_graviton_c7g.json, backend/benchmark_results_x86_c6i.json"
+cp "${WORKDIR}/results_${ARM_TAG}.json" "benchmark_results_graviton_${ARM_TAG}.json"
+cp "${WORKDIR}/results_${X86_TAG}.json" "benchmark_results_x86_${X86_TAG}.json"
+echo "Saved: backend/benchmark_results_graviton_${ARM_TAG}.json, backend/benchmark_results_x86_${X86_TAG}.json"
 
 if [[ "${KEEP}" -eq 1 ]]; then
   echo "Keeping instances (--keep): ARM=${ID_ARM} x86=${ID_X86}"
