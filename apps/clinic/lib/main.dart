@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,6 +12,9 @@ import 'services/bachs_payment_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Fonts are bundled as assets (assets/fonts/, OFL licensed) - the app makes
+  // no third-party typography requests (privacy by design; GDPR/HIPAA friendly).
+  GoogleFonts.config.allowRuntimeFetching = false;
   await dotenv.load(fileName: 'assets/app.env');
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,

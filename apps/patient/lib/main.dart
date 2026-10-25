@@ -1,5 +1,6 @@
 import 'package:copilot_core/copilot_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,9 @@ import 'services/user_memory_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Fonts are bundled as assets (assets/fonts/, OFL licensed) - the app makes
+  // no third-party typography requests (privacy by design; GDPR/HIPAA friendly).
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Load environment configuration FIRST (assets/app.env — see README).
   await dotenv.load(fileName: 'assets/app.env');

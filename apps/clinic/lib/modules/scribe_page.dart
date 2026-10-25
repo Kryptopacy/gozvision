@@ -2252,7 +2252,7 @@ ${sc.currentCorrection}''';
                       children: [
                         Text(
                           effectiveTemplate.split('·').first.toUpperCase().trim(),
-                          style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
+                          style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5),
                         ),
                         Text(
                           '${scope.clinicName.toUpperCase()} · COMPREHENSIVE OPTOMETRIC CLINICAL RECORD',
