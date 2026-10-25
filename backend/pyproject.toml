@@ -5,16 +5,16 @@ description = "GozVision ADK agents — grounded clinical support for the Goz co
 requires-python = ">=3.10"
 dependencies = [
     "google-adk>=1.0.0",
-    "google-genai",
-    "numpy",
-    "opencv-python-headless>=4.8.0",
+    "google-genai>=1.0.0",
+    "numpy>=2.0,<3",
+    "opencv-python-headless>=5.0.0,<5.1",
     "mcp>=1.0.0",
-    "python-dotenv",
+    "python-dotenv>=1.0",
     "supabase>=2.0.0",
 ]
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = ["pytest>=8.0"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

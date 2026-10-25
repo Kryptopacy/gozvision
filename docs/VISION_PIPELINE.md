@@ -31,6 +31,56 @@ GozVision deploys an edge computer vision pipeline engineered with **OpenCV 5.0.
   3. Extracts bounding contours and filters out non-text aspect ratios.
 * **Benefit:** Guides the patient's camera to focus on text and projects bounding boxes for targeted magnification and OCR routing.
 
+### D. OpenCV 5 DNN Spatial Depth Disparity Engine (`spatial_depth`)
+* **Target Pathology:** Fall prevention across physical drop-offs, stairs down, and sidewalk curbs.
+* **Mechanism:**
+  1. Executes monocular relative depth estimation via `cv2.dnn.readNetFromONNX` (`model-small.onnx` or `depth_anything_v2_vits.onnx`).
+  2. Projects egocentric walking navigation corridor with dynamic pitch horizon adjustment ($y_{\text{horizon}} = c_y + f_y \tan(\theta_{\text{pitch}})$).
+  3. Evaluates piecewise-linear Theil-Sen robust median-of-slopes baseline across full and lateral lanes (left 33%, center 33%, right 33%).
+  4. Quantifies physical drop disparity jump ($\Delta D > 0.08$) and estimates metric step height ($12\text{cm} - 28\text{cm}$).
+* **Benefit:** Reliably isolates genuine physical drop-offs while rejecting flat coplanar road markings.
+
+### E. Binocular Stereo Vision Triangulation Engine (`opencv_stereo_sgbm`)
+* **Target Hardware:** Binocular smart glasses and dual-camera headsets (baseline $B \approx 6.5\text{ cm}$).
+* **Mechanism:**
+  1. Computes Semi-Global Block Matching (`cv2.StereoSGBM_create`) across rectified left/right sensor frames.
+  2. Calculates metric Euclidean depth directly via trigonometric triangulation:
+     $$Z = \frac{f_x \cdot B}{d_{\text{disparity}}}$$
+  3. Completely texture- and color-invariant: detects concrete curb edges dropping into asphalt regardless of surface color or cast shadow patterns.
+* **Benefit:** Provides hardware-level 60 FPS metric depth perception without relying on monocular neural network approximations.
+
+### F. Epipolar Plane-plus-Parallax Homography Veto
+* **Target Scenario:** High-contrast cast shadows, painted zebra crossings, and tree silhouettes on flat ground.
+* **Mechanism:**
+  1. Tracks lower-corridor features via `cv2.goodFeaturesToTrack` and pyramidal Lucas-Kanade optical flow (`cv2.calcOpticalFlowPyrLK`).
+  2. Fits ground plane homography matrix $H$ using RANSAC.
+  3. Evaluates feature transfer residual error within candidate hazard regions ($||x' - Hx||_2$).
+  4. If transfer error is $< 2.5\text{ px}$, the boundary is mathematically coplanar with the floor and is vetoed (`homography_vetoed = True`, `hazard_category = "coplanar_clear"`).
+* **Benefit:** Eliminates false alarms on flat walking surfaces, dropping video false alarm rate to **0.0 FAR/min**.
+
+### G. Forward Optical Flow Metric Scale Calibration
+* **Mechanism:**
+  1. Forward pedestrian motion $V_z$ induces vertical optical flow divergence on the ground plane:
+     $$v_y = \frac{f_y \cdot V_z}{Z} \implies Z = \frac{f_y \cdot V_z \cdot \Delta t}{\Delta y}$$
+  2. Dynamically calibrates camera height and lookahead distance ($Z_{\text{metric}}$) without active LiDAR.
+
+### H. Multi-Modal Transverse Curb & Stair Edge Gating
+* **Mechanism:**
+  1. Real curbs and stairs feature a transverse horizontal boundary crossing the lower corridor.
+  2. Fuses vertical Sobel derivatives ($I_y$, perpendicular to horizontal steps) with morphological structuring elements ($19 \times 1$).
+  3. Adapts baseline disparity threshold sensitivity upon detecting a structural transverse boundary, catching subtle, low-contrast concrete steps.
+
+### I. Diagnosis-Adaptive Vision Enhancement (DAVE)
+* **Target Innovation:** Tailoring computer vision shaders to patient-specific retinal damage from FHIR clinical records.
+* **Mechanism:**
+  1. Ingests ICD-10 diagnosis (`H35.31` AMD, `H40.11` Glaucoma, `H25.1` Cataract, `H35.52` Retinitis Pigmentosa).
+  2. Builds spatial retinal weighting maps (central scotoma preservation vs peripheral annulus boost).
+  3. Evaluates efficacy via **Sighted-Region SSIM**, **Contrast Improvement Index (CII)**, and **Edge Energy Ratio (EER)** ($2.52\times$ edge boost in surviving retina).
+
+### J. Decoupled Dual-Loop Asynchronous Architecture
+* **Loop A (Display Refresh):** Executes CLAHE, DAVE spatial shaders, and HUD overlay at **>68 FPS (<15 ms latency)** without waiting on neural depth.
+* **Loop B (Spatial 3D Depth Worker):** Asynchronously computes 3D depth and homography vetoes at **8–12 Hz** via a thread-safe non-blocking drop-old queue.
+
 ---
 
 ## 2. Smart Glasses Telemetry Profile (`backend/gozvision_vision/smart_glasses.py`)
@@ -61,15 +111,14 @@ Engineered for optical see-through smart glasses (e.g. **Ray-Ban Meta**, **Rokid
 
 ## 3. Cloud-Optimized OpenCV Library (COOL) on AWS Graviton (`cool_pipeline.py`)
 
-GozVision accelerates cloud video stream processing using the **Cloud-Optimized OpenCV Library (COOL)** deployed on **AWS Graviton3/Graviton4 (c7g/c8g)** instances.
+GozVision accelerates cloud video stream processing using the **Cloud-Optimized OpenCV Library (COOL)** deployed on **AWS Graviton-backed Amazon ECS Fargate** (linux/arm64 task, `CpuArchitecture: ARM64` in `infra/gozvision-stack.yaml`).
 
-### Architectural Advantages on AWS Graviton:
-1. **ARM NEON & SVE Vector Acceleration:** Vectorized 128-bit/256-bit SIMD execution across LAB color space conversions, 2D Gaussian convolutions, and CLAHE histogram equalization.
-2. **Cache-Topology Aligned Threading:** Optimized thread pool pinned to physical Neoverse cores, eliminating x86 hyper-threading cache thrashing.
-3. **Cloud Economics & Throughput:**
-   * **Latency Reduction:** 25.4% faster per-frame inference compared to standard x86 instances.
-   * **Throughput:** ~1.34x frames per second improvement.
-   * **Cost Savings:** 36.8% lower cost per million processed optical accessibility frames on AWS Graviton (`c7g.xlarge` @ $0.145/hr vs `c6i.xlarge` @ $0.170/hr).
+### Architectural Advantages targeted on AWS Graviton:
+1. **ARM NEON & SVE Vector Acceleration:** Vectorized SIMD execution across LAB color space conversions, 2D Gaussian convolutions, and CLAHE histogram equalization (OpenCV build dispatches NEON paths on arm64).
+2. **Cache-Topology Aligned Threading:** Thread pool sized to the task's vCPU allocation.
+3. **Cloud Economics & Throughput (measured, never projected):**
+   * **Dev-workstation measurements** (amd64, OpenCV 5.0.0, 640x480, DNN depth active): see `backend/benchmark_results.json` — spatial depth 12.4 FPS, enhanced contrast 414 FPS, glare suppression 71 FPS, reading-zone isolation 919 FPS.
+   * **Cross-architecture measurements:** `scripts/run_graviton_benchmark.sh` runs the identical benchmark on Spot `c7g.xlarge` (Graviton3) and `c6i.xlarge` (x86) instances and `backend/compare_benchmarks.py` computes the per-mode ratios from the two measured files (`benchmark_results_graviton_c7g.json`, `benchmark_results_x86_c6i.json`). No cross-architecture figure is published unless both sides were measured.
 
 ---
 

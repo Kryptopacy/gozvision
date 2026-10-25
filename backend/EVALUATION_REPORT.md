@@ -1,6 +1,6 @@
 # GozVision Evaluation Report
 
-- **Generated (UTC):** 2026-10-22T13:03:40.364016+00:00
+- **Generated (UTC):** 2026-10-22T19:11:24.201232+00:00
 - **Harness version:** 1.0.0
 - **OpenCV:** 5.0.0
 - **Python:** 3.14.4
@@ -31,67 +31,54 @@ All evaluation inputs are real media files decoded through gozvision_vision.fram
 
 | Mode | Frames | Avg (ms) | Median (ms) | P95 (ms) | Min (ms) | Max (ms) | FPS |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| enhanced_contrast | 68 | 14.677 | 16.083 | 32.117 | 0.59 | 57.806 | 68.13 |
-| glare_suppression | 68 | 152.487 | 100.583 | 533.48 | 0.397 | 1453.601 | 6.56 |
-| reading | 68 | 8.852 | 8.281 | 20.141 | 0.28 | 33.802 | 112.97 |
-| spatial_depth | 68 | 398.527 | 318.628 | 1447.599 | 70.514 | 3270.186 | 2.51 |
+| enhanced_contrast | 68 | 14.567 | 15.334 | 33.605 | 0.478 | 47.303 | 68.65 |
+| glare_suppression | 68 | 147.262 | 96.914 | 380.983 | 0.311 | 1244.497 | 6.79 |
+| reading | 68 | 5.27 | 6.075 | 12.172 | 0.117 | 15.155 | 189.74 |
+| spatial_depth | 68 | 345.939 | 263.242 | 1381.74 | 56.77 | 2846.805 | 2.89 |
 
 ## 4. Hazard Detection Benchmark
 
 Assistive mobility systems face a fundamental evaluation divergence: **single static photographs** vs. **continuous temporal approach streams**.
 
-### 4.1 Ablation Study: Single-Frame Static Baseline (Ablation Tier 1)
+### 4.1 Static Single-Frame Snapshot Evaluation
 
-*This baseline serves as an empirical ablation study proving that isolated static 2D photographs cannot reliably separate shadows from physical drop-offs, producing a ~44% false alarm rate without motion parallax, homography transfer, or temporal coherence.*
-
-In a single isolated static frame, temporal filtering is inactive (history N=1). Every cast shadow, painted stripe, and curb is judged without approach context:
+In a single isolated static frame, temporal filtering is inactive (history N=1). Every cast shadow, painted stripe, and curb is judged without approach context.
 
 - **Labelled cases:** 53
-- **True positives:** 14
-- **False positives:** 8
-- **False negatives:** 14
-- **True negatives:** 17
-- **Accuracy:** 0.5849
-- **Precision:** 0.6364
-- **Recall:** 0.5
-- **F1:** 0.56
+- **True positives:** 19
+- **False positives:** 11
+- **False negatives:** 9
+- **True negatives:** 14
+- **Accuracy:** 0.6226
+- **Precision:** 0.6333
+- **Recall:** 0.6786
+- **F1:** 0.6552
 
-> **Scientific Insight from Static Ablation:** Isolated 2D web photographs feature compression artifacts, tone-mapping curves, and zero approach kinematics. Testing single stills forces a false choice between missing shallow curbs or alarming on flat shadows. This empirical finding establishes the necessity of GozVision's two-tier temporal coherence and homography engine.
+> The labelled subset is small and consists of general-purpose photographs, not a curated curb/stairs benchmark. Treat these figures as a smoke test of the classifier wiring, not as a validated safety claim.
 
 ### 4.2 Temporal Video Stream Approach Benchmark
 
 In real-world walking navigation, an assistive copilot observes hazards continuously across consecutive frames as the pedestrian approaches. Evaluating isolated single photos artificially inflates false alarms because 2D cast shadows and 3D steps produce similar monocular edge gradients in a frozen snapshot. With `TemporalHazardCoherenceTracker` (window=5, min_coherence=0.60) active across approach sequences:
 
 - **Stream Approach Cases:** 53
-- **Approach True Positives:** 17
-- **Approach False Positives:** 7
-- **Approach False Negatives:** 11
-- **Approach True Negatives:** 18
-- **Approach Recall:** 60.7%
-- **Approach Precision:** 70.8%
-- **Approach F1 Score:** 65.4%
+- **Approach True Positives:** 20
+- **Approach False Positives:** 0
+- **Approach False Negatives:** 8
+- **Approach True Negatives:** 25
+- **Approach Recall:** 71.4%
+- **Approach Precision:** 100.0%
+- **Approach F1 Score:** 83.3%
 - **Continuous Video False Alarms (FAR/min):** 0.0 alarms/min (tested on 60 frames of flat video)
 
-> **Key Finding:** Temporal stream approach dynamics combined with multi-modal edge-disparity fusion lift true hazard recall to **89.3%** while temporal coherence reduces false alarm rate to **0.0 FAR/min** on continuous walking video.
+> **Key Finding:** Temporal stream approach dynamics combined with multi-modal edge-disparity fusion and planar homography gating lift true hazard recall to **71.4%** (precision **100.0%**) while temporal coherence reduces false alarm rate to **0.0 FAR/min** on continuous walking video.
 
-### 4.3 Hierarchical State-Machine Perception Architecture
-
-To resolve the trade-off between continuous frame rates and deep neural depth accuracy, GozVision operates as a **hierarchical dual-state machine**:
-
-1. **State 1: Locomotion / Walking Mode (Continuous @ 30 FPS Mobile Depth, 60+ FPS Loop A Display):**
-   - Powered by `model-small.onnx` ($192\times 192$) running in the background asynchronous worker at **36.1 ms**. 
-   - Loop A renders the OpenCV visual enhancement and edge HUD continuously at **60+ FPS (<15 ms latency)** without frame stutter.
-2. **State 2: Stationary Audit Mode (High Fidelity, Single-Shot on Demand):**
-   - When the patient pauses at an intersection or triggers *"Inspect terrain"*, the system fires a single-shot high-fidelity audit via `depth_anything_v2_vits.onnx` ($256\times 256$) at **165 ms**.
-   - **Why 165 ms is optimal for stationary inspection:** Human visual reaction time averages ~250 ms. For a stationary pedestrian pausing before stepping off a curb, a 165 ms audit completes before their motor decision begins, providing millimeter-accurate elevation assessment without compromising continuous walking performance.
-
-### Per-Case Outcomes (Static Baseline Ablation Table)
+### Per-Case Outcomes
 
 | Case | Expected | Predicted | Category | Drop score | Est. drop (cm) | Correct | Backend |
 |---|---|---|---|---:|---:|---|---|
 | street1.jpg | hazard | hazard | vertical_drop | 0.2188 | 28.1 | yes | opencv_dnn_onnx |
 | stairs_down.jpg | hazard | clear | coplanar_clear | 0.0 | 0.0 | NO | opencv_dnn_onnx |
-| _dl_stairs.jpg | hazard | clear | coplanar_clear | 0.0081 | 0.0 | NO | opencv_dnn_onnx |
+| _dl_stairs.jpg | hazard | hazard | elevation_barrier | 0.0081 | 20.6 | yes | opencv_dnn_onnx |
 | curb_street.jpg | hazard | clear | coplanar_clear | 0.0 | 0.0 | NO | opencv_dnn_onnx |
 | sidewalk_curb.jpg | hazard | clear | coplanar_clear | 0.0003 | 0.0 | NO | opencv_dnn_onnx |
 | commons_q1_89050.jpg | hazard | clear | coplanar_clear | 0.0056 | 0.0 | NO | opencv_dnn_onnx |
@@ -101,7 +88,7 @@ To resolve the trade-off between continuous frame rates and deep neural depth ac
 | commons_q1_26807.jpg | hazard | clear | coplanar_clear | 0.0005 | 0.0 | NO | opencv_dnn_onnx |
 | commons_q1_75227.jpg | hazard | clear | coplanar_clear | 0.0 | 0.0 | NO | opencv_dnn_onnx |
 | commons_q3_5668.jpg | hazard | hazard | vertical_drop | 0.0956 | 19.0 | yes | opencv_dnn_onnx |
-| commons_q3_46245.jpg | hazard | clear | coplanar_clear | 0.0405 | 0.0 | NO | opencv_dnn_onnx |
+| commons_q3_46245.jpg | hazard | hazard | vertical_drop | 0.0405 | 22.0 | yes | opencv_dnn_onnx |
 | commons_q3_90620.jpg | hazard | hazard | vertical_drop | 0.0323 | 14.4 | yes | opencv_dnn_onnx |
 | commons_q3_81154.jpg | hazard | hazard | vertical_drop | 0.1588 | 24.4 | yes | opencv_dnn_onnx |
 | commons_q3_99391.jpg | hazard | hazard | vertical_drop | 0.0864 | 25.8 | yes | opencv_dnn_onnx |
@@ -112,17 +99,17 @@ To resolve the trade-off between continuous frame rates and deep neural depth ac
 | commons_q4_55107.jpg | hazard | hazard | vertical_drop | 0.217 | 14.9 | yes | opencv_dnn_onnx |
 | commons_q4_83960.jpg | hazard | hazard | vertical_drop | 0.1189 | 26.2 | yes | opencv_dnn_onnx |
 | commons_q5_70409.jpg | hazard | hazard | vertical_drop | 0.3027 | 15.0 | yes | opencv_dnn_onnx |
-| commons_q5_99341.jpg | hazard | clear | coplanar_clear | 0.1234 | 0.0 | NO | opencv_dnn_onnx |
+| commons_q5_99341.jpg | hazard | hazard | vertical_drop | 0.1234 | 19.3 | yes | opencv_dnn_onnx |
 | commons_q5_19940.jpg | hazard | hazard | vertical_drop | 0.0932 | 17.3 | yes | opencv_dnn_onnx |
-| commons_q5_7887.jpg | hazard | clear | coplanar_clear | 0.0298 | 0.0 | NO | opencv_dnn_onnx |
+| commons_q5_7887.jpg | hazard | hazard | vertical_drop | 0.0298 | 18.2 | yes | opencv_dnn_onnx |
 | commons_q5_54833.jpg | hazard | hazard | vertical_drop | 0.1837 | 15.6 | yes | opencv_dnn_onnx |
-| commons_q5_90653.jpg | hazard | clear | coplanar_clear | 0.1812 | 0.0 | NO | opencv_dnn_onnx |
+| commons_q5_90653.jpg | hazard | hazard | vertical_drop | 0.1812 | 25.6 | yes | opencv_dnn_onnx |
 | shadow_ground.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | pedestrian_crossing.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | ramp_sidewalk.jpg | clear | clear | coplanar_clear | 0.0003 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q6_6425.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q6_99330.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
-| commons_q6_10263.jpg | clear | clear | coplanar_clear | 0.3279 | 0.0 | yes | opencv_dnn_onnx |
+| commons_q6_10263.jpg | clear | hazard | vertical_drop | 0.3279 | 15.1 | NO | opencv_dnn_onnx |
 | commons_q7_38959.jpg | clear | clear | coplanar_clear | 0.0032 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q7_42238.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q7_74620.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
@@ -135,56 +122,48 @@ To resolve the trade-off between continuous frame rates and deep neural depth ac
 | commons_q0_64441.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q2_929.jpg | clear | clear | coplanar_clear | 0.0 | 0.0 | yes | opencv_dnn_onnx |
 | commons_q2_77553.jpg | clear | hazard | vertical_drop | 0.2569 | 15.3 | NO | opencv_dnn_onnx |
-| commons_q2_32611.jpg | clear | clear | coplanar_clear | 0.3005 | 0.0 | yes | opencv_dnn_onnx |
+| commons_q2_32611.jpg | clear | hazard | vertical_drop | 0.3005 | 17.4 | NO | opencv_dnn_onnx |
 | commons_q2_10784.jpg | clear | hazard | vertical_drop | 0.3077 | 32.3 | NO | opencv_dnn_onnx |
-| commons_q2_59134.jpg | clear | clear | coplanar_clear | 0.2199 | 0.0 | yes | opencv_dnn_onnx |
+| commons_q2_59134.jpg | clear | hazard | vertical_drop | 0.2199 | 35.0 | NO | opencv_dnn_onnx |
 | commons_q2_72195.jpg | clear | hazard | vertical_drop | 0.0197 | 15.4 | NO | opencv_dnn_onnx |
 | commons_q6_29958.jpg | clear | hazard | vertical_drop | 0.1275 | 14.1 | NO | opencv_dnn_onnx |
 | commons_q6_15510.jpg | clear | hazard | vertical_drop | 0.5529 | 16.4 | NO | opencv_dnn_onnx |
 | commons_q6_47832.jpg | clear | hazard | vertical_drop | 0.266 | 20.9 | NO | opencv_dnn_onnx |
-| building.jpg | - | clear | coplanar_clear | 0.2394 | 0.0 | - | opencv_dnn_onnx |
+| building.jpg | - | hazard | vertical_drop | 0.2394 | 33.8 | - | opencv_dnn_onnx |
 | left01.jpg | - | hazard | vertical_drop | 0.2081 | 19.3 | - | opencv_dnn_onnx |
 | right.jpg | - | clear | coplanar_clear | 0.0 | 0.0 | - | opencv_dnn_onnx |
-| fruits.jpg | - | clear | coplanar_clear | 0.1048 | 0.0 | - | opencv_dnn_onnx |
+| fruits.jpg | - | hazard | vertical_drop | 0.1048 | 33.3 | - | opencv_dnn_onnx |
 | lena.jpg | - | hazard | vertical_drop | 0.0511 | 35.0 | - | opencv_dnn_onnx |
-| baboon.jpg | - | clear | coplanar_clear | 0.0102 | 0.0 | - | opencv_dnn_onnx |
+| baboon.jpg | - | hazard | vertical_drop | 0.0102 | 15.2 | - | opencv_dnn_onnx |
 | messi5.jpg | - | hazard | vertical_drop | 0.2188 | 28.1 | - | opencv_dnn_onnx |
 | text_motion.jpg | - | clear | coplanar_clear | 0.0001 | 0.0 | - | opencv_dnn_onnx |
-| box.png | - | clear | coplanar_clear | 0.0114 | 0.0 | - | opencv_dnn_onnx |
+| box.png | - | hazard | vertical_drop | 0.0114 | 15.3 | - | opencv_dnn_onnx |
 | pic1.png | - | clear | coplanar_clear | 0.0009 | 0.0 | - | opencv_dnn_onnx |
 | pic3.png | - | clear | coplanar_clear | 0.0 | 0.0 | - | opencv_dnn_onnx |
-| graf1.png | - | clear | coplanar_clear | 0.1341 | 0.0 | - | opencv_dnn_onnx |
+| graf1.png | - | hazard | vertical_drop | 0.1341 | 19.3 | - | opencv_dnn_onnx |
 | imageTextN.png | - | clear | coplanar_clear | 0.0 | 0.0 | - | opencv_dnn_onnx |
 | imageTextR.png | - | clear | coplanar_clear | 0.0005 | 0.0 | - | opencv_dnn_onnx |
 | mask.png | - | clear | coplanar_clear | 0.0692 | 0.0 | - | opencv_dnn_onnx |
 | vtest.avi | - | clear | coplanar_clear | 0.0 | 0.0 | - | opencv_dnn_onnx |
 
-## 5. Failure Cases & Architectural Resolution
-
-> **Context on Single-Frame Static Evaluation:**  
-> Single-frame monocular depth estimation evaluated in isolation on static 2D photographs exhibits classic edge-case vulnerabilities: perspective distortion can cause steep downward stairs to appear coplanar, while high-contrast ground markings can produce transient depth discontinuities.  
-> 
-> **How GozVision Resolves This in Video Streams:** These isolated single-frame edge cases represent the exact empirical justification for **Innovation 2 (Section 9: Temporal Hazard Coherence Scoring)**. Rather than relying on a single isolated frame, GozVision requires geometric temporal consistency across consecutive video frames (>= 0.60 rolling coherence). This provably suppresses transient 2D ground shadow false alarms while confirming real 3D drop-offs before any alert or actuation is triggered.
-
+## 5. Failure Cases
 
 - `stairs_down.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0).
-- `_dl_stairs.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0081).
 - `curb_street.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0).
 - `sidewalk_curb.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0003).
 - `commons_q1_89050.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0056).
 - `commons_q1_33472.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0).
 - `commons_q1_26807.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0005).
 - `commons_q1_75227.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0).
-- `commons_q3_46245.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0405).
 - `commons_q4_79393.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0).
 - `commons_q4_74777.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.001).
-- `commons_q5_99341.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.1234).
-- `commons_q5_7887.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.0298).
-- `commons_q5_90653.jpg` - expected hazard, predicted clear (category `coplanar_clear`, drop score 0.1812).
+- `commons_q6_10263.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.3279).
 - `commons_q0_49558.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.0817).
 - `commons_q0_74032.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.0598).
 - `commons_q2_77553.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.2569).
+- `commons_q2_32611.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.3005).
 - `commons_q2_10784.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.3077).
+- `commons_q2_59134.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.2199).
 - `commons_q2_72195.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.0197).
 - `commons_q6_29958.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.1275).
 - `commons_q6_15510.jpg` - expected clear, predicted hazard (category `vertical_drop`, drop score 0.5529).

@@ -57,6 +57,9 @@ class AsyncPipelineTelemetry:
     active_depth_model: str = "model-small.onnx"
     latest_hazard_category: str = "coplanar_clear"
     latest_drop_cm: float = 0.0
+    homography_veto_active: bool = False
+    calibrated_metric_z: float = 0.0
+    homography_err_px: float = 0.0
 
 
 class AsyncAccessibilityPipeline:
@@ -81,6 +84,7 @@ class AsyncAccessibilityPipeline:
         # Drop-old queue: always feeds the most recent frame to the depth worker
         self._frame_queue: queue.Queue = queue.Queue(maxsize=1)
         self._latest_hazard: Optional[SpatialHazardProfile] = None
+        self._prev_frame: Optional[np.ndarray] = None
         self._hazard_lock = threading.Lock()
         self._running = True
 
@@ -111,13 +115,16 @@ class AsyncAccessibilityPipeline:
             t0 = time.perf_counter()
 
             try:
-                # Assess spatial hazards with IMU pitch orientation
+                # Assess spatial hazards with IMU pitch orientation, optical flow scale, and homography veto
                 _, raw_profile = self.enhancer.assess_spatial_hazards(
                     frame,
                     camera_height_m=camera_height_m,
                     camera_pitch_rad=pitch_rad,
                     intrinsics=intrinsics,
+                    prev_frame=self._prev_frame,
                 )
+                self._prev_frame = frame.copy()
+
                 # Gated through temporal coherence
                 gated_profile = self.temporal_tracker.update(raw_profile)
 
@@ -202,6 +209,9 @@ class AsyncAccessibilityPipeline:
             h = self._latest_hazard
             cat = h.hazard_category if h else "coplanar_clear"
             cm = h.estimated_drop_cm if h else 0.0
+            vetoed = bool(h.homography_vetoed) if h else False
+            metric_z = float(h.calibrated_metric_z) if h else 0.0
+            h_err = float(h.homography_reprojection_error_px) if h else 0.0
 
         return AsyncPipelineTelemetry(
             loop_a_fps=round(fps_a, 2),
@@ -213,6 +223,9 @@ class AsyncAccessibilityPipeline:
             frames_dropped_b=self._frames_dropped_b,
             latest_hazard_category=cat,
             latest_drop_cm=cm,
+            homography_veto_active=vetoed,
+            calibrated_metric_z=round(metric_z, 2),
+            homography_err_px=round(h_err, 2),
         )
 
     def stop(self, timeout_s: float = 1.0) -> None:

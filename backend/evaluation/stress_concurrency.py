@@ -53,9 +53,10 @@ def _simulate_patient_stream(
     worker_id: int,
     frame_count: int,
     frame: np.ndarray,
+    shared_enhancer: Optional[LowVisionEnhancer] = None,
 ) -> StreamWorkerResult:
     """Worker function processing a stream of frames through AsyncAccessibilityPipeline."""
-    enhancer = LowVisionEnhancer(VisionEnhancementConfig(performance_profile="realtime_mobile_30fps"))
+    enhancer = shared_enhancer or LowVisionEnhancer(VisionEnhancementConfig(performance_profile="realtime_mobile_30fps"))
     pipeline = AsyncAccessibilityPipeline(enhancer)
     latencies: List[float] = []
     t_start = time.perf_counter()
@@ -69,7 +70,7 @@ def _simulate_patient_stream(
 
     elapsed = time.perf_counter() - t_start
     telemetry = pipeline.get_telemetry()
-    pipeline.stop()
+    pipeline.stop(timeout_s=0.05)
 
     lat_sorted = sorted(latencies)
     n = len(lat_sorted)
@@ -96,6 +97,7 @@ class ConcurrencyStressHarness:
     def __init__(self, num_workers: int = 10, frames_per_worker: int = 40):
         self.num_workers = num_workers
         self.frames_per_worker = frames_per_worker
+        self.enhancer = LowVisionEnhancer(VisionEnhancementConfig(performance_profile="realtime_mobile_30fps"))
 
     def run_benchmark(self) -> Dict[str, Any]:
         """Execute concurrent multi-stream simulation."""
@@ -109,7 +111,7 @@ class ConcurrencyStressHarness:
 
         with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
             futures = [
-                executor.submit(_simulate_patient_stream, w_id, self.frames_per_worker, frame)
+                executor.submit(_simulate_patient_stream, w_id, self.frames_per_worker, frame, self.enhancer)
                 for w_id in range(self.num_workers)
             ]
             for f in as_completed(futures):

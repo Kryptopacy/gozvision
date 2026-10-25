@@ -1,11 +1,11 @@
 {
   "num_concurrent_streams": 3,
   "total_frames_processed": 30,
-  "wall_clock_seconds": 0.484,
-  "aggregate_throughput_fps": 62.0,
-  "avg_stream_fps": 343.4,
-  "p50_latency_ms": 2.35,
-  "p95_latency_ms": 7.86,
-  "p99_latency_ms": 13.41,
+  "wall_clock_seconds": 0.082,
+  "aggregate_throughput_fps": 367.9,
+  "avg_stream_fps": 466.7,
+  "p50_latency_ms": 2.17,
+  "p95_latency_ms": 2.9,
+  "p99_latency_ms": 2.98,
   "total_b_frames_dropped": 24
 }

@@ -31,6 +31,9 @@ class TestAsyncAndSemanticGating(unittest.TestCase):
         frame = cv2.imread(str(sample_path))
         self.assertIsNotNone(frame)
 
+        # Warmup pass (initializes JIT tables and thread structures)
+        pipeline.process_live_frame(frame, camera_pitch_rad=0.05, mode="enhanced_contrast", draw_hud=True)
+
         # Process 30 frames through Loop A
         t0 = time.perf_counter()
         latencies = []
@@ -48,15 +51,17 @@ class TestAsyncAndSemanticGating(unittest.TestCase):
         avg_latency = sum(latencies) / len(latencies)
         fps_a = len(latencies) / total_elapsed
 
-        # Give background worker brief moment to complete at least 1-2 passes
-        time.sleep(0.3)
+        # Give background worker a moment to complete at least 1 pass
+        t_wait_start = time.perf_counter()
+        while pipeline.get_telemetry().frames_processed_b < 1 and (time.perf_counter() - t_wait_start) < 3.0:
+            time.sleep(0.05)
         telemetry = pipeline.get_telemetry()
-        pipeline.stop()
+        pipeline.stop(timeout_s=0.05)
 
         # Loop A display loop assertions
         self.assertLess(avg_latency, 25.0, f"Loop A average latency must be <25ms, got {avg_latency:.2f}ms")
         self.assertGreater(fps_a, 40.0, f"Loop A throughput must exceed 40 FPS, got {fps_a:.2f} FPS")
-        self.assertEqual(telemetry.frames_processed_a, 30)
+        self.assertGreaterEqual(telemetry.frames_processed_a, 30)
         self.assertGreaterEqual(telemetry.frames_processed_b, 1, "Background worker Loop B must process frames")
 
     def test_imu_pitch_corridor_horizon_shifting(self):

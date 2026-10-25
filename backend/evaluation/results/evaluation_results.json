@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T13:03:40.364016+00:00",
+  "generated_utc": "2026-10-22T19:11:24.201232+00:00",
   "harness_version": "1.0.0",
   "environment": {
     "python": "3.14.4",
@@ -802,55 +802,55 @@
     "enhanced_contrast": {
       "mode": "enhanced_contrast",
       "frames_evaluated": 68,
-      "avg_latency_ms": 14.677,
-      "median_latency_ms": 16.083,
-      "p95_latency_ms": 32.117,
-      "min_latency_ms": 0.59,
-      "max_latency_ms": 57.806,
-      "throughput_fps": 68.13
+      "avg_latency_ms": 14.567,
+      "median_latency_ms": 15.334,
+      "p95_latency_ms": 33.605,
+      "min_latency_ms": 0.478,
+      "max_latency_ms": 47.303,
+      "throughput_fps": 68.65
     },
     "glare_suppression": {
       "mode": "glare_suppression",
       "frames_evaluated": 68,
-      "avg_latency_ms": 152.487,
-      "median_latency_ms": 100.583,
-      "p95_latency_ms": 533.48,
-      "min_latency_ms": 0.397,
-      "max_latency_ms": 1453.601,
-      "throughput_fps": 6.56
+      "avg_latency_ms": 147.262,
+      "median_latency_ms": 96.914,
+      "p95_latency_ms": 380.983,
+      "min_latency_ms": 0.311,
+      "max_latency_ms": 1244.497,
+      "throughput_fps": 6.79
     },
     "reading": {
       "mode": "reading",
       "frames_evaluated": 68,
-      "avg_latency_ms": 8.852,
-      "median_latency_ms": 8.281,
-      "p95_latency_ms": 20.141,
-      "min_latency_ms": 0.28,
-      "max_latency_ms": 33.802,
-      "throughput_fps": 112.97
+      "avg_latency_ms": 5.27,
+      "median_latency_ms": 6.075,
+      "p95_latency_ms": 12.172,
+      "min_latency_ms": 0.117,
+      "max_latency_ms": 15.155,
+      "throughput_fps": 189.74
     },
     "spatial_depth": {
       "mode": "spatial_depth",
       "frames_evaluated": 68,
-      "avg_latency_ms": 398.527,
-      "median_latency_ms": 318.628,
-      "p95_latency_ms": 1447.599,
-      "min_latency_ms": 70.514,
-      "max_latency_ms": 3270.186,
-      "throughput_fps": 2.51
+      "avg_latency_ms": 345.939,
+      "median_latency_ms": 263.242,
+      "p95_latency_ms": 1381.74,
+      "min_latency_ms": 56.77,
+      "max_latency_ms": 2846.805,
+      "throughput_fps": 2.89
     }
   },
   "hazard_metrics": {
     "labelled_cases": 53,
     "unlabelled_cases": 16,
-    "true_positive": 14,
-    "false_positive": 8,
-    "false_negative": 14,
-    "true_negative": 17,
-    "accuracy": 0.5849,
-    "precision": 0.6364,
-    "recall": 0.5,
-    "f1": 0.56,
+    "true_positive": 19,
+    "false_positive": 11,
+    "false_negative": 9,
+    "true_negative": 14,
+    "accuracy": 0.6226,
+    "precision": 0.6333,
+    "recall": 0.6786,
+    "f1": 0.6552,
     "note": "The labelled subset is small and consists of general-purpose photographs, not a curated curb/stairs benchmark. Treat these figures as a smoke test of the classifier wiring, not as a validated safety claim."
   },
   "hazard_outcomes": [
@@ -877,11 +877,11 @@
     {
       "name": "_dl_stairs.jpg",
       "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "elevation_barrier",
       "vertical_drop_score": 0.0081,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
+      "estimated_drop_cm": 20.6,
+      "correct": true,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -977,11 +977,11 @@
     {
       "name": "commons_q3_46245.jpg",
       "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.0405,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
+      "estimated_drop_cm": 22.0,
+      "correct": true,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1087,11 +1087,11 @@
     {
       "name": "commons_q5_99341.jpg",
       "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.1234,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
+      "estimated_drop_cm": 19.3,
+      "correct": true,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1107,11 +1107,11 @@
     {
       "name": "commons_q5_7887.jpg",
       "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.0298,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
+      "estimated_drop_cm": 18.2,
+      "correct": true,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1127,11 +1127,11 @@
     {
       "name": "commons_q5_90653.jpg",
       "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.1812,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
+      "estimated_drop_cm": 25.6,
+      "correct": true,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1187,11 +1187,11 @@
     {
       "name": "commons_q6_10263.jpg",
       "expect_hazard": false,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.3279,
-      "estimated_drop_cm": 0.0,
-      "correct": true,
+      "estimated_drop_cm": 15.1,
+      "correct": false,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1317,11 +1317,11 @@
     {
       "name": "commons_q2_32611.jpg",
       "expect_hazard": false,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.3005,
-      "estimated_drop_cm": 0.0,
-      "correct": true,
+      "estimated_drop_cm": 17.4,
+      "correct": false,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1337,11 +1337,11 @@
     {
       "name": "commons_q2_59134.jpg",
       "expect_hazard": false,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.2199,
-      "estimated_drop_cm": 0.0,
-      "correct": true,
+      "estimated_drop_cm": 35.0,
+      "correct": false,
       "depth_backend": "opencv_dnn_onnx"
     },
     {
@@ -1387,10 +1387,10 @@
     {
       "name": "building.jpg",
       "expect_hazard": null,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.2394,
-      "estimated_drop_cm": 0.0,
+      "estimated_drop_cm": 33.8,
       "correct": null,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1417,10 +1417,10 @@
     {
       "name": "fruits.jpg",
       "expect_hazard": null,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.1048,
-      "estimated_drop_cm": 0.0,
+      "estimated_drop_cm": 33.3,
       "correct": null,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1437,10 +1437,10 @@
     {
       "name": "baboon.jpg",
       "expect_hazard": null,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.0102,
-      "estimated_drop_cm": 0.0,
+      "estimated_drop_cm": 15.2,
       "correct": null,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1467,10 +1467,10 @@
     {
       "name": "box.png",
       "expect_hazard": null,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.0114,
-      "estimated_drop_cm": 0.0,
+      "estimated_drop_cm": 15.3,
       "correct": null,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1497,10 +1497,10 @@
     {
       "name": "graf1.png",
       "expect_hazard": null,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.1341,
-      "estimated_drop_cm": 0.0,
+      "estimated_drop_cm": 19.3,
       "correct": null,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1552,16 +1552,6 @@
       "predicted_hazard": false,
       "hazard_category": "coplanar_clear",
       "vertical_drop_score": 0.0,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
-      "depth_backend": "opencv_dnn_onnx"
-    },
-    {
-      "name": "_dl_stairs.jpg",
-      "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
-      "vertical_drop_score": 0.0081,
       "estimated_drop_cm": 0.0,
       "correct": false,
       "depth_backend": "opencv_dnn_onnx"
@@ -1627,16 +1617,6 @@
       "depth_backend": "opencv_dnn_onnx"
     },
     {
-      "name": "commons_q3_46245.jpg",
-      "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
-      "vertical_drop_score": 0.0405,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
-      "depth_backend": "opencv_dnn_onnx"
-    },
-    {
       "name": "commons_q4_79393.jpg",
       "expect_hazard": true,
       "predicted_hazard": false,
@@ -1657,32 +1637,12 @@
       "depth_backend": "opencv_dnn_onnx"
     },
     {
-      "name": "commons_q5_99341.jpg",
-      "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
-      "vertical_drop_score": 0.1234,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
-      "depth_backend": "opencv_dnn_onnx"
-    },
-    {
-      "name": "commons_q5_7887.jpg",
-      "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
-      "vertical_drop_score": 0.0298,
-      "estimated_drop_cm": 0.0,
-      "correct": false,
-      "depth_backend": "opencv_dnn_onnx"
-    },
-    {
-      "name": "commons_q5_90653.jpg",
-      "expect_hazard": true,
-      "predicted_hazard": false,
-      "hazard_category": "coplanar_clear",
-      "vertical_drop_score": 0.1812,
-      "estimated_drop_cm": 0.0,
+      "name": "commons_q6_10263.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.3279,
+      "estimated_drop_cm": 15.1,
       "correct": false,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1717,12 +1677,32 @@
       "depth_backend": "opencv_dnn_onnx"
     },
     {
+      "name": "commons_q2_32611.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.3005,
+      "estimated_drop_cm": 17.4,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
       "name": "commons_q2_10784.jpg",
       "expect_hazard": false,
       "predicted_hazard": true,
       "hazard_category": "vertical_drop",
       "vertical_drop_score": 0.3077,
       "estimated_drop_cm": 32.3,
+      "correct": false,
+      "depth_backend": "opencv_dnn_onnx"
+    },
+    {
+      "name": "commons_q2_59134.jpg",
+      "expect_hazard": false,
+      "predicted_hazard": true,
+      "hazard_category": "vertical_drop",
+      "vertical_drop_score": 0.2199,
+      "estimated_drop_cm": 35.0,
       "correct": false,
       "depth_backend": "opencv_dnn_onnx"
     },
@@ -1769,13 +1749,13 @@
   ],
   "stream_benchmark": {
     "stream_cases": 53,
-    "true_positive": 17,
-    "false_positive": 7,
-    "false_negative": 11,
-    "true_negative": 18,
-    "recall": 0.6071,
-    "precision": 0.7083,
-    "f1": 0.6538,
+    "true_positive": 20,
+    "false_positive": 0,
+    "false_negative": 8,
+    "true_negative": 25,
+    "recall": 0.7143,
+    "precision": 1.0,
+    "f1": 0.8333,
     "video_far_per_minute": 0.0,
     "video_frames_tested": 60
   },
@@ -1903,5 +1883,5 @@
     "Depth is monocular and relative. 'estimated_drop_cm' is a heuristic derived from a depth-discontinuity ratio, not a metric measurement; it has not been validated against a surveyed curb/stairs dataset.",
     "Latency figures are single-process, warm-cache CPU measurements on the machine named in 'environment'. They are not a substitute for a controlled AWS Graviton benchmark run."
   ],
-  "total_wall_time_s": 478.63
+  "total_wall_time_s": 352.78
 }

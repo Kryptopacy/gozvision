@@ -6,6 +6,8 @@ import cv2
 from gozvision_vision.cv_pipeline import (
     CameraIntrinsics,
     LowVisionEnhancer,
+    SpatialDepthEstimator,
+    StereoDepthEstimator,
     VisionEnhancementConfig,
     discover_depth_model,
     measure_contrast_improvement,
@@ -174,6 +176,59 @@ class TestOpenCV5AccessibilityPipeline(unittest.TestCase):
         self.assertLessEqual(ssim_val, 1.0)
         # CII must always be >= 1.0 when CLAHE is applied to a low-contrast frame
         self.assertGreaterEqual(metrics["cii"], 1.0)
+
+    def test_stereo_depth_estimator_triangulation(self):
+        """Stereo SGBM engine must compute metric disparity and depth for binocular smart glasses."""
+        stereo = StereoDepthEstimator(baseline_m=0.065)
+        # Create synthetic left/right pair with known horizontal disparity
+        left = np.full((240, 320, 3), 120, dtype=np.uint8)
+        right = np.full((240, 320, 3), 120, dtype=np.uint8)
+        # Put high-contrast pattern shifted by 8 pixels horizontally
+        cv2.rectangle(left, (100, 80), (160, 160), (255, 255, 255), -1)
+        cv2.rectangle(right, (92, 80), (152, 160), (255, 255, 255), -1)
+
+        disp = stereo.compute_disparity_map(left, right)
+        self.assertEqual(disp.shape, (240, 320))
+
+        depth_norm, z_metric = stereo.compute_metric_depth_map(left, right)
+        self.assertEqual(depth_norm.shape, (240, 320))
+        self.assertEqual(z_metric.shape, (240, 320))
+        self.assertGreater(float(np.max(z_metric)), 0.0)
+
+        # Assess via LowVisionEnhancer binocular route
+        _, prof = self.enhancer.assess_spatial_hazards(left, right_frame=right)
+        self.assertEqual(prof.depth_backend, "opencv_stereo_sgbm")
+
+    def test_transverse_curb_boundary_detection(self):
+        """Transverse horizontal curb edges must be detected across the lower walking corridor."""
+        # Frame with prominent horizontal curb step across corridor
+        corridor = np.full((200, 300, 3), 128, dtype=np.uint8)
+        cv2.line(corridor, (0, 100), (300, 100), (250, 250, 250), 3)
+        cv2.line(corridor, (0, 102), (300, 102), (20, 20, 20), 2)
+
+        has_transverse, edge_strength = SpatialDepthEstimator.detect_transverse_curb_boundary(corridor)
+        self.assertTrue(has_transverse)
+        self.assertGreater(edge_strength, 15.0)
+
+    def test_warp_depth_optical_flow(self):
+        """Asymmetric keyframe depth warping must propagate depth forward under camera motion."""
+        h, w = 120, 160
+        prev_frame = np.full((h, w, 3), 100, dtype=np.uint8)
+        # Shifted pattern
+        cv2.circle(prev_frame, (60, 60), 20, (255, 255, 255), -1)
+        curr_frame = np.full((h, w, 3), 100, dtype=np.uint8)
+        cv2.circle(curr_frame, (65, 60), 20, (255, 255, 255), -1)  # 5px rightward translation
+
+        # Mock initial depth map with circle at (60, 60)
+        cached_depth = np.zeros((h, w), dtype=np.float32)
+        cv2.circle(cached_depth, (60, 60), 20, 1.0, -1)
+
+        warped = SpatialDepthEstimator.warp_depth_optical_flow(cached_depth, prev_frame, curr_frame)
+        self.assertEqual(warped.shape, (h, w))
+        # The center of mass in warped depth should have shifted rightward (x > 60)
+        ys, xs = np.nonzero(warped > 0.5)
+        self.assertGreater(len(xs), 0)
+        self.assertGreaterEqual(float(np.mean(xs)), 60.0)
 
 
 if __name__ == "__main__":
