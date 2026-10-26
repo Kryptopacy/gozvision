@@ -1,0 +1,42 @@
+name: selfheal-cloudfront-origin
+
+# GozVision backend health monitor: probes /health twice (transient blip
+# guard) and, on a real outage, repoints the CloudFront origin at the
+# currently-running Fargate task's DNS — the same manual fix performed by
+# scripts/update_cloudfront_origin.py after every deploy, automated.
+# Runs in the cloud so healing does not depend on any developer's laptop.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   GOZVISION_AWS_ACCESS_KEY_ID      - access key for the gozvision-ci IAM user
+#   GOZVISION_AWS_SECRET_ACCESS_KEY  - its secret key
+# The gozvision-ci policy is read-only except for cloudfront:UpdateDistribution.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  selfheal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure gozvision-ci credentials
+        run: |
+          aws configure set aws_access_key_id "$GOZVISION_AWS_ACCESS_KEY_ID" --profile pacy-labs-ci
+          aws configure set aws_secret_access_key "$GOZVISION_AWS_SECRET_ACCESS_KEY" --profile pacy-labs-ci
+          aws configure set region eu-north-1 --profile pacy-labs-ci
+        env:
+          GOZVISION_AWS_ACCESS_KEY_ID: ${{ secrets.GOZVISION_AWS_ACCESS_KEY_ID }}
+          GOZVISION_AWS_SECRET_ACCESS_KEY: ${{ secrets.GOZVISION_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Probe and heal
+        run: python3 scripts/selfheal_cloudfront_origin.py
+
+      - name: Report
+        if: always()
+        run: echo "Run finished with status ${{ job.status }}"

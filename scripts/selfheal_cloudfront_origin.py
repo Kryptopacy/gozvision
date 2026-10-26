@@ -23,7 +23,7 @@ import sys
 import time
 import urllib.request
 
-PROFILE = "pacy-labs"
+PROFILE = "pacy-labs-ci"
 REGION = "eu-north-1"
 CLUSTER = "gozvision-cluster"
 SERVICE = "gozvision-backend-service"

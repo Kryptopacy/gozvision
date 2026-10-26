@@ -72,3 +72,4 @@ backend/gozvision_backend.egg-info/
 # Raw intro takes (too large for git; final video ships via Devpost/YouTube)
 *.mov
 *.MOV
+cf-selfheal-config.json
