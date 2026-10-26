@@ -65,7 +65,6 @@ async def _combined_lifespan(app):
 
 
 ADK_APP.router.lifespan_context = _combined_lifespan
-ADK_APP.mount("/mcp", MCP_APP, name="gozvision-mcp")
 
 
 @ADK_APP.get("/health")
@@ -116,5 +115,9 @@ def vision_enhance(req: EnhanceRequest) -> JSONResponse:
         "metadata": metadata,
     })
 
+
+# Register the root fallback last so all ADK and GozVision API routes above
+# take precedence while MCP keeps its own exact `/mcp` route.
+ADK_APP.mount("/", MCP_APP, name="gozvision-mcp")
 
 app = ADK_APP
