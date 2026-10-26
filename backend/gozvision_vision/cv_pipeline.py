@@ -88,6 +88,7 @@ class DiagnosisAdaptiveConfig:
     # Provenance metadata (written into telemetry / evaluation report)
     icd10_codes: Tuple[str, ...] = ()
     hvf_mean_deviation_db: Optional[float] = None
+    hvf_grid_points_used: int = 0
     visual_acuity_logmar: Optional[float] = None
     profile_name: str = "generic_baseline"
 
@@ -134,11 +135,96 @@ def _build_gaussian_centre_mask(h: int, w: int, sigma_frac: float = 0.3) -> np.n
     return mask.astype(np.float32)
 
 
+def _build_hvf_grid_mask(
+    hvf_points: List[Tuple[float, float, float]],
+    frame_shape: Tuple[int, int],
+    normal_db: float = 30.0,
+    floor_db: float = 5.0,
+) -> np.ndarray:
+    """Patient-specific sighted-region mask interpolated from perimetry points.
+
+    A population stereotype (annulus / Gaussian) is a reasonable fallback, but
+    the patient's Humphrey 24-2 report already contains per-point retinal
+    sensitivity in dB.  This builder turns those measurements into the spatial
+    weight map directly, so the mask reflects *this* patient's field — an
+    eccentric AMD scotoma, a glaucoma nasal step, a hemianopic cut — instead of
+    the condition's population average.
+
+    Parameters
+    ----------
+    hvf_points:
+        ``(x_deg, y_deg, sensitivity_db)`` per tested location, in visual-angle
+        degrees with the fixation point at the origin (Humphrey convention:
+        positive x = temporal/right of fixation for the displayed eye chart,
+        positive y = superior).
+    frame_shape:
+        ``(height, width)`` of the camera frame.
+    normal_db:
+        Sensitivity treated as fully-functioning retina (weight 1.0).
+        Age-matched normals sit near 28-31 dB; 30 dB is the conservative pick.
+    floor_db:
+        Sensitivity treated as scotoma (weight 0.0).  5 dB keeps dense
+        scotoma measurements fully suppressed without harsh clipping of
+        barely-detecting points.
+
+    Returns
+    -------
+    float32 H×W mask in [0, 1].
+
+    Notes
+    -----
+    - Interpolation is a Gaussian radial-basis kernel in pure numpy (no scipy
+      dependency), sigma = 3 degrees (half the 6-degree Humphrey grid spacing),
+      so each pixel is governed by its nearest tested locations and a
+      scotoma/normal boundary stays as sharp as the data — inverse-distance
+      weighting smears that boundary across the whole field.
+    - **Pixels with no tested location within ~8 degrees (2.6 sigma; total
+      kernel weight < 0.05) default to functioning (weight 1.0).**  Perimetry
+      samples the central ~30 degrees; suppressing untested periphery would
+      blind the patient to content we have no evidence is invisible.
+    - The dB-to-weight mapping is linear between floor and normal; a measured
+      relative scotoma (e.g. 18 dB) is partially weighted, matching the
+      partial sensitivity real relative defects retain.
+    """
+    h, w = frame_shape
+    pts = np.asarray(hvf_points, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[0] == 0 or pts.shape[1] != 3:
+        raise ValueError("hvf_points must be a non-empty (N, 3) array of (x_deg, y_deg, sensitivity_db)")
+    px, py, pdb = pts[:, 0], pts[:, 1], pts[:, 2]
+
+    # Map the frame onto visual-angle space: fixation at frame centre, frame
+    # edges at the tested extent plus one 6-degree grid spacing of padding.
+    pad = 6.0
+    x_half = max(float(np.max(np.abs(px))), 3.0) + pad
+    y_half = max(float(np.max(np.abs(py))), 3.0) + pad
+    y_px, x_px = np.mgrid[0:h, 0:w]
+    gx = (x_px - (w - 1) / 2.0) / ((w - 1) / 2.0) * x_half
+    gy = -((y_px - (h - 1) / 2.0) / ((h - 1) / 2.0) * y_half)   # screen y grows down; degrees grow up
+
+    # Gaussian radial-basis interpolation: sigma = half the 6-degree Humphrey
+    # grid spacing, so influence is local and field boundaries stay sharp.
+    dx = gx[..., None] - px[None, None, :]
+    dy = gy[..., None] - py[None, None, :]
+    dist2 = dx * dx + dy * dy
+    weights = np.exp(-dist2 / (2.0 * 3.0 ** 2))
+    total = weights.sum(axis=2)
+    sens = np.divide(
+        np.sum(weights * pdb[None, None, :], axis=2),
+        total,
+        out=np.full((h, w), normal_db),   # no measurement within ~2.6 sigma -> functioning
+        where=total > 0.05,
+    )
+
+    weight = np.clip((sens - floor_db) / (normal_db - floor_db), 0.0, 1.0)
+    return weight.astype(np.float32)
+
+
 def build_config_from_diagnosis(
     icd10_codes: List[str],
     visual_acuity_logmar: Optional[float] = None,
     hvf_mean_deviation_db: Optional[float] = None,
     frame_shape: Tuple[int, int] = (480, 640),
+    hvf_point_sensitivities: Optional[List[Tuple[float, float, float]]] = None,
 ) -> DiagnosisAdaptiveConfig:
     """Build a DiagnosisAdaptiveConfig from the patient's FHIR clinical data.
 
@@ -152,19 +238,34 @@ def build_config_from_diagnosis(
         From FHIR ``Condition`` resources on the patient's encounter.
     visual_acuity_logmar:
         Best-corrected VA from FHIR Observation (LOINC 8684-3).
-        Higher = worse (1.0 = 20/200, legal blindness threshold).
+        Higher = worse (1.0 = 20/200, legal blindness threshold).  Scales the
+        contrast boost by up to +25% (bounded — see Notes).
     hvf_mean_deviation_db:
         Humphrey Visual Field mean deviation from FHIR ``DiagnosticReport``.
         Negative values indicate field loss (-6 dB = moderate, -12 dB = severe).
     frame_shape:
         ``(height, width)`` of the camera frame — used to pre-compute the
         spatial weight mask at the correct resolution.
+    hvf_point_sensitivities:
+        Optional per-point ``(x_deg, y_deg, sensitivity_db)`` values from the
+        Humphrey grid (FHIR ``Observation`` per visual-field location).  When
+        present, the spatial weight map is interpolated from *this patient's*
+        measured field instead of the condition's population stereotype.  Falls
+        back to the geometric mask when absent or when the condition branch has
+        no grid-aware mapping.
 
     Returns
     -------
     DiagnosisAdaptiveConfig
         A condition-specific configuration.  Falls back to the generic baseline
         if no recognised ICD-10 code is present.
+
+    Notes
+    -----
+    ``visual_acuity_logmar`` severity scaling is deliberately bounded at +25%
+    (logMAR 0.0 -> x1.00, 1.0 (20/200) -> x1.25, capped).  Unbounded
+    "worse vision -> more contrast" rules over-amplify sensor noise for
+    near-blind patients; the cap keeps the boost inside CLAHE's stable range.
     """
     codes = frozenset(icd10_codes)
     h, w = frame_shape
@@ -173,6 +274,7 @@ def build_config_from_diagnosis(
         visual_acuity_logmar=visual_acuity_logmar,
         hvf_mean_deviation_db=hvf_mean_deviation_db,
     )
+    grid = hvf_point_sensitivities or None
 
     if codes & _AMD_CODES:
         # AMD: central scotoma + peripheral residual vision.
@@ -184,7 +286,12 @@ def build_config_from_diagnosis(
         cfg.clahe_clip_limit = 4.5
         cfg.edge_enhancement_weight = 0.50
         cfg.glare_suppression_factor = 0.55
-        cfg.spatial_weight_map = _build_annulus_mask(h, w, inner_radius_frac=0.25)
+        if grid is not None:
+            cfg.spatial_weight_map = _build_hvf_grid_mask(grid, (h, w))
+            cfg.hvf_grid_points_used = len(grid)
+            cfg.profile_name = "amd_hvf_grid"
+        else:
+            cfg.spatial_weight_map = _build_annulus_mask(h, w, inner_radius_frac=0.25)
 
     elif codes & _GLAUCOMA_CODES:
         # Glaucoma (POAG): progressive peripheral field loss — tunnel vision.
@@ -194,7 +301,12 @@ def build_config_from_diagnosis(
         cfg.clahe_clip_limit = 3.5
         cfg.edge_enhancement_weight = 0.40
         cfg.processing_order = ("contrast", "edges", "glare")
-        cfg.spatial_weight_map = _build_gaussian_centre_mask(h, w, sigma_frac=0.30)
+        if grid is not None:
+            cfg.spatial_weight_map = _build_hvf_grid_mask(grid, (h, w))
+            cfg.hvf_grid_points_used = len(grid)
+            cfg.profile_name = "glaucoma_hvf_grid"
+        else:
+            cfg.spatial_weight_map = _build_gaussian_centre_mask(h, w, sigma_frac=0.30)
 
     elif codes & _CATARACT_CODES:
         # Cataract: diffuse light scatter causes haze + severe glare.
@@ -218,6 +330,12 @@ def build_config_from_diagnosis(
             severity_boost = 1.3     # Moderate-to-severe field loss: push harder
         cfg.clahe_clip_limit = round(3.5 * severity_boost, 2)
         cfg.edge_enhancement_weight = 0.45
+        if grid is not None:
+            # Patchy loss is exactly what a point grid captures and a
+            # population mask cannot: interpolate it directly.
+            cfg.spatial_weight_map = _build_hvf_grid_mask(grid, (h, w))
+            cfg.hvf_grid_points_used = len(grid)
+            cfg.profile_name = "diabetic_retinopathy_hvf_grid"
 
     elif codes & _RP_CODES:
         # Retinitis Pigmentosa: rod degeneration → nyctalopia + contracted pupils.
@@ -229,10 +347,20 @@ def build_config_from_diagnosis(
         cfg.clahe_tile_grid_size = (4, 4)
         cfg.edge_enhancement_weight = 0.60
         cfg.glare_threshold = 180       # RP patients are extremely photophobic
-        cfg.spatial_weight_map = _build_gaussian_centre_mask(h, w, sigma_frac=0.20)
+        if grid is not None:
+            cfg.spatial_weight_map = _build_hvf_grid_mask(grid, (h, w))
+            cfg.hvf_grid_points_used = len(grid)
+            cfg.profile_name = "rp_hvf_grid"
+        else:
+            cfg.spatial_weight_map = _build_gaussian_centre_mask(h, w, sigma_frac=0.20)
 
     else:
         cfg.profile_name = "generic_baseline"
+
+    # Best-corrected visual acuity severity scaling — bounded (see docstring).
+    if visual_acuity_logmar is not None and cfg.profile_name != "generic_baseline":
+        va_factor = 1.0 + 0.25 * min(max(visual_acuity_logmar, 0.0), 1.0)
+        cfg.clahe_clip_limit = round(cfg.clahe_clip_limit * va_factor, 2)
 
     return cfg
 

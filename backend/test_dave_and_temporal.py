@@ -35,6 +35,7 @@ from gozvision_vision.cv_pipeline import (
     _RP_CODES,
     _build_annulus_mask,
     _build_gaussian_centre_mask,
+    _build_hvf_grid_mask,
     build_config_from_diagnosis,
     measure_sighted_region_ssim,
 )
@@ -388,6 +389,97 @@ class TestTemporalHazardCoherenceTracker(unittest.TestCase):
         # The stair should have been detected in at least 3 of 5 frames
         self.assertGreaterEqual(tracker.drop_coherence, 0.6)
         self.assertTrue(gated.is_vertical_drop)
+
+
+class TestHVFGridMasks(unittest.TestCase):
+    """DAVE's spatial mask can be interpolated from the patient's own
+    perimetry points instead of the condition's population stereotype."""
+
+    # A 24-2-style grid with a dense central scotoma (AMD-like) on an
+    # otherwise healthy field.
+    AMD_GRID = [
+        (x, y, (8.0 if abs(x) <= 9 and abs(y) <= 9 else 30.0))
+        for x in range(-27, 28, 6)
+        for y in range(-27, 28, 6)
+    ]
+
+    # Glaucoma-like: peripheral field collapsed, central island surviving.
+    GLAUCOMA_GRID = [
+        (x, y, (30.0 if abs(x) <= 9 and abs(y) <= 9 else 6.0))
+        for x in range(-27, 28, 6)
+        for y in range(-27, 28, 6)
+    ]
+
+    def test_amd_grid_mask_downweights_scotoma(self):
+        cfg = build_config_from_diagnosis(
+            ["H35.31"], frame_shape=(300, 400), hvf_point_sensitivities=self.AMD_GRID
+        )
+        self.assertEqual(cfg.profile_name, "amd_hvf_grid")
+        self.assertEqual(cfg.hvf_grid_points_used, len(self.AMD_GRID))
+        mask = cfg.spatial_weight_map
+        centre = float(mask[150, 200])
+        corner = float(mask[10, 20])
+        self.assertLess(centre, 0.35)      # measured scotoma -> strongly suppressed
+        self.assertGreater(corner, 0.90)   # healthy periphery -> functioning
+
+    def test_amd_fallback_to_annulus_without_grid(self):
+        cfg = build_config_from_diagnosis(["H35.31"], frame_shape=(300, 400))
+        self.assertEqual(cfg.profile_name, "amd_peripheral_annulus")
+        self.assertEqual(cfg.hvf_grid_points_used, 0)
+
+    def test_glaucoma_grid_mask_keeps_central_island(self):
+        cfg = build_config_from_diagnosis(
+            ["H40.11"], frame_shape=(300, 400), hvf_point_sensitivities=self.GLAUCOMA_GRID
+        )
+        self.assertEqual(cfg.profile_name, "glaucoma_hvf_grid")
+        mask = cfg.spatial_weight_map
+        centre = float(mask[150, 200])
+        corner = float(mask[10, 20])
+        self.assertGreater(centre, 0.90)
+        self.assertLess(corner, 0.35)
+
+    def test_untested_region_defaults_to_functioning(self):
+        """Perimetry samples the central field; periphery outside the tested
+        extent must NOT be suppressed (no evidence it is invisible)."""
+        tiny_grid = [(0.0, 0.0, 5.0)]   # one dense central scotoma point
+        mask = _build_hvf_grid_mask(tiny_grid, (300, 400))
+        self.assertLess(float(mask[150, 200]), 0.3)
+        self.assertEqual(float(mask[10, 380]), 1.0)   # far corner: untested -> 1.0
+
+    def test_grid_mask_is_float32_in_range(self):
+        mask = _build_hvf_grid_mask(self.AMD_GRID, (300, 400))
+        self.assertEqual(mask.dtype, np.float32)
+        self.assertGreaterEqual(float(mask.min()), 0.0)
+        self.assertLessEqual(float(mask.max()), 1.0)
+
+    def test_empty_grid_raises(self):
+        with self.assertRaises(ValueError):
+            _build_hvf_grid_mask([], (300, 400))
+
+
+class TestVisualAcuityScaling(unittest.TestCase):
+    """Best-corrected VA modulates the contrast boost, bounded at +25%."""
+
+    def test_no_va_leaves_profile_defaults(self):
+        cfg = build_config_from_diagnosis(["H35.31"])
+        self.assertEqual(cfg.clahe_clip_limit, 4.5)
+
+    def test_normal_va_is_neutral(self):
+        cfg = build_config_from_diagnosis(["H35.31"], visual_acuity_logmar=0.0)
+        self.assertEqual(cfg.clahe_clip_limit, 4.5)
+
+    def test_worse_va_increases_clip_boundedly(self):
+        moderate = build_config_from_diagnosis(["H35.31"], visual_acuity_logmar=0.5)
+        blind = build_config_from_diagnosis(["H35.31"], visual_acuity_logmar=2.0)
+        self.assertAlmostEqual(moderate.clahe_clip_limit, round(4.5 * 1.125, 2))
+        self.assertAlmostEqual(blind.clahe_clip_limit, round(4.5 * 1.25, 2))
+        self.assertLess(blind.clahe_clip_limit, 4.5 * 1.3)   # cap holds
+
+    def test_va_scaling_skips_generic_baseline(self):
+        """No recognised diagnosis -> no severity signal to anchor on; leave baseline."""
+        cfg = build_config_from_diagnosis(["Z00.00"], visual_acuity_logmar=1.0)
+        self.assertEqual(cfg.profile_name, "generic_baseline")
+        self.assertEqual(cfg.clahe_clip_limit, 3.0)          # baseline untouched
 
 
 if __name__ == "__main__":

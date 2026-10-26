@@ -73,7 +73,7 @@ Over **2.2 billion people** globally live with vision impairment (WHO). For pati
 2. **OpenCV 5 DNN Depth Disparity (`cv2.dnn`):** Loads ONNX depth backends (`model-small.onnx`, `depth_anything_v2_vits.onnx`) via `cv2.dnn.readNetFromONNX` (`DNN_BACKEND_OPENCV`). Evaluates the vertical disparity gradient $\nabla_y D$ against a robust Theil-Sen median-of-slopes ground baseline.
 3. **Binocular Stereo SGBM Triangulation (`cv2.StereoSGBM`):** Triangulates metric Euclidean distance $Z = \frac{f_x \cdot B}{d}$ on dual-camera smart glasses ($B \approx 6.5\text{ cm}$).
 4. **Epipolar Plane-plus-Parallax Homography Veto:** Tracks pyramidal Lucas-Kanade optical flow features (`cv2.calcOpticalFlowPyrLK`), estimates ground homography $H$ via RANSAC, and vetoes candidate hazards with transfer error $< 2.5\text{ px}$.
-5. **Diagnosis-Adaptive Vision Enhancement (DAVE):** DERIVES spatial weight masks directly from FHIR R4 clinical diagnosis codes (`H35.31` AMD peripheral annulus, `H40.11` Glaucoma central focus), boosting edge energy by up to $2.52\times$ in viable retina.
+5. **Diagnosis-Adaptive Vision Enhancement (DAVE):** DERIVES spatial weight masks directly from FHIR R4 clinical diagnosis codes (`H35.31` AMD peripheral annulus, `H40.11` Glaucoma central focus); when per-point Humphrey 24-2 sensitivity observations are available in FHIR, the mask is instead interpolated from the patient's *measured* visual field (Gaussian RBF, $\sigma = 3°$ = half the grid spacing; no evidence of loss $\Rightarrow$ full weight, so untested periphery is never suppressed). Best-corrected visual acuity (logMAR) modulates the contrast boost, bounded at $+25\%$ to avoid noise amplification in near-blind vision. Boosts edge energy by up to $2.52\times$ in viable retina.
 
 ---
 
