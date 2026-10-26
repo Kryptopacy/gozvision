@@ -33,6 +33,7 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
 from google.adk.cli.fast_api import get_fast_api_app
+from mcp.server.transport_security import TransportSecuritySettings
 
 from gozvision_mcp.server import mcp as mcp_server
 from gozvision_vision.cool_pipeline import CoolGravitonPipeline
@@ -49,7 +50,20 @@ ADK_APP = get_fast_api_app(
     port=PORT,
 )
 
-MCP_APP = mcp_server.streamable_http_app(streamable_http_path="/mcp")
+MCP_APP = mcp_server.streamable_http_app(
+    streamable_http_path="/mcp",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=[
+            "d7icpdzxenshi.cloudfront.net",
+            "localhost:8080",
+            "127.0.0.1:8080",
+        ],
+        allowed_origins=[
+            "https://d7icpdzxenshi.cloudfront.net",
+        ],
+    ),
+)
 PIPELINE = CoolGravitonPipeline()
 
 # Combine the ADK app's own lifespan with the MCP session-manager lifespan.
