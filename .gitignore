@@ -29,6 +29,7 @@ assets/app.env
 apps/*/assets/app.env
 !apps/*/assets/app.env
 backend/.env
+backend/taskdef_*.json
 !.env.example
 !*.env.example
 

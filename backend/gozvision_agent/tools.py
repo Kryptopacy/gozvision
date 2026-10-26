@@ -4,10 +4,12 @@ All tools return structured dicts and NEVER raise exceptions to the agent.
 Errors are caught, logged, and returned as graceful fallbacks to prevent
 hallucinations and ensure the agent always has a valid structured response.
 """
+from __future__ import annotations
+
 import os
 import traceback
 from datetime import datetime, timezone, timedelta
-from typing import Any
+from typing import Any, Optional
 
 from .rag_service import SemanticKnowledgeBase
 
@@ -20,9 +22,17 @@ if not _SUPABASE_AVAILABLE:
     print("[GozVision] Supabase unavailable (SUPABASE_URL/SERVICE_KEY missing). SOS will run in stub mode.")
 
 
-# Initialize the vector DB (client/db fall back internally; db=None when
-# Supabase unavailable skips dynamic RAG loading)
-knowledge_base = SemanticKnowledgeBase(db=_db)
+# The semantic index is expensive to build and may call an external embedding
+# service. Construct it only when a knowledge-search tool is actually invoked;
+# container startup and non-RAG tools must never depend on that service.
+_knowledge_base: Optional[SemanticKnowledgeBase] = None
+
+
+def _get_knowledge_base() -> SemanticKnowledgeBase:
+    global _knowledge_base
+    if _knowledge_base is None:
+        _knowledge_base = SemanticKnowledgeBase(db=_db)
+    return _knowledge_base
 
 # Shared disclaimer appended to all medical responses
 _MEDICAL_DISCLAIMER = (
@@ -73,7 +83,7 @@ def search_optometry_guidelines(query: str) -> dict:
         }
 
     try:
-        result = knowledge_base.semantic_search(query, domain="optometry", threshold=0.55)
+        result = _get_knowledge_base().semantic_search(query, domain="optometry", threshold=0.55)
 
         if result.get("found"):
             data = result["data"]
@@ -206,7 +216,7 @@ def get_medication_info(medication_name: str) -> dict:
         }
 
     try:
-        result = knowledge_base.semantic_search(
+        result = _get_knowledge_base().semantic_search(
             medication_name, domain="medication", threshold=0.55
         )
 
@@ -270,7 +280,7 @@ def get_low_vision_statistics(query: str) -> dict:
         }
 
     try:
-        result = knowledge_base.semantic_search(query, domain="statistics", threshold=0.55)
+        result = _get_knowledge_base().semantic_search(query, domain="statistics", threshold=0.55)
 
         if result.get("found"):
             data = result["data"]
