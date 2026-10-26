@@ -560,6 +560,7 @@ def agentic_vision_hazard_loop(
     patient_id: str = "demo_patient_001",
     telemetry_stumble_detected: bool = False,
     location: str = "Market St & 4th Ave, Curb Transition",
+    frame_base64: Optional[str] = None,
 ) -> dict[str, Any]:
     """Run OpenCV 5 Agentic Vision loop: edge hazard detection driving adaptive guidance & emergency SOS dispatch.
 
@@ -567,12 +568,14 @@ def agentic_vision_hazard_loop(
         patient_id: Identifier of the low-vision patient.
         telemetry_stumble_detected: Simulated IMU pitch threshold confirming a stumble/fall.
         location: GPS or street intersection.
+        frame_base64: Optional base64 JPEG/PNG frame. When provided, the loop runs on these real pixels and the trace carries a SHA-256 provenance record.
     """
     from gozvision_agent.tools import execute_agentic_hazard_inspection
     return execute_agentic_hazard_inspection(
         patient_id=patient_id,
         telemetry_stumble_detected=telemetry_stumble_detected,
         location=location,
+        frame_base64=frame_base64,
     )
 
 
@@ -580,17 +583,20 @@ def agentic_vision_hazard_loop(
 def agentic_vision_medication_guardrail(
     ocr_extracted_text: str = "Alphagan P 0.15% (Brimonidine Tartrate)",
     patient_id: str = "demo_patient_001",
+    frame_base64: Optional[str] = None,
 ) -> dict[str, Any]:
     """Run OpenCV 5 closed-loop medication verification, halting conflicting drops and drafting clinician review.
 
     Args:
         ocr_extracted_text: Drug name localized by OpenCV morphological pipeline.
         patient_id: Patient ID to check against active clinical records.
+        frame_base64: Optional base64 JPEG/PNG of the label frame; the trace then carries a SHA-256 provenance record.
     """
     from gozvision_agent.tools import execute_agentic_medication_guardrail
     return execute_agentic_medication_guardrail(
         ocr_extracted_text=ocr_extracted_text,
         patient_id=patient_id,
+        frame_base64=frame_base64,
     )
 
 

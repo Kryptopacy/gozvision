@@ -1014,31 +1014,70 @@ def announce_ring_intercom_message(
     return ring_monitor.broadcast_intercom_chime(message=message, device_id=device_id)
 
 
+def _decode_mcp_frame(frame_base64: str) -> tuple:
+    """Decode a base64 frame uploaded over MCP and build its provenance record.
+
+    Returns (frame, provenance_dict). Raises ValueError on undecodable input so
+    the caller can fall back to the synthetic corridor frame instead of failing
+    the agent loop.
+    """
+    import base64
+    import hashlib
+
+    import cv2
+    import numpy as np
+
+    img_bytes = base64.b64decode(frame_base64)
+    frame = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+    if frame is None:
+        raise ValueError("frame_base64 could not be decoded as an image")
+    provenance = {
+        "source_type": "mcp_frame_upload",
+        "source_ref": "base64 frame uploaded via MCP tool call",
+        "content_sha256": hashlib.sha256(img_bytes).hexdigest(),
+        "decoded_shape": list(frame.shape),
+    }
+    return frame, provenance
+
+
 def execute_agentic_hazard_inspection(
     patient_id: str = "demo_patient_001",
     telemetry_stumble_detected: bool = False,
     location: str = "Transit Plaza & Curb Transition",
+    frame_base64: Optional[str] = None,
 ) -> dict[str, Any]:
     """Execute a multi-step Agentic Vision perception-decision-action loop with OpenCV 5.
 
     Extracts edge salience from the optical forward corridor. If high-contrast hazards exist,
     renders auditory guidance. If telemetry flags a stumble, autonomously escalates to an
     emergency SOS dispatch with visual metrics.
+
+    When frame_base64 is provided, the loop runs on the caller's real pixels and the
+    returned trace carries a SHA-256 provenance record of those exact bytes.
     """
     import numpy as np
     import cv2
     from .agentic_vision import agentic_orchestrator
 
-    # Generate synthetic corridor frame with a curb edge
-    frame = np.full((480, 640, 3), 150, dtype=np.uint8)
-    frame[300:480, :] = 90
-    cv2.line(frame, (0, 300), (640, 300), (30, 30, 30), 4)
+    frame = None
+    provenance = None
+    if frame_base64:
+        try:
+            frame, provenance = _decode_mcp_frame(frame_base64)
+        except Exception:
+            frame = None
+    if frame is None:
+        # Generate synthetic corridor frame with a curb edge
+        frame = np.full((480, 640, 3), 150, dtype=np.uint8)
+        frame[300:480, :] = 90
+        cv2.line(frame, (0, 300), (640, 300), (30, 30, 30), 4)
 
     trace = agentic_orchestrator.execute_hazard_mitigation_workflow(
         frame=frame,
         patient_id=patient_id,
         telemetry_stumble_detected=telemetry_stumble_detected,
         simulated_location=location,
+        provenance=provenance,
     )
     from dataclasses import asdict
     return asdict(trace)
@@ -1047,26 +1086,39 @@ def execute_agentic_hazard_inspection(
 def execute_agentic_medication_guardrail(
     ocr_extracted_text: str = "Alphagan P 0.15% (Brimonidine Tartrate)",
     patient_id: str = "demo_patient_001",
+    frame_base64: Optional[str] = None,
 ) -> dict[str, Any]:
     """Execute Agentic Vision closed-loop medication verification.
 
     Uses OpenCV 5 morphological text localization. Cross-references extracted drug names
     against the patient's active clinic EHR chart. Halts unauthorized administration
     and initiates a human-in-the-loop Scribe chart review if contraindicated.
+
+    When frame_base64 is provided, label localization runs on the caller's real
+    pixels and the returned trace carries a SHA-256 provenance record.
     """
     import numpy as np
     import cv2
     from .agentic_vision import agentic_orchestrator
 
-    # Generate synthetic label frame
-    frame = np.full((480, 640, 3), 200, dtype=np.uint8)
-    cv2.rectangle(frame, (100, 150), (540, 320), (240, 240, 240), -1)
-    cv2.putText(frame, ocr_extracted_text, (120, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (20, 20, 20), 2)
+    frame = None
+    provenance = None
+    if frame_base64:
+        try:
+            frame, provenance = _decode_mcp_frame(frame_base64)
+        except Exception:
+            frame = None
+    if frame is None:
+        # Generate synthetic label frame
+        frame = np.full((480, 640, 3), 200, dtype=np.uint8)
+        cv2.rectangle(frame, (100, 150), (540, 320), (240, 240, 240), -1)
+        cv2.putText(frame, ocr_extracted_text, (120, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (20, 20, 20), 2)
 
     trace = agentic_orchestrator.execute_medication_guardrail_workflow(
         frame=frame,
         ocr_extracted_text=ocr_extracted_text,
         patient_id=patient_id,
+        provenance=provenance,
     )
     from dataclasses import asdict
     return asdict(trace)

@@ -42,8 +42,11 @@ on luminance only; Telea fast-marching inpainting of specular glare
 (`cv2.inpaint`); morphological reading-zone isolation that finds and
 highlights text blocks for OCR — medication labels, appliances, signage,
 documents — indoors and out; and DAVE, diagnosis-adaptive spatial masks
-derived from the patient's FHIR ICD-10 codes so contrast gain concentrates in
-functioning retina instead of being wasted on a scotoma.
+derived from the patient's FHIR ICD-10 codes — interpolated directly from
+their per-point Humphrey visual-field sensitivities when the 24-2 grid is
+available, so an eccentric AMD scotoma or a glaucoma nasal step is weighted
+as measured, not as the condition's population average — so contrast gain
+concentrates in functioning retina instead of being wasted on a scotoma.
 
 **The spatial-depth flagship (Loop B, asynchronous geometry):** the deepest
 CV innovation is the indoor/outdoor hazard discriminator — monocular depth
@@ -96,6 +99,19 @@ $0.0285). Reproduce both runs yourself: `scripts/run_graviton_benchmark.sh` +
 (`pytest test_cv_pipeline.py test_cool_pipeline.py test_agentic_vision.py`).
 Full commands in `docs/TECHNICAL_REPORT.md` §9.
 
+**Verified agentic loop over MCP (judge-runnable).** Vision output doesn't stop
+at pixels — it changes what the agent does next. `scripts/run_agentic_mcp_session.py`
+runs a logged MCP session against our live AWS endpoint: a real stairs photo
+goes through the OpenCV 5 `spatial_depth` tool (`elevation_barrier` detected,
+~21 cm drop estimated), the client decision rule escalates the plan, the
+`agentic_vision_hazard_loop` executes a 4-step
+perception→reasoning→actuator→tool_call trace that dispatches a real SOS alert
+(`firestore_written: true`), and the medication guardrail HALTS a
+contraindicated drop and escalates to clinician review. The raw session log
+with per-step latencies and the frame's SHA-256 is preserved at
+`backend/evaluation/results/agentic_mcp_session_trace.json`; the same command
+works with `--local` for offline judging. Full trace: `docs/AGENTIC_MCP.md` §3.
+
 ## Live endpoints
 
 | What | URL |
@@ -103,6 +119,7 @@ Full commands in `docs/TECHNICAL_REPORT.md` §9.
 | API (CloudFront → ECS Fargate) | https://d7icpdzxenshi.cloudfront.net |
 | Health check | https://d7icpdzxenshi.cloudfront.net/health |
 | Interactive API docs | https://d7icpdzxenshi.cloudfront.net/docs |
+| MCP server (streamable-HTTP) | https://d7icpdzxenshi.cloudfront.net/mcp |
 | Patient & clinic web apps | https://main.d1lr4zsb46he1m.amplifyapp.com |
 
 ## Challenges
