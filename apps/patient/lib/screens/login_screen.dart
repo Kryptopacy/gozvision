@@ -371,10 +371,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       _passwordController.text = 'gozvision-demo';
                                       _submitAuth();
                                     },
-                                    icon: const Icon(Icons.flash_on_rounded, size: 14, color: GozAITheme.warningAmber),
+                                    icon: const Icon(Icons.flash_on_rounded, size: 14, color: GozAITheme.patientAccent),
                                     label: const Text(
                                       'Fill Demo Caregiver Credentials (Ngozi Balogun)',
-                                      style: TextStyle(color: GozAITheme.warningAmber, fontSize: 12),
+                                      style: TextStyle(color: GozAITheme.patientAccent, fontSize: 12),
                                     ),
                                   ),
                                 ),
