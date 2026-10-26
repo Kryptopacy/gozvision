@@ -2,7 +2,7 @@
   "containerDefinitions": [
     {
       "name": "gozvision-agent",
-      "image": "202504327910.dkr.ecr.eu-north-1.amazonaws.com/gozvision-backend:v20261025-honest",
+      "image": "202504327910.dkr.ecr.eu-north-1.amazonaws.com/gozvision-backend:v20261025-honest-r2",
       "cpu": 0,
       "portMappings": [
         {
@@ -49,13 +49,13 @@
   "networkMode": "awsvpc",
   "volumes": [],
   "placementConstraints": [],
-  "requiresCompatibilities": [
-    "FARGATE"
-  ],
-  "cpu": "512",
-  "memory": "1024",
   "runtimePlatform": {
     "cpuArchitecture": "ARM64",
     "operatingSystemFamily": "LINUX"
-  }
+  },
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "1024",
+  "memory": "2048"
 }

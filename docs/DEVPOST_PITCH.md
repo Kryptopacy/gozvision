@@ -9,42 +9,52 @@ exact commands.
 ## Project title
 
 ```
-GozVision — OpenCV 5 Spatial Depth Copilot for Low-Vision Pedestrians
+GozVision — OpenCV 5 Assistive Vision Copilot for Low Vision
 ```
 
 ## Elevator pitch (Devpost ~200-char line)
 
 ```
-A 2D edge filter can't tell a 15 cm curb from a painted shadow. GozVision
-can: OpenCV 5 DNN depth disparity + temporal coherence separate real drop-offs
-from flat shadows, and an agent acts on the result.
+A 2D edge filter can't tell a 15 cm stair from a painted stripe. GozVision
+can: OpenCV 5 depth disparity + temporal coherence separate real hazards from
+flat patterns — indoors and outdoors — with contrast, glare and reading aids
+tuned to each patient's diagnosis.
 ```
 
 ## About the project (full description)
 
-**The problem.** 2.2 billion people live with vision impairment (WHO). For a
-pedestrian with macular degeneration or advanced glaucoma, the deadliest
-failure of classical computer vision is geometric, not cosmetic: a 2D edge
-detector (Canny, Sobel) responds identically to a 15 cm drop-off and to a flat
-painted line or a dark pavement shadow. Alert on every edge and the user
-experiences alarm fatigue; suppress alerts and a curb becomes a fall. We
-built GozVision to answer one question per frame, correctly: **is this edge a
-physical elevation change, or is it coplanar?**
+**The problem.** 2.2 billion people live with vision impairment (WHO), and
+their needs span the whole day, indoors and outdoors: a person with cataracts
+is blinded by specular glare off wet pavement and kitchen counters; a person
+with macular degeneration cannot read a prescription bottle, an appliance
+panel, or a departure board; a person with advanced glaucoma navigating a
+stairwell or a curb faces the deadliest classical-CV failure there is — a 2D
+edge detector (Canny, Sobel) responds identically to a 15 cm elevation change
+and to a flat painted line or a dark floor shadow. Alert on every edge and
+the user experiences alarm fatigue; suppress alerts and a stair becomes a
+fall. GozVision is a full-spectrum assistive vision copilot built around one
+question per frame, answered correctly: **what does this specific patient's
+remaining vision need from this frame — and is this edge a real hazard or a
+coplanar pattern?**
 
-**The CV.** GozVision is an OpenCV 5 dual-loop pipeline
-(`backend/gozvision_vision/cv_pipeline.py`):
+**The full aid suite (Loop A, synchronous display):** CIE-LAB adaptive CLAHE
+on luminance only; Telea fast-marching inpainting of specular glare
+(`cv2.inpaint`); morphological reading-zone isolation that finds and
+highlights text blocks for OCR — medication labels, appliances, signage,
+documents — indoors and out; and DAVE, diagnosis-adaptive spatial masks
+derived from the patient's FHIR ICD-10 codes so contrast gain concentrates in
+functioning retina instead of being wasted on a scotoma.
 
-- **Loop A (display, synchronous):** CIE-LAB adaptive CLAHE on luminance only,
-  Telea fast-marching inpainting of specular glare (`cv2.inpaint`), and DAVE —
-  diagnosis-adaptive spatial masks derived from the patient's FHIR ICD-10
-  codes so contrast gain concentrates in functioning retina, not in a scotoma.
-- **Loop B (geometry, asynchronous):** monocular depth disparity via
-  `cv2.dnn.readNetFromONNX` (MiDaS-small), StereoSGBM triangulation when a
-  stereo baseline exists, a RANSAC ground-homography parallax veto for coplanar
-  surfaces, optical-flow scale calibration, and the core innovation: the
-  **vertical depth-disparity gradient (∂D/∂y) test** across the walking
-  corridor, gated by a 5-frame `TemporalHazardCoherenceTracker`. Output is a
-  decision — `vertical_drop` (with estimated cm) vs `coplanar_clear`.
+**The spatial-depth flagship (Loop B, asynchronous geometry):** the deepest
+CV innovation is the indoor/outdoor hazard discriminator — monocular depth
+disparity via `cv2.dnn.readNetFromONNX` (MiDaS-small), StereoSGBM
+triangulation when a stereo baseline exists, a RANSAC ground-homography
+parallax veto for coplanar surfaces, optical-flow scale calibration, and the
+core innovation: the **vertical depth-disparity gradient (∂D/∂y) test**
+across the walking corridor, gated by a 5-frame `TemporalHazardCoherenceTracker`.
+Output is a decision — `vertical_drop` (with estimated cm) vs
+`coplanar_clear` — for staircases, curbs, transit gaps, and indoor level
+changes alike.
 
 **The honesty section (read this, judges).** On 69 real street/corridor frames
 (0 synthetic, Wikimedia-licensed, per-case SHA-256 recorded), single-frame
