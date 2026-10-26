@@ -1173,7 +1173,7 @@ class _ClinicShellState extends State<ClinicShell> {
                       ),
                       child: Text(
                         roleBadge,
-                        style: GoogleFonts.jetbrainsMono(
+                        style: GoogleFonts.jetBrainsMono(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: ClinicTheme.brandAccent,
