@@ -69,3 +69,6 @@ docs/DEMO_VIDEO.md
 backend/evaluation/dataset/
 backend/evaluation/results/aws_benchmark_*/
 backend/gozvision_backend.egg-info/
+# Raw intro takes (too large for git; final video ships via Devpost/YouTube)
+*.mov
+*.MOV

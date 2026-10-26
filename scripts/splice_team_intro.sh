@@ -6,16 +6,23 @@
 #
 # The intro is normalized to the demo's format (1920x1080 30fps H.264 + AAC)
 # and concatenated; the output defaults to gozvision_opencv_demo_final.mp4.
+# Portrait sources get a blurred-fill background instead of black bars.
 set -euo pipefail
 
 INTRO="${1:?usage: splice_team_intro.sh <intro_clip> [out.mp4]}"
 DEMO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && (pwd -W 2>/dev/null || pwd))/gozvision_opencv_demo.mp4"
 OUT="${2:-$(dirname "$INTRO")/gozvision_opencv_demo_final.mp4}"
 TMPDIR_T="$(mktemp -d)"
+# Native ffmpeg.exe cannot read MSYS /tmp paths; convert to a Windows path.
+command -v cygpath >/dev/null 2>&1 && TMPDIR_T="$(cygpath -m "$TMPDIR_T")"
 
-ffmpeg -y -v error -i "$INTRO" \
-  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p" \
-  -an -c:v libx264 -preset fast -crf 18 "$TMPDIR_T/intro.mp4"
+ffmpeg -y -v error -i "$INTRO" -filter_complex "
+  [0:v]split=2[bg][fg];
+  [bg]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,boxblur=20:5[bgb];
+  [fg]scale=-2:1080[fgs];
+  [bgb][fgs]overlay=(W-w)/2:(H-h)/2,fps=30,format=yuv420p[v]" \
+  -map "[v]" -map 0:a? -c:v libx264 -preset fast -crf 18 \
+  -c:a aac -ar 48000 -ac 2 "$TMPDIR_T/intro.mp4"
 
 ffmpeg -y -v error -i "$DEMO" \
   -vf "fps=30,format=yuv420p" -c:v libx264 -preset fast -crf 18 \
