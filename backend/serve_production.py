@@ -96,6 +96,11 @@ def vision_telemetry() -> JSONResponse:
     )
     telemetry["depth_model"] = estimator.model_name if estimator.use_onnx else None
     telemetry["serving_app"] = "serve_production"
+    if os.environ.get("AWS_EXECUTION_ENV", "").startswith("AWS_ECS_FARGATE"):
+        # Fargate allocates task CPU/memory; it is not a named EC2 instance.
+        telemetry.pop("target_instance_type", None)
+        telemetry.pop("instance_cost_per_hour_usd", None)
+        telemetry["compute_runtime"] = "AWS ECS Fargate ARM64"
     return JSONResponse(telemetry)
 
 

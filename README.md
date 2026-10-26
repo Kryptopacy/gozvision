@@ -16,7 +16,8 @@ GozVision is an end-to-end, multi-tenant clinical intelligence and assistive vis
 | **System Health Check** | Amazon ECS Fargate Container Ingress | [`https://d7icpdzxenshi.cloudfront.net/health`](https://d7icpdzxenshi.cloudfront.net/health) | **Active** (`{"status":"ok"}`) |
 | **API Documentation** | FastAPI Interactive Swagger UI | [`https://d7icpdzxenshi.cloudfront.net/docs`](https://d7icpdzxenshi.cloudfront.net/docs) | **Interactive UI** |
 | **Patient & Clinic Apps** | AWS Amplify Global Web Hosting | [`https://main.d1lr4zsb46he1m.amplifyapp.com`](https://main.d1lr4zsb46he1m.amplifyapp.com) | **HTTP 200 OK** |
-| **MCP Streamable HTTP** | Model Context Protocol (`spec 2025-11-25+`) | `https://d7icpdzxenshi.cloudfront.net/mcp` | **Image refresh in flight** (`backend/gozvision_mcp`) |
+| **MCP Streamable HTTP** | Model Context Protocol (`2025-06-18` compatible) | [`https://d7icpdzxenshi.cloudfront.net/mcp`](https://d7icpdzxenshi.cloudfront.net/mcp) | **Active** (initialize HTTP 200) |
+| **Live OpenCV Telemetry** | OpenCV 5 DNN on Graviton/ARM64 | [`https://d7icpdzxenshi.cloudfront.net/vision/telemetry`](https://d7icpdzxenshi.cloudfront.net/vision/telemetry) | **Active** (`aarch64`, `opencv_dnn_onnx`) |
 | **Official Demo Video** | 3-Min Walkthrough & Storyboard | [`docs/DEMO_VIDEO.md`](docs/DEMO_VIDEO.md) | **Production Script & Video** |
 | **HIPAA & Data Security** | Security Architecture & BAA Audit | [`docs/HIPAA_COMPLIANCE.md`](docs/HIPAA_COMPLIANCE.md) | **Audited** |
 | **Infrastructure as Code** | AWS CloudFormation Graviton3 Stack | [`infra/gozvision-stack.yaml`](infra/gozvision-stack.yaml) | **Production IaC** |
