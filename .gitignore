@@ -73,3 +73,7 @@ backend/gozvision_backend.egg-info/
 *.mov
 *.MOV
 cf-selfheal-config.json
+
+# AI-assistant workspace rules (local only; AGENTS.md is the canonical tracked copy)
+CLAUDE.md
+GEMINI.md
