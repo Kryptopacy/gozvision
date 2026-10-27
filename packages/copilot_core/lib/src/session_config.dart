@@ -2,9 +2,10 @@
 /// global AppConfig; the package takes it as a value so hosts own their
 /// environment loading).
 class SessionConfig {
-  /// WebSocket endpoint for the Gemini Multimodal Live API
-  /// (BidiGenerateContent, v1alpha).
-  final String geminiLiveWsUrl;
+  /// Resolves a fresh authenticated WebSocket endpoint for each Live session.
+  /// Browser hosts should mint a one-use ephemeral token through their backend;
+  /// native and test hosts may return a fixed endpoint.
+  final Future<String> Function() resolveGeminiLiveWsUrl;
 
   /// Gemini model for multimodal live.
   final String geminiModel;
@@ -23,8 +24,8 @@ class SessionConfig {
   /// The ADK agent module name (backend/agents/).
   final String adkAgentName;
 
-  const SessionConfig({
-    required this.geminiLiveWsUrl,
+  SessionConfig({
+    required this.resolveGeminiLiveWsUrl,
     required this.geminiModel,
     this.audioInputSampleRate = 16000,
     required this.demoPatientId,

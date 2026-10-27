@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Git Bash on Windows rewrites `/clinic/` and `/patient/` into local Windows
+# paths unless path conversion is disabled. Linux and Vercel ignore this.
+export MSYS_NO_PATHCONV=1
+
 echo "=================================================="
 echo " Starting Unified GozVision Web Build for Vercel "
 echo "=================================================="

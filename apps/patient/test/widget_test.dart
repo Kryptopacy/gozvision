@@ -104,7 +104,7 @@ void main() {
     test('a fresh session service starts disconnected in scene mode', () {
       final service = GeminiLiveService(
         config: SessionConfig(
-          geminiLiveWsUrl: 'wss://example.invalid',
+          resolveGeminiLiveWsUrl: () async => 'wss://example.invalid',
           geminiModel: 'models/test-model',
           demoPatientId: 'demo_patient_001',
           adkBackendUrl: 'http://localhost:8080',

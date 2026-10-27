@@ -23,16 +23,23 @@ import base64
 import contextlib
 import os
 import sys
+import threading
+import time
+from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import cv2
 import numpy as np
-from fastapi import HTTPException
+from fastapi import Header, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
+from google import genai
 from google.adk.cli.fast_api import get_fast_api_app
+from google.genai import types
 from mcp.server.transport_security import TransportSecuritySettings
 
 from gozvision_mcp.server import mcp as mcp_server
@@ -65,6 +72,103 @@ MCP_APP = mcp_server.streamable_http_app(
     ),
 )
 PIPELINE = CoolGravitonPipeline()
+
+WEB_ORIGINS = [
+    "https://gozvision.vercel.app",
+    "https://main.d1lr4zsb46he1m.amplifyapp.com",
+]
+ADK_APP.add_middleware(
+    CORSMiddleware,
+    allow_origins=WEB_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+_LIVE_MODEL = "gemini-3.8-live"
+_LIVE_WS_BASE = (
+    "wss://generativelanguage.googleapis.com/ws/"
+    "google.ai.generativelanguage.v1beta.GenerativeService."
+    "BidiGenerateContentConstrained"
+)
+_token_lock = threading.Lock()
+_token_issued_at: dict[str, list[float]] = {}
+
+
+def _rate_limit_token(user_id: str, limit: int = 6, window_seconds: int = 60) -> None:
+    """Bound token minting per authenticated user without external state."""
+    now = time.monotonic()
+    with _token_lock:
+        recent = [t for t in _token_issued_at.get(user_id, []) if now - t < window_seconds]
+        if len(recent) >= limit:
+            raise HTTPException(status_code=429, detail="Live token rate limit exceeded")
+        recent.append(now)
+        _token_issued_at[user_id] = recent
+
+
+def _authenticated_user_id(authorization: str | None) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+    jwt = authorization[7:].strip()
+    if not jwt:
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+
+    from gozvision_agent.db import service_client
+
+    client = service_client()
+    if client is None:
+        raise HTTPException(status_code=503, detail="Identity service unavailable")
+    try:
+        response = client.auth.get_user(jwt)
+        user = getattr(response, "user", None)
+        user_id = getattr(user, "id", None)
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    return str(user_id)
+
+
+@ADK_APP.post("/gemini/live-token")
+def gemini_live_token(authorization: str | None = Header(default=None)) -> JSONResponse:
+    """Mint a one-use Gemini Live token for an authenticated patient session."""
+    user_id = _authenticated_user_id(authorization)
+    _rate_limit_token(user_id)
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Gemini Live is not configured")
+
+    now = datetime.now(timezone.utc)
+    try:
+        client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(api_version="v1alpha"),
+        )
+        token = client.auth_tokens.create(
+            config=types.CreateAuthTokenConfig(
+                uses=1,
+                expire_time=now + timedelta(minutes=5),
+                new_session_expire_time=now + timedelta(minutes=1),
+                live_connect_constraints=types.LiveConnectConstraints(
+                    model=_LIVE_MODEL,
+                    config=types.LiveConnectConfig(
+                        response_modalities=["AUDIO"],
+                        session_resumption=types.SessionResumptionConfig(),
+                    ),
+                ),
+            )
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail="Unable to mint Gemini Live token") from exc
+    if not token.name:
+        raise HTTPException(status_code=502, detail="Gemini Live returned an empty token")
+
+    return JSONResponse({
+        "websocket_url": f"{_LIVE_WS_BASE}?access_token={quote(token.name, safe='')}",
+        "model": f"models/{_LIVE_MODEL}",
+        "uses": 1,
+    })
 
 # Combine the ADK app's own lifespan with the MCP session-manager lifespan.
 _adk_lifespan = ADK_APP.router.lifespan_context

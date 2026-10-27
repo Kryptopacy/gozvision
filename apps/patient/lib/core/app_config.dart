@@ -8,11 +8,8 @@ class AppConfig {
   /// See CONTEXT.md ("Patient identity").
   static const String patientId = 'demo_patient_001';
 
-  /// The ADK agent module running on Cloud Run (backend/gozvision_agent/).
-  /// Used to address the agent in ADK API server routes (/apps/{app}/..., /run).
+  /// The ADK agent module running on the production backend.
   static const String adkAgentName = 'gozvision_agent';
-
-  static String get geminiApiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
   /// Supabase backend (auth + Postgres). See supabase/migrations/ and ADR-0003.
   static String get supabaseUrl =>
@@ -29,27 +26,21 @@ class AppConfig {
   static String get adkBackendUrl =>
       dotenv.env['ADK_BACKEND_URL'] ?? 'http://localhost:8080';
 
-  /// Gemini Multimodal Live API WebSocket endpoint.
-  /// BidiGenerateContent WebSocket utilizes v1alpha for the native audio preview model.
-  static String get geminiLiveWsUrl =>
-      'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=$geminiApiKey';
-
-  /// Gemini model for multimodal live.
-  /// bidiGenerateContent endpoint on v1alpha.
-  /// Bleeding edge: the newest generation speaks the Live API natively
-  /// (bidiGenerateContent). Fallback if needed:
-  /// models/gemini-2.5-flash-native-audio-latest.
+  /// Gemini model for multimodal Live. The permanent key stays on the backend;
+  /// the patient app obtains a one-use ephemeral WebSocket URL at session start.
   static const String geminiModel = 'models/gemini-3.8-live';
 
-  /// Camera frame rate for continuous monitoring (frames per second)
+  /// Camera frame rate for continuous monitoring (frames per second).
   static const double cameraFps = 1.0;
 
-  /// Audio recording sample rate (Hz) — Gemini expects 16kHz
+  /// Audio recording sample rate (Hz) — Gemini expects 16kHz.
   static const int audioInputSampleRate = 16000;
 
-  /// Audio playback sample rate (Hz) — Gemini outputs 24kHz
+  /// Audio playback sample rate (Hz) — Gemini outputs 24kHz.
   static const int audioOutputSampleRate = 24000;
 
-  /// Validate that required config is present
-  static bool get isConfigured => geminiApiKey.isNotEmpty;
+  static bool get isConfigured =>
+      supabaseUrl.isNotEmpty &&
+      supabasePublishableKey.isNotEmpty &&
+      adkBackendUrl.isNotEmpty;
 }

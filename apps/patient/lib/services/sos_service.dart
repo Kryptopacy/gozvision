@@ -54,6 +54,7 @@ class SosService implements CopilotAlertSink {
       }
     } catch (e) {
       debugPrint('SosService: Failed to send alert: $e');
+      rethrow;
     }
   }
 
@@ -82,11 +83,9 @@ class SosService implements CopilotAlertSink {
       final rows = await _client
           .from('profiles')
           .select('caregiver_phone')
-          .contains('assigned_patients', [userId])
-          .limit(1);
-      final caregiverPhone = rows.isNotEmpty
-          ? rows.first['caregiver_phone'] as String?
-          : null;
+          .contains('assigned_patients', [userId]).limit(1);
+      final caregiverPhone =
+          rows.isNotEmpty ? rows.first['caregiver_phone'] as String? : null;
       if (caregiverPhone != null && caregiverPhone.isNotEmpty) {
         final uri = Uri(scheme: 'tel', path: caregiverPhone);
         if (await canLaunchUrl(uri)) {

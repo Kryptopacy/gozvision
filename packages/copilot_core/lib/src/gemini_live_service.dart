@@ -27,7 +27,8 @@ class GeminiLiveService extends ChangeNotifier {
     required this.config,
     required this.identity,
     required String Function(GozAIMode mode) buildSystemPrompt,
-  }) : _buildSystemPrompt = buildSystemPrompt; // ignore: prefer_initializing_formals — named params cannot be private
+  }) : _buildSystemPrompt =
+            buildSystemPrompt; // ignore: prefer_initializing_formals — named params cannot be private
 
   final SessionConfig config;
   final CopilotIdentity identity;
@@ -39,7 +40,8 @@ class GeminiLiveService extends ChangeNotifier {
   String _statusMessage = 'Tap to connect';
   bool _isModelSpeaking = false;
 
-  late final AdkBridgeService _adkBridge = AdkBridgeService(identity: identity, config: config);
+  late final AdkBridgeService _adkBridge =
+      AdkBridgeService(identity: identity, config: config);
 
   // Spatial Context Buffer — grounding Gemini with a running mental map.
   // Research basis: Seiple W. et al., TVST 14(1):3, 2025 (PMC11721483) —
@@ -63,7 +65,6 @@ class GeminiLiveService extends ChangeNotifier {
   /// seam between the session and the device. Implemented by
   /// [SessionCoordinator].
   CopilotDelegate? delegate;
-
 
   // Public getters
   GeminiConnectionState get connectionState => _connectionState;
@@ -95,9 +96,10 @@ class GeminiLiveService extends ChangeNotifier {
     _setStatus('Connecting to GozAI...');
 
     try {
-      final wsUrl = config.geminiLiveWsUrl;
-      debugPrint('GeminiLive: Connecting to $wsUrl');
+      final wsUrl = await config.resolveGeminiLiveWsUrl();
       final uri = Uri.parse(wsUrl);
+      debugPrint(
+          'GeminiLive: Connecting with ${uri.queryParameters.containsKey('access_token') ? 'ephemeral token' : 'configured credentials'}');
       _channel = WebSocketChannel.connect(uri);
 
       // Wait for the WebSocket handshake to complete.
@@ -105,8 +107,7 @@ class GeminiLiveService extends ChangeNotifier {
       await _channel!.ready;
 
       _setConnectionState(GeminiConnectionState.connected);
-      _setStatus('Connected');
-      _reconnectAttempts = 0;
+      _setStatus('Authenticating...');
 
       // Send setup message with system prompt
       _sendSetupMessage();
@@ -115,7 +116,8 @@ class GeminiLiveService extends ChangeNotifier {
       _channel!.stream.listen(
         _handleMessage,
         onError: (error) {
-          debugPrint('GeminiLive WebSocket error: $error (type: ${error.runtimeType})');
+          debugPrint(
+              'GeminiLive WebSocket error: $error (type: ${error.runtimeType})');
           _setConnectionState(GeminiConnectionState.error);
           _setStatus('Connection error: $error');
           _scheduleReconnect();
@@ -145,11 +147,12 @@ class GeminiLiveService extends ChangeNotifier {
     if (_reconnectAttempts < _maxReconnectAttempts) {
       _reconnectAttempts++;
       final backoff = Duration(seconds: 2 * _reconnectAttempts);
-      debugPrint('GeminiLive: Reconnecting in ${backoff.inSeconds} seconds (Attempt $_reconnectAttempts/$_maxReconnectAttempts)...');
+      debugPrint(
+          'GeminiLive: Reconnecting in ${backoff.inSeconds} seconds (Attempt $_reconnectAttempts/$_maxReconnectAttempts)...');
       _setStatus('Reconnecting in ${backoff.inSeconds}s...');
-      
+
       Future.delayed(backoff, () {
-        if (_connectionState == GeminiConnectionState.disconnected || 
+        if (_connectionState == GeminiConnectionState.disconnected ||
             _connectionState == GeminiConnectionState.error) {
           connect();
         }
@@ -194,17 +197,20 @@ class GeminiLiveService extends ChangeNotifier {
             'functionDeclarations': [
               {
                 'name': 'switchCamera',
-                'description': 'Switches or flips the user\'s camera (e.g., from front to back, or back to front). Call this when the user asks to switch the camera, flip the camera, or look at them.',
+                'description':
+                    'Switches or flips the user\'s camera (e.g., from front to back, or back to front). Call this when the user asks to switch the camera, flip the camera, or look at them.',
               },
               {
                 'name': 'switchMode',
-                'description': 'Switches the application mode (e.g., to scene, reading, screen, or light meter).',
+                'description':
+                    'Switches the application mode (e.g., to scene, reading, screen, or light meter).',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'mode': {
                       'type': 'STRING',
-                      'description': 'The mode to switch to. Must be one of: scene, reading, uiNav, lightMeter',
+                      'description':
+                          'The mode to switch to. Must be one of: scene, reading, uiNav, lightMeter',
                       'enum': ['scene', 'reading', 'uiNav', 'lightMeter']
                     }
                   },
@@ -213,13 +219,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'switchVisionProfile',
-                'description': 'Switches the patient user profile and copilot assist level between "lowVisionAssist" (continuous scene descriptions, high haptics, obstacle detection) and "clinicCompanion" (silent on-demand assistant, subdued haptics, visual appointment hub). Call this when the user asks to switch to seeing mode, quiet mode, companion mode, or back to low-vision/assist mode.',
+                'description':
+                    'Switches the patient user profile and copilot assist level between "lowVisionAssist" (continuous scene descriptions, high haptics, obstacle detection) and "clinicCompanion" (silent on-demand assistant, subdued haptics, visual appointment hub). Call this when the user asks to switch to seeing mode, quiet mode, companion mode, or back to low-vision/assist mode.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'profile': {
                       'type': 'STRING',
-                      'description': 'The target profile: "lowVisionAssist" or "clinicCompanion".',
+                      'description':
+                          'The target profile: "lowVisionAssist" or "clinicCompanion".',
                       'enum': ['lowVisionAssist', 'clinicCompanion']
                     }
                   },
@@ -228,22 +236,32 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'captureSnapshot',
-                'description': 'Takes a high-resolution snapshot photo for detailed analysis. Call this when the user explicitly asks to take a picture, snap a photo, or look closely at something.',
+                'description':
+                    'Takes a high-resolution snapshot photo for detailed analysis. Call this when the user explicitly asks to take a picture, snap a photo, or look closely at something.',
               },
               {
                 'name': 'disconnectSession',
-                'description': 'Gracefully hangs up and ends the current GozAI session. Call this when the user says goodbye, stop listening, or asks you to turn off.',
+                'description':
+                    'Gracefully hangs up and ends the current GozAI session. Call this when the user says goodbye, stop listening, or asks you to turn off.',
               },
               {
                 'name': 'triggerHaptic',
-                'description': 'Triggers a haptic vibration pattern on the device to communicate urgency non-visually. Call this proactively when you POSITIVELY detect a hazard (pattern: hazard), a person approaching (pattern: person), a navigation cue (pattern: navigate), a clear path (pattern: safe), or when you map the environment (pattern: environment_mapped).',
+                'description':
+                    'Triggers a haptic vibration pattern on the device to communicate urgency non-visually. Call this proactively when you POSITIVELY detect a hazard (pattern: hazard), a person approaching (pattern: person), a navigation cue (pattern: navigate), a clear path (pattern: safe), or when you map the environment (pattern: environment_mapped).',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'pattern': {
                       'type': 'STRING',
-                      'description': 'The haptic pattern to trigger. Must be one of: hazard, person, navigate, safe, environment_mapped',
-                      'enum': ['hazard', 'person', 'navigate', 'safe', 'environment_mapped']
+                      'description':
+                          'The haptic pattern to trigger. Must be one of: hazard, person, navigate, safe, environment_mapped',
+                      'enum': [
+                        'hazard',
+                        'person',
+                        'navigate',
+                        'safe',
+                        'environment_mapped'
+                      ]
                     }
                   },
                   'required': ['pattern']
@@ -251,7 +269,8 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'clickUiElement',
-                'description': 'Taps a specific UI element on the screen in UI NAVIGATOR mode. Use the x and y coordinates of the element you see in the screenshot. Coordinates should be relative to a standard 1080x1920 logical screen, though the relative position is most important. NOTE: This tool currently synthesizes taps within the Flutter app environment but is engineered with (x,y) arguments to bridge directly to OS accessibility services (e.g., Android AccessibilityNodeInfo or Windows UIAutomation) for arbitrary OS-level app control in the native architecture.',
+                'description':
+                    'Taps a specific UI element on the screen in UI NAVIGATOR mode. Use the x and y coordinates of the element you see in the screenshot. Coordinates should be relative to a standard 1080x1920 logical screen, though the relative position is most important. NOTE: This tool currently synthesizes taps within the Flutter app environment but is engineered with (x,y) arguments to bridge directly to OS accessibility services (e.g., Android AccessibilityNodeInfo or Windows UIAutomation) for arbitrary OS-level app control in the native architecture.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
@@ -269,13 +288,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'toggleFlashlight',
-                'description': 'Turns the device\'s hardware LED flashlight on or off. Use this autonomously if the camera feed is completely black and you cannot see, OR if the user explicitly asks you to turn on the light.',
+                'description':
+                    'Turns the device\'s hardware LED flashlight on or off. Use this autonomously if the camera feed is completely black and you cannot see, OR if the user explicitly asks you to turn on the light.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'on': {
                       'type': 'BOOLEAN',
-                      'description': 'True to turn the flashlight ON. False to turn it OFF.',
+                      'description':
+                          'True to turn the flashlight ON. False to turn it OFF.',
                     }
                   },
                   'required': ['on'],
@@ -283,18 +304,21 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'requestHardwareAccess',
-                'description': 'Requests the app to re-initialize and turn ON hardware, OR explicitly turn OFF hardware (camera or mic). Call this if the user asks you to turn a sensor ON or OFF. If the user asks you to turn a sensor OFF for privacy/security reasons, you MUST also send a mild SOS alert to their caregiver so they are aware the patient has intentionally gone dark.',
+                'description':
+                    'Requests the app to re-initialize and turn ON hardware, OR explicitly turn OFF hardware (camera or mic). Call this if the user asks you to turn a sensor ON or OFF. If the user asks you to turn a sensor OFF for privacy/security reasons, you MUST also send a mild SOS alert to their caregiver so they are aware the patient has intentionally gone dark.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'hardwareType': {
                       'type': 'STRING',
-                      'description': 'The hardware to request: "camera" or "mic".',
+                      'description':
+                          'The hardware to request: "camera" or "mic".',
                       'enum': ['camera', 'mic'],
                     },
                     'action': {
                       'type': 'STRING',
-                      'description': 'Whether to turn the hardware "on" or "off".',
+                      'description':
+                          'Whether to turn the hardware "on" or "off".',
                       'enum': ['on', 'off'],
                     }
                   },
@@ -303,13 +327,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'updateSpatialContext',
-                'description': 'Stores a key landmark or spatial description in your running mental map of the user\'s environment. Call this when the user enters a new room, passes a major landmark (e.g., stairs, checkout counter, exit), or when the environment changes significantly.',
+                'description':
+                    'Stores a key landmark or spatial description in your running mental map of the user\'s environment. Call this when the user enters a new room, passes a major landmark (e.g., stairs, checkout counter, exit), or when the environment changes significantly.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'description': {
                       'type': 'STRING',
-                      'description': 'A concise description of the spatial layout or landmark, relative to the user. (e.g., "Entrance is 10 feet behind you.")',
+                      'description':
+                          'A concise description of the spatial layout or landmark, relative to the user. (e.g., "Entrance is 10 feet behind you.")',
                     }
                   },
                   'required': ['description'],
@@ -317,13 +343,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'searchOptometryGuidelines',
-                'description': 'Search curated optometry guidelines for safe, verified medical information. Use this when a user asks a specific eye health question. Do not attempt to diagnose.',
+                'description':
+                    'Search curated optometry guidelines for safe, verified medical information. Use this when a user asks a specific eye health question. Do not attempt to diagnose.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'query': {
                       'type': 'STRING',
-                      'description': 'The eye health question or condition to look up.',
+                      'description':
+                          'The eye health question or condition to look up.',
                     }
                   },
                   'required': ['query'],
@@ -331,13 +359,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'getMedicationInfo',
-                'description': 'Look up safe, verified medication information for common eye medications. Use this when a user asks about a specific eye drop or medication.',
+                'description':
+                    'Look up safe, verified medication information for common eye medications. Use this when a user asks about a specific eye drop or medication.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'medication_name': {
                       'type': 'STRING',
-                      'description': 'The name of the medication to look up (e.g., Timolol, Latanoprost).',
+                      'description':
+                          'The name of the medication to look up (e.g., Timolol, Latanoprost).',
                     }
                   },
                   'required': ['medication_name'],
@@ -345,13 +375,15 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'getLowVisionStatistics',
-                'description': 'Provide clinical statistics and research findings on low vision. Use this when asked about the prevalence of vision impairment, or gaps in assistive technology.',
+                'description':
+                    'Provide clinical statistics and research findings on low vision. Use this when asked about the prevalence of vision impairment, or gaps in assistive technology.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'query': {
                       'type': 'STRING',
-                      'description': 'The statistic topic to look up (e.g., global prevalence, tech abandonment).',
+                      'description':
+                          'The statistic topic to look up (e.g., global prevalence, tech abandonment).',
                     }
                   },
                   'required': ['query'],
@@ -359,22 +391,26 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'sendSosAlert',
-                'description': 'Sends an emergency SOS alert to the user\'s designated caregiver via Firestore. Call this IMMEDIATELY if the user says they need help, are lost, feel unsafe, say "emergency", or if their speech sounds panicked or distressed. Do NOT ask for confirmation — act immediately.',
+                'description':
+                    'Sends an emergency SOS alert to the user\'s designated caregiver via Firestore. Call this IMMEDIATELY if the user says they need help, are lost, feel unsafe, say "emergency", or if their speech sounds panicked or distressed. Do NOT ask for confirmation — act immediately.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'message': {
                       'type': 'STRING',
-                      'description': 'A brief, clear description of the situation to send to the caregiver. E.g., "User says they are lost and scared."',
+                      'description':
+                          'A brief, clear description of the situation to send to the caregiver. E.g., "User says they are lost and scared."',
                     },
                     'severity': {
                       'type': 'STRING',
-                      'description': 'Severity of the alert. Use "mild" for confusion/lost. Use "critical" for danger/injury.',
+                      'description':
+                          'Severity of the alert. Use "mild" for confusion/lost. Use "critical" for danger/injury.',
                       'enum': ['mild', 'critical'],
                     },
                     'target': {
                       'type': 'STRING',
-                      'description': 'Target of the SOS alert. Use "caregiver" for general assistance or "doctor" for medical emergencies.',
+                      'description':
+                          'Target of the SOS alert. Use "caregiver" for general assistance or "doctor" for medical emergencies.',
                       'enum': ['caregiver', 'doctor'],
                     },
                   },
@@ -383,18 +419,29 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'rememberFact',
-                'description': 'Saves an important fact about the user to persistent memory so you can recall it in future sessions. Call this when you learn something worth remembering: their name, a medication they take, their caregiver\'s name, a place they frequent, a food allergy, a preference, etc. Do NOT remember trivial conversational details.',
+                'description':
+                    'Saves an important fact about the user to persistent memory so you can recall it in future sessions. Call this when you learn something worth remembering: their name, a medication they take, their caregiver\'s name, a place they frequent, a food allergy, a preference, etc. Do NOT remember trivial conversational details.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'category': {
                       'type': 'STRING',
-                      'description': 'Category of the fact. Use: medication, person, place, allergy, preference, health, or general.',
-                      'enum': ['medication', 'person', 'place', 'allergy', 'preference', 'health', 'general'],
+                      'description':
+                          'Category of the fact. Use: medication, person, place, allergy, preference, health, or general.',
+                      'enum': [
+                        'medication',
+                        'person',
+                        'place',
+                        'allergy',
+                        'preference',
+                        'health',
+                        'general'
+                      ],
                     },
                     'fact': {
                       'type': 'STRING',
-                      'description': 'The fact to remember. E.g., "User takes Metformin 500mg twice daily." or "Caregiver\'s name is Sarah."',
+                      'description':
+                          'The fact to remember. E.g., "User takes Metformin 500mg twice daily." or "Caregiver\'s name is Sarah."',
                     },
                   },
                   'required': ['category', 'fact'],
@@ -402,25 +449,29 @@ class GeminiLiveService extends ChangeNotifier {
               },
               {
                 'name': 'toggleDebugCamera',
-                'description': 'Toggles the visibility of the internal debug camera video feed window on the user\'s screen. Call this when the user asks to see what I see, open the video feed, hide the camera, or show the debug window.',
+                'description':
+                    'Toggles the visibility of the internal debug camera video feed window on the user\'s screen. Call this when the user asks to see what I see, open the video feed, hide the camera, or show the debug window.',
                 'parameters': {
                   'type': 'OBJECT',
                   'properties': {
                     'visible': {
                       'type': 'BOOLEAN',
-                      'description': 'True to show the video feed, False to hide it.',
+                      'description':
+                          'True to show the video feed, False to hide it.',
                     }
                   },
                   'required': ['visible'],
                 }
               },
-               {
+              {
                 'name': 'openTranscripts',
-                'description': 'Opens the hidden live transcript viewer on the screen. Call this ONLY when the user explicitly asks to read, see, or open the conversation transcripts or history.',
+                'description':
+                    'Opens the hidden live transcript viewer on the screen. Call this ONLY when the user explicitly asks to read, see, or open the conversation transcripts or history.',
               },
               {
                 'name': 'analyzeDocument',
-                'description': 'Triggers the native device to take a high-resolution, auto-focused still image and extract dense text using ML Kit OCR. Use this instead of relying on the low-res video stream when the user asks you to read specific, tiny, or dense text like a pill bottle, a prescription label, mail, or a screen. The native app will capture the frame, parse the text, and inject it securely back into your context.',
+                'description':
+                    'Triggers the native device to take a high-resolution, auto-focused still image and extract dense text using ML Kit OCR. Use this instead of relying on the low-res video stream when the user asks you to read specific, tiny, or dense text like a pill bottle, a prescription label, mail, or a screen. The native app will capture the frame, parse the text, and inject it securely back into your context.',
               }
             ]
           }
@@ -521,32 +572,32 @@ class GeminiLiveService extends ChangeNotifier {
         debugPrint('GeminiLive: Unknown message type: ${message.runtimeType}');
         return;
       }
-      
+
       final dynamic data;
       try {
         data = jsonDecode(messageStr);
       } catch (e) {
-        final snippet = messageStr.length > 200 
-            ? messageStr.substring(0, 200) 
-            : messageStr;
+        final snippet =
+            messageStr.length > 200 ? messageStr.substring(0, 200) : messageStr;
         debugPrint('GeminiLiveService: JSON Parse Error: $e');
         debugPrint('Payload (first 200 chars): $snippet');
         return;
       }
-      
+
       final Map<String, dynamic> dataMap = data as Map<String, dynamic>;
       // Handle setup complete
       if (dataMap.containsKey('setupComplete')) {
         debugPrint('GeminiLive setup complete');
+        _reconnectAttempts = 0;
         _setStatus('Ready');
-        
+
         // Inject hardware context if provided
         if (_pendingHardwareContext != null) {
           debugPrint('GeminiLive: Injecting hardware context state.');
           sendText(_pendingHardwareContext!);
           _pendingHardwareContext = null;
         }
-        
+
         return;
       }
 
@@ -617,7 +668,7 @@ class GeminiLiveService extends ChangeNotifier {
   Future<void> _handleToolCall(Map<String, dynamic> toolCall) async {
     if (!toolCall.containsKey('functionCalls')) return;
     final functionCalls = toolCall['functionCalls'] as List<dynamic>;
-    
+
     final functionResponses = [];
 
     for (final call in functionCalls) {
@@ -659,12 +710,12 @@ class GeminiLiveService extends ChangeNotifier {
           case 'updateSpatialContext':
             final desc = args['description'] as String?;
             if (desc != null && desc.isNotEmpty) {
-               _spatialContextHistory.add(desc);
-               if (_spatialContextHistory.length > _maxSpatialContextItems) {
-                 _spatialContextHistory.removeAt(0);
-               }
-               delegate?.onSpatialUpdate(desc);
-               debugPrint('GeminiLive: Spatial Context Updated -> \$desc');
+              _spatialContextHistory.add(desc);
+              if (_spatialContextHistory.length > _maxSpatialContextItems) {
+                _spatialContextHistory.removeAt(0);
+              }
+              delegate?.onSpatialUpdate(desc);
+              debugPrint('GeminiLive: Spatial Context Updated -> \$desc');
             }
             break;
           case 'clickUiElement':
@@ -682,7 +733,8 @@ class GeminiLiveService extends ChangeNotifier {
             delegate?.onSendSosAlert(message, severity, target);
             // Trigger urgent haptic pattern immediately so user feels the action
             delegate?.onTriggerHaptic('hazard');
-            debugPrint('GeminiLive: SOS alert fired — severity: $severity, target: $target, message: $message');
+            debugPrint(
+                'GeminiLive: SOS alert fired — severity: $severity, target: $target, message: $message');
             break;
           case 'toggleFlashlight':
             final on = args['on'] as bool? ?? false;
@@ -711,38 +763,41 @@ class GeminiLiveService extends ChangeNotifier {
           case 'analyzeDocument':
             delegate?.onAnalyzeDocument();
             break;
-            
+
           // ADK Backend Delegated Tools
           case 'searchOptometryGuidelines':
             final query = args['query'] as String? ?? '';
-            final responseStr = await _adkBridge.consultBackendAgent('Search optometry guidelines for: $query');
+            final responseStr = await _adkBridge
+                .consultBackendAgent('Search optometry guidelines for: $query');
             functionResponses.add({
               'id': callId,
               'name': name,
               'response': {'result': responseStr}
             });
             continue; // Skip the default append below
-            
+
           case 'getMedicationInfo':
             final medName = args['medication_name'] as String? ?? '';
-            final responseStr = await _adkBridge.consultBackendAgent('Get medication info for: $medName');
+            final responseStr = await _adkBridge
+                .consultBackendAgent('Get medication info for: $medName');
             functionResponses.add({
               'id': callId,
               'name': name,
               'response': {'result': responseStr}
             });
             continue;
-            
+
           case 'getLowVisionStatistics':
             final query = args['query'] as String? ?? '';
-            final responseStr = await _adkBridge.consultBackendAgent('Get low vision statistics about: $query');
+            final responseStr = await _adkBridge
+                .consultBackendAgent('Get low vision statistics about: $query');
             functionResponses.add({
               'id': callId,
               'name': name,
               'response': {'result': responseStr}
             });
             continue;
-            
+
           default:
             debugPrint('GeminiLive: Unknown tool call $name');
             success = false;

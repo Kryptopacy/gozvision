@@ -32,8 +32,8 @@ Resources:
       Name: !Sub 'gozvision/${EnvironmentName}/credentials'
       Description: 'Runtime credentials for GozVision multi-tenant database and clinical services'
       GenerateSecretString:
-        SecretStringTemplate: '{"SUPABASE_URL": "https://d7icpdzxenshi.supabase.co"}'
-        GenerateStringKey: 'SERVICE_ROLE_KEY'
+        SecretStringTemplate: '{"SUPABASE_URL": "https://zxvdcazzayuwgzpeabfc.supabase.co", "SUPABASE_SECRET_KEY": "replace-me", "GEMINI_API_KEY": "replace-me"}'
+        GenerateStringKey: 'NONCE'
         PasswordLength: 32
         ExcludePunctuation: true
 
@@ -133,15 +133,17 @@ Resources:
               Value: '1'
             - Name: OPENCV_FORBID_ONLY_PTHREADS_USAGE
               Value: '1'
-            - Name: AWS_INSTANCE_TYPE
-              Value: 'c7g.xlarge'
+            - Name: AWS_COMPUTE_RUNTIME
+              Value: 'AWS ECS Fargate ARM64'
             - Name: PORT
               Value: !Ref ContainerPort
           Secrets:
             - Name: SUPABASE_URL
               ValueFrom: !Sub '${GozVisionSecrets}:SUPABASE_URL::'
-            - Name: SUPABASE_SERVICE_ROLE_KEY
-              ValueFrom: !Sub '${GozVisionSecrets}:SERVICE_ROLE_KEY::'
+            - Name: SUPABASE_SERVICE_KEY
+              ValueFrom: !Sub '${GozVisionSecrets}:SUPABASE_SECRET_KEY::'
+            - Name: GEMINI_API_KEY
+              ValueFrom: !Sub '${GozVisionSecrets}:GEMINI_API_KEY::'
           LogConfiguration:
             LogDriver: awslogs
             Options:

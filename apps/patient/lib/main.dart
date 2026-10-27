@@ -19,6 +19,7 @@ import 'services/audio_service.dart';
 import 'services/barcode_service.dart';
 import 'services/camera_service.dart';
 import 'services/clinical_telemetry_service.dart';
+import 'services/gemini_live_token_service.dart';
 import 'services/light_meter_service.dart';
 import 'services/ocr_service.dart';
 import 'services/platform_monitor.dart';
@@ -43,10 +44,8 @@ void main() async {
     publishableKey: AppConfig.supabasePublishableKey,
   );
 
-  // Validate configuration
-  if (!AppConfig.isConfigured) {
-    debugPrint('ERROR: Missing GEMINI_API_KEY in .env file');
-  }
+  // Gemini Live credentials are minted server-side as one-use ephemeral tokens.
+  // The browser bundle intentionally contains no permanent Gemini API key.
 
   // Zero-UI demo flow: establish the demo patient session (no-op when real
   // credentials are absent) before anything reads the identity.
@@ -81,7 +80,8 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/caregiver',
-      builder: (context, state) => CaregiverDashboard(patientUid: AppConfig.patientId),
+      builder: (context, state) =>
+          CaregiverDashboard(patientUid: AppConfig.patientId),
     ),
     GoRoute(
       path: '/transcripts',
@@ -107,18 +107,20 @@ class GozVisionApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileService()),
-        ChangeNotifierProvider(create: (_) => GeminiLiveService(
-          config: SessionConfig(
-            geminiLiveWsUrl: AppConfig.geminiLiveWsUrl,
-            geminiModel: AppConfig.geminiModel,
-            audioInputSampleRate: AppConfig.audioInputSampleRate,
-            demoPatientId: AppConfig.patientId,
-            adkBackendUrl: AppConfig.adkBackendUrl,
-            adkAgentName: AppConfig.adkAgentName,
-          ),
-          identity: identity,
-          buildSystemPrompt: GozAISystemPrompt.build,
-        )),
+        ChangeNotifierProvider(
+            create: (_) => GeminiLiveService(
+                  config: SessionConfig(
+                    resolveGeminiLiveWsUrl:
+                        GeminiLiveTokenService.fetchWebSocketUrl,
+                    geminiModel: AppConfig.geminiModel,
+                    audioInputSampleRate: AppConfig.audioInputSampleRate,
+                    demoPatientId: AppConfig.patientId,
+                    adkBackendUrl: AppConfig.adkBackendUrl,
+                    adkAgentName: AppConfig.adkAgentName,
+                  ),
+                  identity: identity,
+                  buildSystemPrompt: GozAISystemPrompt.build,
+                )),
         ChangeNotifierProvider(create: (_) => CameraService()),
         ChangeNotifierProvider(create: (_) => AudioService()),
         ChangeNotifierProvider(create: (_) => OcrService()),
@@ -165,7 +167,10 @@ class GozVisionApp extends StatelessWidget {
                 // Enforce minimum text scaling for accessibility
                 data: MediaQuery.of(context).copyWith(
                   textScaler: TextScaler.linear(
-                    MediaQuery.of(context).textScaler.scale(1.0).clamp(1.0, 2.0),
+                    MediaQuery.of(context)
+                        .textScaler
+                        .scale(1.0)
+                        .clamp(1.0, 2.0),
                   ),
                 ),
                 child: routerChild!,

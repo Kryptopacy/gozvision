@@ -39,7 +39,8 @@ class SessionCoordinator implements CopilotDelegate {
     required this.identity,
     required this.haptics,
     required CopilotPlatformMonitor platformMonitor,
-  }) : _platformMonitor = platformMonitor; // ignore: prefer_initializing_formals — named params cannot be private
+  }) : _platformMonitor =
+            platformMonitor; // ignore: prefer_initializing_formals — named params cannot be private
 
   final GeminiLiveService gemini;
   final CopilotCamera camera;
@@ -214,7 +215,9 @@ class SessionCoordinator implements CopilotDelegate {
       String? userName;
       try {
         final nameFact = memory.facts.firstWhere(
-          (f) => f['category'] == 'person' && (f['fact'] as String).toLowerCase().contains('name is'),
+          (f) =>
+              f['category'] == 'person' &&
+              (f['fact'] as String).toLowerCase().contains('name is'),
         );
         final factText = nameFact['fact'] as String;
         // Extract name if pattern is "User's name is X" or similar
@@ -308,14 +311,16 @@ class SessionCoordinator implements CopilotDelegate {
       camera.stopStreaming();
     }
     haptics.tap();
-    final nowOn = camera.isInitialized && !camera.initFailed && camera.isStreaming;
+    final nowOn =
+        camera.isInitialized && !camera.initFailed && camera.isStreaming;
     gemini.sendText(SystemTags.cameraToggled(nowOn));
   }
 
   // --- Senses → Session pipelines ---
 
   void _onCameraFrame(Uint8List frame) {
-    if (gemini.currentMode == GozAIMode.uiNav) return; // UI nav uses screen frames
+    if (gemini.currentMode == GozAIMode.uiNav)
+      return; // UI nav uses screen frames
 
     gemini.sendVideoFrame(frame);
 
@@ -372,7 +377,8 @@ class SessionCoordinator implements CopilotDelegate {
         );
 
         gemini.sendText(SystemTags.ocrGrounding(groundingString));
-        debugPrint('OCR grounding sent: ${result.fullText.length} chars, isMed: $isMed, isNutr: $isNutr');
+        debugPrint(
+            'OCR grounding sent: ${result.fullText.length} chars, isMed: $isMed, isNutr: $isNutr');
       }
     } catch (e) {
       debugPrint('OCR grounding error: $e');
@@ -424,7 +430,8 @@ class SessionCoordinator implements CopilotDelegate {
   void _onIdleCheckIn() {
     if (!gemini.isConnected) return;
     gemini.sendText(SystemTags.idleCheckIn());
-    debugPrint('GozAI: Idle check-in triggered after ${_idleCheckInDuration.inSeconds}s of silence.');
+    debugPrint(
+        'GozAI: Idle check-in triggered after ${_idleCheckInDuration.inSeconds}s of silence.');
   }
 
   // --- CopilotDelegate: intents from the model → actuators ---
@@ -501,7 +508,8 @@ class SessionCoordinator implements CopilotDelegate {
 
   @override
   void onRequestHardwareAccess(String hardwareType, String action) async {
-    debugPrint('GozAI: Model requested hardware access for: $hardwareType action: $action');
+    debugPrint(
+        'GozAI: Model requested hardware access for: $hardwareType action: $action');
     if (action == 'on') {
       if (hardwareType == 'camera') {
         await camera.initialize();
@@ -517,18 +525,24 @@ class SessionCoordinator implements CopilotDelegate {
       } else if (hardwareType == 'mic') {
         audio.stopRecording();
       }
-      sos.sendAlert(
+      unawaited(sos
+          .sendAlert(
         userId: identity.userId,
-        message: 'User intentionally disabled their $hardwareType feed via voice command.',
+        message:
+            'User intentionally disabled their $hardwareType feed via voice command.',
         severity: 'info',
         target: 'caregiver',
-      );
+      )
+          .catchError((Object error) {
+        debugPrint('GozAI: Hardware-status alert failed: $error');
+      }));
     }
 
     // Inject the current state back so the model knows whether it succeeded
     gemini.sendText(SystemTags.hardwareStatus(
       micOn: audio.isRecording,
-      cameraOn: camera.isInitialized && !camera.initFailed && camera.isStreaming,
+      cameraOn:
+          camera.isInitialized && !camera.initFailed && camera.isStreaming,
     ));
   }
 
@@ -549,13 +563,15 @@ class SessionCoordinator implements CopilotDelegate {
 
     try {
       // Send absolute physical pixels to native Android AccessibilityService
-      await const MethodChannel('com.gozai/accessibility').invokeMethod('dispatchClick', {
+      await const MethodChannel('com.gozai/accessibility')
+          .invokeMethod('dispatchClick', {
         'x': position.dx * metrics.pixelRatio,
         'y': position.dy * metrics.pixelRatio,
       });
       debugPrint('GozAI: MethodChannel executed Global OS click successfully.');
     } catch (e) {
-      debugPrint('GozAI: OS-level click failed ($e). Falling back to internal GestureBinding.');
+      debugPrint(
+          'GozAI: OS-level click failed ($e). Falling back to internal GestureBinding.');
       GestureBinding.instance.handlePointerEvent(
         PointerDownEvent(
           pointer: 999,
@@ -577,12 +593,16 @@ class SessionCoordinator implements CopilotDelegate {
 
   @override
   void onSendSosAlert(String message, String severity, String target) {
-    sos.sendAlert(
+    unawaited(sos
+        .sendAlert(
       userId: identity.userId,
       message: message,
       severity: severity,
       target: target,
-    );
+    )
+        .catchError((Object error) {
+      debugPrint('GozAI: Autonomous SOS alert failed: $error');
+    }));
   }
 
   @override
@@ -628,10 +648,12 @@ class SessionCoordinator implements CopilotDelegate {
       return;
     }
 
-    final isMed = ocr.isMedicationLabel(result) || ocr.isPrescriptionLabel(result);
+    final isMed =
+        ocr.isMedicationLabel(result) || ocr.isPrescriptionLabel(result);
     final isNut = ocr.isNutritionLabel(result);
 
-    final groundingString = result.buildGroundingString(isMedication: isMed, isNutrition: isNut);
+    final groundingString =
+        result.buildGroundingString(isMedication: isMed, isNutrition: isNut);
 
     // Inject to Gemini
     gemini.sendText(SystemTags.ocrCaptureSuccessful(groundingString));

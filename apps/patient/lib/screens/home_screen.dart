@@ -20,7 +20,6 @@ import 'profile_screen.dart';
 import 'clinic_discovery_sheet.dart';
 import 'patient_dispensary_sheet.dart';
 
-
 /// The main GozAI interface.
 ///
 /// Designed for zero-friction, accessibility-first interaction:
@@ -128,8 +127,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
 
             // Debug Camera Overlay (Floating Window - Topmost Layer)
-            if (_showDebugCamera)
-              _buildDebugCameraOverlay(context),
+            if (_showDebugCamera) _buildDebugCameraOverlay(context),
           ],
         ),
       ),
@@ -182,7 +180,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 400),
                       curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: isActive
                             ? GozAITheme.malachite.withValues(alpha: 0.15)
@@ -197,7 +196,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         boxShadow: isActive
                             ? [
                                 BoxShadow(
-                                  color: GozAITheme.malachite.withValues(alpha: 0.20),
+                                  color: GozAITheme.malachite
+                                      .withValues(alpha: 0.20),
                                   blurRadius: 12,
                                   spreadRadius: 1,
                                 ),
@@ -213,11 +213,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             height: 7,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isActive ? GozAITheme.malachite : GozAITheme.textSecondary,
+                              color: isActive
+                                  ? GozAITheme.malachite
+                                  : GozAITheme.textSecondary,
                               boxShadow: isActive
                                   ? [
                                       BoxShadow(
-                                        color: GozAITheme.malachite.withValues(alpha: 0.6),
+                                        color: GozAITheme.malachite
+                                            .withValues(alpha: 0.6),
                                         blurRadius: 6,
                                         spreadRadius: 1,
                                       ),
@@ -246,7 +249,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1.1,
-                              color: isActive ? GozAITheme.brandAccent : GozAITheme.textSecondary,
+                              color: isActive
+                                  ? GozAITheme.brandAccent
+                                  : GozAITheme.textSecondary,
                             ),
                           ),
                         ],
@@ -313,9 +318,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           )
               .animate(onPlay: (c) => c.repeat())
-              .scaleXY(begin: 0.8, end: 1.3, duration: 800.ms, curve: Curves.easeInOut)
+              .scaleXY(
+                  begin: 0.8,
+                  end: 1.3,
+                  duration: 800.ms,
+                  curve: Curves.easeInOut)
               .then()
-              .scaleXY(begin: 1.3, end: 0.8, duration: 800.ms, curve: Curves.easeInOut),
+              .scaleXY(
+                  begin: 1.3,
+                  end: 0.8,
+                  duration: 800.ms,
+                  curve: Curves.easeInOut),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
@@ -337,68 +350,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   /// Explicitly visible Camera Preview toggle
   Widget _buildGozViewToggleHint() {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _showDebugCamera = !_showDebugCamera;
-        });
-        HapticService.tap();
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16), // Premium frosted glass
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: BoxDecoration(
-                color: GozAITheme.backgroundBlack.withValues(alpha: 0.5), // Lower alpha for glass
+        onTap: () {
+          setState(() {
+            _showDebugCamera = !_showDebugCamera;
+          });
+          HapticService.tap();
+        },
+        child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: GozAITheme.accentCyan.withValues(alpha: 0.4), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: GozAITheme.accentCyan.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    spreadRadius: 2,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                      sigmaX: 16, sigmaY: 16), // Premium frosted glass
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: GozAITheme.backgroundBlack
+                          .withValues(alpha: 0.5), // Lower alpha for glass
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                          color: GozAITheme.accentCyan.withValues(alpha: 0.4),
+                          width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: GozAITheme.accentCyan.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _showDebugCamera
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: GozAITheme.accentCyan,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              _showDebugCamera
+                                  ? 'HIDE CAMERA PREVIEW'
+                                  : 'SHOW CAMERA PREVIEW',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          "Tap to see what your camera sees",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _showDebugCamera ? Icons.visibility_off : Icons.visibility,
-                  color: GozAITheme.accentCyan,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  _showDebugCamera ? 'HIDE CAMERA PREVIEW' : 'SHOW CAMERA PREVIEW',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              "Tap to see what your camera sees",
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ))));
+                ))));
   }
 
   /// Premium Navigation Header for routing to specialized Dashboards.
@@ -417,13 +439,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(width: 8),
           Text(
             'GozVision',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.storefront_outlined, color: GozAITheme.accentCyan),
+          icon: const Icon(Icons.storefront_outlined,
+              color: GozAITheme.accentCyan),
           tooltip: 'Prescription Glasses & Eye Drops',
           onPressed: () => PatientDispensarySheet.show(context),
         ),
@@ -433,7 +459,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           onPressed: () => ClinicDiscoverySheet.show(context),
         ),
         IconButton(
-          icon: const Icon(Icons.account_circle_outlined, color: GozAITheme.accentCyan),
+          icon: const Icon(Icons.account_circle_outlined,
+              color: GozAITheme.accentCyan),
           tooltip: 'My Profile & Eye Drops',
           onPressed: () => context.push('/profile'),
         ),
@@ -458,14 +485,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: GozAITheme.surfacePure,
-                  border: Border.all(color: GozAITheme.borderSubtle, width: 1.5),
+                  border:
+                      Border.all(color: GozAITheme.borderSubtle, width: 1.5),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Semantics(
-                  label: 'Status: ${gemini.statusMessage}. Mode: ${_modeName(gemini.currentMode)}',
+                  label:
+                      'Status: ${gemini.statusMessage}. Mode: ${_modeName(gemini.currentMode)}',
                   child: Row(
                     children: [
                       Container(
@@ -476,7 +506,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: _connectionColor(gemini.connectionState),
                           boxShadow: [
                             BoxShadow(
-                              color: _connectionColor(gemini.connectionState).withValues(alpha: 0.6),
+                              color: _connectionColor(gemini.connectionState)
+                                  .withValues(alpha: 0.6),
                               blurRadius: 16,
                               spreadRadius: 3,
                             ),
@@ -487,18 +518,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Expanded(
                         child: Text(
                           gemini.statusMessage,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.2,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.2,
+                                  ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: GozAITheme.primaryBlue.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: GozAITheme.primaryBlue.withValues(alpha: 0.4)),
+                          border: Border.all(
+                              color: GozAITheme.primaryBlue
+                                  .withValues(alpha: 0.4)),
                         ),
                         child: Text(
                           _modeName(gemini.currentMode),
@@ -526,7 +561,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Consumer3<GeminiLiveService, AudioService, CameraService>(
       builder: (context, gemini, audio, camera, _) {
         final isMicOn = audio.isRecording;
-        final isCameraOn = camera.isInitialized && !camera.initFailed && camera.isStreaming;
+        final isCameraOn =
+            camera.isInitialized && !camera.initFailed && camera.isStreaming;
         String cameraText = 'Camera: Off';
         if (isCameraOn) {
           final dir = camera.currentLensDirection;
@@ -548,7 +584,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 icon: isMicOn ? Icons.mic : Icons.mic_off,
                 label: isMicOn ? 'Mic: On' : 'Mic: Off',
                 isActive: isMicOn,
-                tooltip: isMicOn ? 'Tap to mute microphone' : 'Tap to unmute microphone',
+                tooltip: isMicOn
+                    ? 'Tap to mute microphone'
+                    : 'Tap to unmute microphone',
                 onTap: () => _coordinator?.setMicEnabled(!isMicOn),
               ),
               const SizedBox(width: 12),
@@ -556,7 +594,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 icon: isCameraOn ? Icons.videocam : Icons.videocam_off,
                 label: cameraText,
                 isActive: isCameraOn,
-                tooltip: isCameraOn ? 'Tap to turn off camera' : 'Tap to turn on camera',
+                tooltip: isCameraOn
+                    ? 'Tap to turn off camera'
+                    : 'Tap to turn on camera',
                 onTap: () => _coordinator?.setCameraEnabled(!isCameraOn),
               ),
             ],
@@ -577,21 +617,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? GozAITheme.success.withValues(alpha: 0.1) : GozAITheme.hazardAlert.withValues(alpha: 0.1),
+        color: isActive
+            ? GozAITheme.success.withValues(alpha: 0.1)
+            : GozAITheme.hazardAlert.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? GozAITheme.success.withValues(alpha: 0.3) : GozAITheme.hazardAlert.withValues(alpha: 0.3),
+          color: isActive
+              ? GozAITheme.success.withValues(alpha: 0.3)
+              : GozAITheme.hazardAlert.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: isActive ? GozAITheme.success : GozAITheme.hazardAlert),
+          Icon(icon,
+              size: 14,
+              color: isActive ? GozAITheme.success : GozAITheme.hazardAlert),
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+                fontSize: 12,
+                color: Colors.white70,
+                fontWeight: FontWeight.w500),
           ),
           if (onTap != null) ...[
             const SizedBox(width: 4),
@@ -614,7 +663,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          splashColor: (isActive ? GozAITheme.success : GozAITheme.hazardAlert).withValues(alpha: 0.2),
+          splashColor: (isActive ? GozAITheme.success : GozAITheme.hazardAlert)
+              .withValues(alpha: 0.2),
           child: chip,
         ),
       ),
@@ -659,12 +709,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       height: isActive ? 240 : 210,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan)
+                        color: (isActive || isSpeaking
+                                ? primaryAccent
+                                : GozAITheme.accentCyan)
                             .withValues(alpha: isActive ? 0.12 : 0.08),
                         boxShadow: [
                           BoxShadow(
-                            color: (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan)
-                                .withValues(alpha: isSpeaking ? 0.45 : (isActive ? 0.35 : 0.22)),
+                            color: (isActive || isSpeaking
+                                    ? primaryAccent
+                                    : GozAITheme.accentCyan)
+                                .withValues(
+                                    alpha: isSpeaking
+                                        ? 0.45
+                                        : (isActive ? 0.35 : 0.22)),
                             blurRadius: isSpeaking ? 60 : (isActive ? 45 : 36),
                             spreadRadius: isSpeaking ? 16 : (isActive ? 10 : 4),
                           ),
@@ -679,10 +736,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         shape: BoxShape.circle,
                         gradient: SweepGradient(
                           colors: [
-                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.85),
-                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.2),
-                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.7),
-                            (isActive || isSpeaking ? primaryAccent : GozAITheme.accentCyan).withValues(alpha: 0.85),
+                            (isActive || isSpeaking
+                                    ? primaryAccent
+                                    : GozAITheme.accentCyan)
+                                .withValues(alpha: 0.85),
+                            (isActive || isSpeaking
+                                    ? primaryAccent
+                                    : GozAITheme.accentCyan)
+                                .withValues(alpha: 0.2),
+                            (isActive || isSpeaking
+                                    ? primaryAccent
+                                    : GozAITheme.accentCyan)
+                                .withValues(alpha: 0.7),
+                            (isActive || isSpeaking
+                                    ? primaryAccent
+                                    : GozAITheme.accentCyan)
+                                .withValues(alpha: 0.85),
                           ],
                         ),
                       ),
@@ -728,15 +797,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                _buildWaveBar(isActive ? 12 : 6, isActive ? 26 : 14, 400),
+                                _buildWaveBar(
+                                    isActive ? 12 : 6, isActive ? 26 : 14, 400),
                                 const SizedBox(width: 4),
-                                _buildWaveBar(isActive ? 20 : 10, isActive ? 44 : 22, 600),
+                                _buildWaveBar(isActive ? 20 : 10,
+                                    isActive ? 44 : 22, 600),
                                 const SizedBox(width: 4),
-                                _buildWaveBar(isActive ? 30 : 16, isActive ? 56 : 32, 500),
+                                _buildWaveBar(isActive ? 30 : 16,
+                                    isActive ? 56 : 32, 500),
                                 const SizedBox(width: 4),
-                                _buildWaveBar(isActive ? 18 : 8, isActive ? 38 : 20, 700),
+                                _buildWaveBar(
+                                    isActive ? 18 : 8, isActive ? 38 : 20, 700),
                                 const SizedBox(width: 4),
-                                _buildWaveBar(isActive ? 10 : 5, isActive ? 22 : 12, 450),
+                                _buildWaveBar(
+                                    isActive ? 10 : 5, isActive ? 22 : 12, 450),
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -784,9 +858,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color: Colors.white,
         borderRadius: BorderRadius.circular(4),
       ),
-    )
-        .animate(onPlay: (controller) => controller.repeat(reverse: true))
-        .scaleY(
+    ).animate(onPlay: (controller) => controller.repeat(reverse: true)).scaleY(
           begin: minH / maxH,
           end: 1.0,
           duration: Duration(milliseconds: ms),
@@ -832,7 +904,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 8),
           _buildTactileDockButton(
-            icon: Icons.sos_outlined,
+            icon: Icons.warning_amber_rounded,
             label: 'Emergency',
             color: GozAITheme.hazardAlert,
             tooltip: 'Call caregiver or clinic for help',
@@ -862,7 +934,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               color: const Color(0xFF131722).withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: effectiveColor.withValues(alpha: 0.45), width: 1.2),
+              border: Border.all(
+                  color: effectiveColor.withValues(alpha: 0.45), width: 1.2),
               boxShadow: [
                 BoxShadow(
                   color: effectiveColor.withValues(alpha: 0.12),
@@ -898,11 +971,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final user = Supabase.instance.client.auth.currentUser;
       final uid = user?.id ?? AppConfig.patientId;
       await context.read<SosService>().sendAlert(
-        userId: uid,
-        message: 'Patient requested immediate assistance via Copilot Emergency trigger',
-        severity: 'critical',
-        target: 'caregiver_and_clinic',
-      );
+            userId: uid,
+            message:
+                'Patient requested immediate assistance via Copilot Emergency trigger',
+            severity: 'critical',
+            target: 'caregiver_and_clinic',
+          );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -912,7 +986,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         );
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Emergency SOS dispatch failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'SOS could not be sent. Call your caregiver or emergency services now.'),
+            backgroundColor: Color(0xFF8B1E2D),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _showDoorstepModal(BuildContext context) {
@@ -924,7 +1010,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Auditory feedback for low-vision safety
     try {
-      context.read<AudioService>().speakOfflineGuidance('$spokenText $guidance');
+      context
+          .read<AudioService>()
+          .speakOfflineGuidance('$spokenText $guidance');
     } catch (_) {}
 
     showModalBottomSheet(
@@ -945,7 +1033,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Container(
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4)),
+                  decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(4)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -959,16 +1049,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           color: GozAITheme.malachite.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: GozAITheme.malachite.withValues(alpha: 0.3)),
+                          border: Border.all(
+                              color:
+                                  GozAITheme.malachite.withValues(alpha: 0.3)),
                         ),
-                        child: const Icon(Icons.sensor_door_outlined, color: GozAITheme.malachite, size: 24),
+                        child: const Icon(Icons.sensor_door_outlined,
+                            color: GozAITheme.malachite, size: 24),
                       ),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          Text('Front Doorstep Vision', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text('Ring Video Doorbell Pro • Dual-Layer Vision', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                          Text('Front Doorstep Vision',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold)),
+                          Text('Ring Video Doorbell Pro • Dual-Layer Vision',
+                              style: TextStyle(
+                                  color: Colors.white60, fontSize: 11)),
                         ],
                       ),
                     ],
@@ -986,7 +1085,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isTrusted ? GozAITheme.malachite.withValues(alpha: 0.4) : Colors.amber.withValues(alpha: 0.4),
+                    color: isTrusted
+                        ? GozAITheme.malachite.withValues(alpha: 0.4)
+                        : Colors.amber.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Column(
@@ -995,14 +1096,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Row(
                       children: [
                         Icon(
-                          isTrusted ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-                          color: isTrusted ? GozAITheme.malachite : Colors.amber,
+                          isTrusted
+                              ? Icons.check_circle_rounded
+                              : Icons.info_outline_rounded,
+                          color:
+                              isTrusted ? GozAITheme.malachite : Colors.amber,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           entityName,
-                          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -1025,7 +1132,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.volume_up_rounded, color: GozAITheme.malachite, size: 28),
+                          const Icon(Icons.volume_up_rounded,
+                              color: GozAITheme.malachite, size: 28),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -1033,12 +1141,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               children: [
                                 const Text(
                                   'SPOKEN AUDIO ANNOUNCEMENT (PATIENT EARS ONLY)',
-                                  style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                                  style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.8),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '"$spokenText"',
-                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -1048,19 +1163,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: GozAITheme.malachite.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.shield_outlined, size: 14, color: GozAITheme.malachite),
+                          Icon(Icons.shield_outlined,
+                              size: 14, color: GozAITheme.malachite),
                           SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               'Silent Audit: BIPA 740 ILCS 14/ & GDPR Art. 9 verified in background logs. Zero legal jargon spoken to patient.',
-                              style: TextStyle(color: Colors.white54, fontSize: 10),
+                              style: TextStyle(
+                                  color: Colors.white54, fontSize: 10),
                             ),
                           ),
                         ],
@@ -1072,7 +1190,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const SizedBox(height: 16),
               const Text(
                 'TEST SCENARIO DETECTION:',
-                style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
+                style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1),
               ),
               const SizedBox(height: 8),
               Row(
@@ -1081,13 +1203,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: GozAITheme.malachite,
-                        side: BorderSide(color: GozAITheme.malachite.withValues(alpha: 0.4)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        side: BorderSide(
+                            color: GozAITheme.malachite.withValues(alpha: 0.4)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Daughter Zainab', style: TextStyle(fontSize: 11)),
+                      child: const Text('Daughter Zainab',
+                          style: TextStyle(fontSize: 11)),
                       onPressed: () {
                         setModalState(() {
-                          spokenText = 'Your daughter Zainab Adeyemi is at the front door.';
+                          spokenText =
+                              'Your daughter Zainab Adeyemi is at the front door.';
                           guidance = 'Safe to unlock and open the door.';
                           entityName = 'Zainab Adeyemi (Daughter)';
                           isTrusted = true;
@@ -1100,14 +1226,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFFFF9900),
-                        side: BorderSide(color: const Color(0xFFFF9900).withValues(alpha: 0.4)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        side: BorderSide(
+                            color:
+                                const Color(0xFFFF9900).withValues(alpha: 0.4)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Amazon Courier', style: TextStyle(fontSize: 11)),
+                      child: const Text('Amazon Courier',
+                          style: TextStyle(fontSize: 11)),
                       onPressed: () {
                         setModalState(() {
-                          spokenText = 'An Amazon delivery carrier in a blue vest with a parcel is at the front door.';
-                          guidance = 'Package being placed on doorstep. Obstacle alert active.';
+                          spokenText =
+                              'An Amazon delivery carrier in a blue vest with a parcel is at the front door.';
+                          guidance =
+                              'Package being placed on doorstep. Obstacle alert active.';
                           entityName = 'Amazon Logistics Carrier';
                           isTrusted = true;
                         });
@@ -1120,13 +1252,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white70,
                         side: const BorderSide(color: Colors.white24),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Unknown Visitor', style: TextStyle(fontSize: 11)),
+                      child: const Text('Unknown Visitor',
+                          style: TextStyle(fontSize: 11)),
                       onPressed: () {
                         setModalState(() {
-                          spokenText = 'A visitor is waiting at the front door.';
-                          guidance = 'Use Ring two-way intercom to speak before opening.';
+                          spokenText =
+                              'A visitor is waiting at the front door.';
+                          guidance =
+                              'Use Ring two-way intercom to speak before opening.';
                           entityName = 'Visitor';
                           isTrusted = false;
                         });
@@ -1143,10 +1279,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: FilledButton.styleFrom(
                     backgroundColor: GozAITheme.malachite,
                     foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   icon: const Icon(Icons.people_alt_outlined, size: 18),
-                  label: const Text('Manage Care Circle Contacts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  label: const Text('Manage Care Circle Contacts',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   onPressed: () {
                     Navigator.pop(ctx);
                     context.push('/caregiver');
@@ -1179,13 +1318,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 child: Row(
                   children: [
-                    _buildModeButton(gemini, GozAIMode.scene, Icons.wallpaper, 'Scene'),
+                    _buildModeButton(
+                        gemini, GozAIMode.scene, Icons.wallpaper, 'Scene'),
                     const SizedBox(width: 4),
-                    _buildModeButton(gemini, GozAIMode.reading, Icons.menu_book, 'Read'),
+                    _buildModeButton(
+                        gemini, GozAIMode.reading, Icons.menu_book, 'Read'),
                     const SizedBox(width: 4),
-                    _buildModeButton(gemini, GozAIMode.uiNav, Icons.touch_app, 'Screen'),
+                    _buildModeButton(
+                        gemini, GozAIMode.uiNav, Icons.touch_app, 'Screen'),
                     const SizedBox(width: 4),
-                    _buildModeButton(gemini, GozAIMode.lightMeter, Icons.light_mode, 'Light'),
+                    _buildModeButton(gemini, GozAIMode.lightMeter,
+                        Icons.light_mode, 'Light'),
                   ],
                 ),
               ),
@@ -1216,19 +1359,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             curve: Curves.easeOutCubic,
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
-              color: isActive ? GozAITheme.primaryBlue.withValues(alpha: 0.25) : Colors.transparent,
+              color: isActive
+                  ? GozAITheme.primaryBlue.withValues(alpha: 0.25)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isActive ? GozAITheme.accentCyan.withValues(alpha: 0.5) : Colors.transparent,
+                color: isActive
+                    ? GozAITheme.accentCyan.withValues(alpha: 0.5)
+                    : Colors.transparent,
                 width: 1,
               ),
-              boxShadow: isActive ? [
-                BoxShadow(
-                  color: GozAITheme.primaryBlue.withValues(alpha: 0.3),
-                  blurRadius: 16,
-                  spreadRadius: -2,
-                )
-              ] : null,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: GozAITheme.primaryBlue.withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        spreadRadius: -2,
+                      )
+                    ]
+                  : null,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1316,7 +1465,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       center: Alignment.center,
                       radius: 0.5,
                       colors: [
-                        mainGlow.withValues(alpha: isSpeaking ? 0.22 : (isActive ? 0.16 : 0.10)),
+                        mainGlow.withValues(
+                            alpha:
+                                isSpeaking ? 0.22 : (isActive ? 0.16 : 0.10)),
                         mainGlow.withValues(alpha: 0.03),
                         Colors.transparent,
                       ],
@@ -1367,7 +1518,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       radius: 0.5,
                       colors: [
                         GozAITheme.accentCyan.withValues(alpha: bottomAlpha),
-                        GozAITheme.accentCyan.withValues(alpha: bottomAlpha * 0.3),
+                        GozAITheme.accentCyan
+                            .withValues(alpha: bottomAlpha * 0.3),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.5, 1.0],
@@ -1397,11 +1549,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     if (!_isDraggingCamera) {
       x = x.clamp(16.0, size.width - width - 16.0);
-      y = y.clamp(100.0, size.height - (_debugCameraMinimized ? minimizedHeight : expandedHeight) - 140.0);
+      y = y.clamp(
+          100.0,
+          size.height -
+              (_debugCameraMinimized ? minimizedHeight : expandedHeight) -
+              140.0);
     }
 
     return AnimatedPositioned(
-      duration: _isDraggingCamera ? Duration.zero : const Duration(milliseconds: 300),
+      duration:
+          _isDraggingCamera ? Duration.zero : const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
       left: x,
       top: y,
@@ -1421,7 +1578,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           setState(() {
             _isDraggingCamera = false;
 
-            final currentHeight = _debugCameraMinimized ? minimizedHeight : expandedHeight;
+            final currentHeight =
+                _debugCameraMinimized ? minimizedHeight : expandedHeight;
 
             // Swipe-to-dismiss logic: fast flick horizontally drops the camera
             if (details.velocity.pixelsPerSecond.dx.abs() > 1200) {
@@ -1433,138 +1591,163 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             final double midX = size.width / 2;
             final double midY = size.height / 2;
 
-            final double targetX = _debugCameraPosition.dx + (width / 2) < midX ? 16.0 : size.width - width - 16.0;
-            final double targetY = _debugCameraPosition.dy + (currentHeight / 2) < midY ? 100.0 : size.height - currentHeight - 140.0;
+            final double targetX = _debugCameraPosition.dx + (width / 2) < midX
+                ? 16.0
+                : size.width - width - 16.0;
+            final double targetY =
+                _debugCameraPosition.dy + (currentHeight / 2) < midY
+                    ? 100.0
+                    : size.height - currentHeight - 140.0;
 
             _debugCameraPosition = Offset(targetX, targetY);
           });
           HapticService.tap();
         },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                width: width,
-                height: _debugCameraMinimized ? minimizedHeight : expandedHeight,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6), // Glass transparency
-                  border: Border.all(color: GozAITheme.primaryBlue.withValues(alpha: 0.4), width: 1.5),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 32,
-                      spreadRadius: 8,
-                      offset: const Offset(0, 16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          width: width,
+          height: _debugCameraMinimized ? minimizedHeight : expandedHeight,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6), // Glass transparency
+            border: Border.all(
+                color: GozAITheme.primaryBlue.withValues(alpha: 0.4),
+                width: 1.5),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 32,
+                spreadRadius: 8,
+                offset: const Offset(0, 16),
+              ),
+              BoxShadow(
+                color: GozAITheme.primaryBlue.withValues(alpha: 0.1),
+                blurRadius: 16,
+                spreadRadius: -4,
+              )
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                  sigmaX: 20, sigmaY: 20), // Premium Glassmorphism
+              child: Column(
+                children: [
+                  // Header / Drag Handle
+                  Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: GozAITheme.surfaceElevated,
+                      border: Border(
+                          bottom: BorderSide(color: GozAITheme.borderSubtle)),
                     ),
-                    BoxShadow(
-                      color: GozAITheme.primaryBlue.withValues(alpha: 0.1),
-                      blurRadius: 16,
-                      spreadRadius: -4,
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Premium Glassmorphism
-                    child: Column(
-                    children: [
-                      // Header / Drag Handle
-                      Container(
-                        height: 36,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: GozAITheme.surfaceElevated,
-                          border: Border(bottom: BorderSide(color: GozAITheme.borderSubtle)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Camera Preview (Live)',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Camera Preview (Live)',
-                              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                            IconButton(
+                              icon: Icon(
+                                _debugCameraMinimized
+                                    ? Icons.expand_more
+                                    : Icons.expand_less,
+                                size: 16,
+                                color: Colors.white70,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                setState(() {
+                                  _debugCameraMinimized =
+                                      !_debugCameraMinimized;
+                                });
+                                HapticService.tap();
+                              },
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    _debugCameraMinimized ? Icons.expand_more : Icons.expand_less,
-                                    size: 16,
-                                    color: Colors.white70,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () {
-                                    setState(() {
-                                      _debugCameraMinimized = !_debugCameraMinimized;
-                                    });
-                                    HapticService.tap();
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: const Icon(Icons.close, size: 16, color: Colors.white70),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showDebugCamera = false;
-                                    });
-                                    HapticService.tap();
-                                  },
-                                ),
-                              ],
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.close,
+                                  size: 16, color: Colors.white70),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                setState(() {
+                                  _showDebugCamera = false;
+                                });
+                                HapticService.tap();
+                              },
                             ),
                           ],
                         ),
-                      ),
-                      // Camera Preview (Only visible when expanded)
-                      if (!_debugCameraMinimized)
-                        Expanded(
-                          child: Consumer<CameraService>(
-                            builder: (context, camera, _) {
-                              if (!camera.isInitialized || camera.controller == null) {
-                                return const Center(child: Icon(Icons.videocam_off, color: Colors.white24, size: 40));
-                              }
-                              return Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  AspectRatio(
-                                    aspectRatio: camera.controller!.value.aspectRatio,
-                                    child: CameraPreview(camera.controller!),
-                                  ),
-                                  // Small indicator showing it's a Live Feed
-                                  Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.withValues(alpha: 0.8),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Text(
-                                        'LIVE',
-                                        style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                  // Camera Preview (Only visible when expanded)
+                  if (!_debugCameraMinimized)
+                    Expanded(
+                      child: Consumer<CameraService>(
+                        builder: (context, camera, _) {
+                          if (!camera.isInitialized ||
+                              camera.controller == null) {
+                            return const Center(
+                                child: Icon(Icons.videocam_off,
+                                    color: Colors.white24, size: 40));
+                          }
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              AspectRatio(
+                                aspectRatio:
+                                    camera.controller!.value.aspectRatio,
+                                child: CameraPreview(camera.controller!),
+                              ),
+                              // Small indicator showing it's a Live Feed
+                              Positioned(
+                                top: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withValues(alpha: 0.8),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'LIVE',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
-        );
+        ),
+      ),
+    );
   }
 
-  Widget _buildClinicCompanionLayout(BuildContext context, ProfileService service) {
+  Widget _buildClinicCompanionLayout(
+      BuildContext context, ProfileService service) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -1578,16 +1761,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               color: GozAITheme.primaryBlue.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: GozAITheme.accentCyan.withValues(alpha: 0.3)),
+              border: Border.all(
+                  color: GozAITheme.accentCyan.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.remove_red_eye_outlined, color: GozAITheme.accentCyan, size: 18),
+                const Icon(Icons.remove_red_eye_outlined,
+                    color: GozAITheme.accentCyan, size: 18),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
                     'Clinic Companion • Quiet On-Demand',
-                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 TextButton(
@@ -1595,7 +1783,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     HapticService.tap();
                     service.toggleProfile(VisionProfile.lowVisionAssist);
                   },
-                  child: const Text('Low-Vision Mode', style: TextStyle(color: GozAITheme.accentCyan, fontSize: 11)),
+                  child: const Text('Low-Vision Mode',
+                      style: TextStyle(
+                          color: GozAITheme.accentCyan, fontSize: 11)),
                 ),
               ],
             ),
@@ -1622,40 +1812,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           const Text(
                             "Today's Eye Health",
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: Colors.amber.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text('14-Day Streak', style: TextStyle(fontSize: 11, color: Colors.amber, fontWeight: FontWeight.bold)),
+                            child: const Text('14-Day Streak',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          const Icon(Icons.medication_outlined, color: Colors.tealAccent, size: 20),
+                          const Icon(Icons.medication_outlined,
+                              color: Colors.tealAccent, size: 20),
                           const SizedBox(width: 10),
                           const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Latanoprost 0.005%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                                Text('1 drop OU at bedtime • Glaucoma IOP', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                                Text('Latanoprost 0.005%',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13)),
+                                Text('1 drop OU at bedtime • Glaucoma IOP',
+                                    style: TextStyle(
+                                        color: Colors.white60, fontSize: 11)),
                               ],
                             ),
                           ),
                           FilledButton(
                             style: FilledButton.styleFrom(
                               backgroundColor: Colors.teal,
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
                               visualDensity: VisualDensity.compact,
                             ),
                             onPressed: () => context.push('/profile'),
-                            child: const Text('View Drops', style: TextStyle(fontSize: 11)),
+                            child: const Text('View Drops',
+                                style: TextStyle(fontSize: 11)),
                           ),
                         ],
                       ),
@@ -1680,27 +1887,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           color: Colors.blue.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.event_available, color: Colors.lightBlueAccent, size: 22),
+                        child: const Icon(Icons.event_available,
+                            color: Colors.lightBlueAccent, size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Annual Comprehensive Exam', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
+                            Text('Annual Comprehensive Exam',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 13)),
                             SizedBox(height: 2),
-                            Text('Tuesday, Oct 20 at 3:00 PM • Dr. Miller', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                            Text('Tuesday, Oct 20 at 3:00 PM • Dr. Miller',
+                                style: TextStyle(
+                                    color: Colors.white60, fontSize: 11)),
                           ],
                         ),
                       ),
                       OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.lightBlueAccent),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           visualDensity: VisualDensity.compact,
                         ),
                         onPressed: () => context.push('/profile'),
-                        child: const Text('Manage', style: TextStyle(color: Colors.lightBlueAccent, fontSize: 11)),
+                        child: const Text('Manage',
+                            style: TextStyle(
+                                color: Colors.lightBlueAccent, fontSize: 11)),
                       ),
                     ],
                   ),
@@ -1710,19 +1927,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // Card 3: Instant Clinical Questions
                 const Text(
                   'QUICK EYE CARE QUESTIONS',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: Colors.white54),
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: Colors.white54),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildCompanionChip('Find eye clinics nearby', action: () => ClinicDiscoverySheet.show(context)),
-                    _buildCompanionChip('Clinic working hours & doctors', action: () => ClinicDiscoverySheet.show(context)),
-                    _buildCompanionChip('Book doctor appointment', action: () => ClinicDiscoverySheet.show(context)),
-                    _buildCompanionChip('Who is at the Door? (Ring Vision)', action: () => _showDoorstepModal(context)),
-                    _buildCompanionChip('Order Drops (Amazon Pharmacy Refill)', action: () => PatientDispensarySheet.show(context)),
-                    _buildCompanionChip('Care Circle & Doorstep Safety', action: () => context.push('/caregiver')),
+                    _buildCompanionChip('Find eye clinics nearby',
+                        action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Clinic working hours & doctors',
+                        action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Book doctor appointment',
+                        action: () => ClinicDiscoverySheet.show(context)),
+                    _buildCompanionChip('Who is at the Door? (Ring Vision)',
+                        action: () => _showDoorstepModal(context)),
+                    _buildCompanionChip('Order Drops (Amazon Pharmacy Refill)',
+                        action: () => PatientDispensarySheet.show(context)),
+                    _buildCompanionChip('Care Circle & Doorstep Safety',
+                        action: () => context.push('/caregiver')),
                     _buildCompanionChip('Why take drops at bedtime?'),
                     _buildCompanionChip('Relief for dry tired eyes'),
                     _buildCompanionChip('What does 20/20 mean?'),
@@ -1753,10 +1980,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: 50,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isListening ? Colors.redAccent : GozAITheme.primaryBlue,
-                          boxShadow: isListening ? [
-                            BoxShadow(color: Colors.redAccent.withValues(alpha: 0.5), blurRadius: 16, spreadRadius: 2)
-                          ] : null,
+                          color: isListening
+                              ? Colors.redAccent
+                              : GozAITheme.primaryBlue,
+                          boxShadow: isListening
+                              ? [
+                                  BoxShadow(
+                                      color: Colors.redAccent
+                                          .withValues(alpha: 0.5),
+                                      blurRadius: 16,
+                                      spreadRadius: 2)
+                                ]
+                              : null,
                         ),
                         child: Icon(
                           isListening ? Icons.mic : Icons.mic_none,
@@ -1773,13 +2008,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Ask Goz Anything', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)),
-                      Text('Voice-activated clinical assistance on demand', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                      Text('Ask Goz Anything',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 14)),
+                      Text('Voice-activated clinical assistance on demand',
+                          style:
+                              TextStyle(color: Colors.white60, fontSize: 11)),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.document_scanner_outlined, color: GozAITheme.accentCyan),
+                  icon: const Icon(Icons.document_scanner_outlined,
+                      color: GozAITheme.accentCyan),
                   tooltip: 'High-Res OCR Reader',
                   onPressed: () => _coordinator?.captureSnapshot(),
                 ),
@@ -1796,13 +2038,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return ActionChip(
       backgroundColor: Colors.white.withValues(alpha: 0.05),
       side: const BorderSide(color: Colors.white12),
-      label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+      label: Text(label,
+          style: const TextStyle(color: Colors.white, fontSize: 11)),
       onPressed: () {
         HapticService.tap();
         if (action != null) {
           action();
         } else {
-          _coordinator?.gemini.sendText('User tapped quick inquiry: "$label". Provide a brief, supportive, clinically grounded answer.');
+          _coordinator?.gemini.sendText(
+              'User tapped quick inquiry: "$label". Provide a brief, supportive, clinically grounded answer.');
         }
       },
     );
@@ -1824,7 +2068,8 @@ class _HomeUiHooks implements CopilotUiHooks {
   void openTranscripts() => _state._openTranscripts();
 
   @override
-  void onVisionProfileChanged(String profile) => _state._onVisionProfileChanged(profile);
+  void onVisionProfileChanged(String profile) =>
+      _state._onVisionProfileChanged(profile);
 
   @override
   ({double width, double height, double pixelRatio}) uiMetrics() {
