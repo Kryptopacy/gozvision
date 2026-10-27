@@ -55,6 +55,10 @@ ADK_APP = get_fast_api_app(
     web=False,
     host="0.0.0.0",
     port=PORT,
+    allow_origins=[
+        "https://gozvision.vercel.app",
+        "https://main.d1lr4zsb46he1m.amplifyapp.com",
+    ],
 )
 
 MCP_APP = mcp_server.streamable_http_app(
